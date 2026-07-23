@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dedalion: Dandelion Life Garden</title>
+    <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
+    <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="is-focused-ui">
+    <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
+      <canvas class="genesis-canvas" id="genesisCanvas" tabindex="0" aria-label="一朵等待被吹向未来的巨大蒲公英"></canvas>
+      <div class="genesis-copy" aria-live="polite">
+        <span id="genesisKicker">DEDALION · ORIGIN</span>
+        <h1 id="genesisTitle">每个人都从一朵蒲公英开始。</h1>
+        <p id="genesisLine">每个人都带着自己的种子而来。</p>
+        <div class="genesis-breath" aria-hidden="true"><i id="genesisBreathFill"></i></div>
+      </div>
+      <div class="genesis-directions" id="genesisDirections" aria-label="第一颗种子的四个方向">
+        <span class="genesis-direction direction-ground" data-genesis-route="forest"><b>扎根大地</b><small>我想了解世界</small></span>
+        <span class="genesis-direction direction-water" data-genesis-route="town"><b>顺水而行</b><small>我想连接生命</small></span>
+        <span class="genesis-direction direction-light" data-genesis-route="sky"><b>向光生长</b><small>我想创造一些东西</small></span>
+        <span class="genesis-direction direction-unknown" data-genesis-route="lake"><b>向未知飞去</b><small>我想寻找答案</small></span>
+      </div>
+      <img class="genesis-companion" id="genesisCompanion" src="./assets/sprites/dandelion-puff.png" alt="你的蒲公英小精灵" />
+
+      <section class="genesis-garden-ui" id="genesisGardenUI" aria-label="你的第一个生命花园">
+        <span>YOUR FIRST GARDEN</span>
+        <h2 id="genesisGardenTitle">飞出去的是未来，留下的是现在。</h2>
+        <p id="genesisGardenLine">一块土地，一间小屋，一株属于你的蒲公英。</p>
+        <div class="genesis-kit" aria-label="起始生命背包">
+          <article><i class="kit-seed" aria-hidden="true"></i><b>初始种子</b><small>未来</small></article>
+          <article><i class="kit-bottle" aria-hidden="true"></i><b>空白漂流瓶</b><small>连接</small></article>
+          <article><i class="kit-can" aria-hidden="true"></i><b>小水壶</b><small>照顾</small></article>
+        </div>
+        <button class="genesis-action" id="genesisWaterButton" type="button"><i class="kit-can" aria-hidden="true"></i><span>浇下第一壶水</span></button>
+      </section>
+
+      <section class="genesis-first-map" id="genesisFirstMap" aria-label="第一次进入大世界">
+        <span>THE FIRST HORIZON</span>
+        <h2>世界从三条路开始。</h2>
+        <p id="genesisMapLine">你的第一颗种子已经先走了一步。</p>
+        <div class="genesis-map-path" aria-label="蒲公英村、小森林和小湖泊">
+          <article data-genesis-place="forest"><i class="map-tree" aria-hidden="true"></i><b>小森林</b><small>发现</small></article>
+          <article data-genesis-place="town"><i class="map-village" aria-hidden="true"></i><b>蒲公英村</b><small>相遇</small></article>
+          <article data-genesis-place="lake"><i class="map-lake" aria-hidden="true"></i><b>小湖泊</b><small>学习</small></article>
+        </div>
+        <button class="genesis-action" id="genesisDepartButton" type="button"><i class="map-seed" aria-hidden="true"></i><span>跟着种子出发</span></button>
+      </section>
+    </section>
+
+    <main class="game">
+      <canvas id="worldCanvas" class="world-canvas" width="960" height="640" aria-label="Dedalion 像素开放世界"></canvas>
+
+      <section class="hud" aria-label="生命状态">
+        <strong><i class="living-glyph glyph-home" aria-hidden="true"></i>Dedalion</strong>
+        <span class="hud-stat"><i class="living-glyph glyph-seed" aria-hidden="true"></i>未来种 <b id="seedValue">0</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-archive" aria-hidden="true"></i>记忆树 <b id="memoryValue">0</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-world" aria-hidden="true"></i>生态花 <b id="ecoValue">0</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-friend" aria-hidden="true"></i>藤蔓友 <b id="friendValue">0</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-map" aria-hidden="true"></i>风域 <b id="areaValue">1</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-wish" aria-hidden="true"></i>生命种 <b id="wishValue">0</b></span>
+        <span><i class="living-glyph glyph-weather" aria-hidden="true"></i><em id="timeLabel">Morning</em></span>
+      </section>
+
+      <nav class="surface-dock" aria-label="Dedalion 五个核心入口">
+        <button class="surface-button" id="surfaceGardenButton" type="button" aria-pressed="false">
+          <i class="living-glyph glyph-home" aria-hidden="true"></i><b>花园</b><span>我的生命</span>
+        </button>
+        <button class="surface-button is-active" id="surfaceDepartButton" type="button" aria-pressed="true">
+          <i class="living-glyph glyph-map" aria-hidden="true"></i><b>世界</b><span>去看看</span>
+        </button>
+        <button class="surface-button" id="surfaceBackpackButton" type="button" aria-pressed="false">
+          <i class="living-glyph glyph-bag" aria-hidden="true"></i><b>背包</b><span>相遇之物</span>
+        </button>
+        <button class="surface-button" id="surfacePostButton" type="button" aria-pressed="false">
+          <i class="living-glyph glyph-mail" aria-hidden="true"></i><b>邮局</b><span>谁在连接</span>
+        </button>
+        <button class="surface-button" id="surfaceDandelionButton" type="button" aria-pressed="false">
+          <i class="living-glyph glyph-companion" aria-hidden="true"></i><b>蒲公英</b><span>下一步</span>
+        </button>
+      </nav>
+
+      <section class="life-weather" id="lifeWeatherPanel" aria-label="今日生命天气">
+        <span><i class="living-glyph glyph-weather" aria-hidden="true"></i>01 · Reality Input / Weather Spirit</span>
+        <strong id="weatherHeadline">杭州 · 小雨 · 安静生长</strong>
+        <div class="weather-grid">
+          <b id="energyValue">能量 65%</b>
+          <b id="createValue">创造 85%</b>
+          <b id="socialValue">社交 40%</b>
+          <b id="focusValue">专注 72%</b>
+        </div>
+        <p id="weatherAdvice">今天适合深度创作，减少碎片社交。只种一颗小种子。</p>
+        <ul id="seedTasks"></ul>
+      </section>
+
+      <section class="life-core" id="lifeCorePanel" aria-label="个人生命花园">
+        <span><i class="living-glyph glyph-home" aria-hidden="true"></i>02 · Personal Garden / 个人花园</span>
+        <strong id="lifeCoreHeadline">你的花园正在等待第一颗生命种子。</strong>
+        <p id="lifeCoreSignal">种子会吸收天气、知识和回应，最后长成一只属于你的精灵。</p>
+        <div class="life-core-track" id="lifeCoreTrack"></div>
+        <div class="life-tree-garden" id="lifeDimensionGarden" aria-label="六维生命树"></div>
+        <section class="water-os" aria-label="生命水源系统">
+          <span><i class="living-glyph glyph-weather" aria-hidden="true"></i>Water OS / 生命水源</span>
+          <strong id="waterReservoir">个人水库正在等待第一滴水。</strong>
+          <p id="waterFlow">世界、关系、知识、创造和记忆会把水送到生命树。</p>
+          <div class="water-streams" id="waterStreams"></div>
+        </section>
+        <section class="slow-life-gate" id="slowLifeGate" aria-label="慢生活现实回流">
+          <span><i class="living-glyph glyph-map" aria-hidden="true"></i>Slow Life / 世界回声</span>
+          <strong id="slowLifeHeadline">蒲公英正在听今天的风。</strong>
+          <p id="slowLifePrompt">它不会把你留在这里，而会为你打开一条回到真实生活的小路。</p>
+          <div class="slow-life-actions">
+            <button id="slowLifeStartButton" type="button" title="把屏幕留在这里，去生活" aria-label="把屏幕留在这里，去生活"><i class="pixel-footstep" aria-hidden="true"></i><span>去生活</span></button>
+            <button id="slowLifeChangeButton" type="button" title="换一阵风" aria-label="换一条现实邀请"><i class="pixel-wind" aria-hidden="true"></i></button>
+          </div>
+          <ol class="reality-discoveries" id="realityDiscoveries" aria-label="最近的现实发现"></ol>
+          <small id="slowLifeStatus">不计时，不验证，也不因今天没有出发而惩罚你。</small>
+        </section>
+        <section class="family-roots" id="familyRoots" aria-label="蒲公英家庭花园关系根系">
+          <span><i class="living-glyph glyph-friend" aria-hidden="true"></i>Family Roots / 共同培育</span>
+          <strong id="familyHeadline">一颗信物正在等待被交给另一个生命。</strong>
+          <p id="familySignal">家庭不由血缘限定；一起照顾生命的人，可以长成同一座花园。</p>
+          <div class="family-tree" id="familyTree" aria-label="家庭共同树"></div>
+          <div class="family-roles" id="familyRoles" aria-label="社区守护责任"></div>
+          <ol class="family-archive" id="familyArchive" aria-label="家庭记忆屋"></ol>
+          <div class="family-healing is-hidden" id="familyHealing" aria-label="家庭关系修复状态">
+            <span>Healing Garden / 安全第三空间</span>
+            <strong id="healingHeadline">两颗记忆种子仍然彼此独立。</strong>
+            <small id="healingSignal">理解可以发生，原谅和继续关系不是完成条件。</small>
+            <div class="family-safety-controls">
+              <button id="healingPauseButton" type="button">暂停这条路</button>
+              <button id="healingWithdrawButton" type="button">收回共享内容</button>
+            </div>
+          </div>
+          <div class="family-ceremony is-hidden" id="familyCeremony" aria-label="共同守护仪式状态">
+            <span>Living Covenant / 共同守护</span>
+            <strong id="ceremonyHeadline">仪式尚未开始。</strong>
+            <small id="ceremonySignal">它记录双方真实承诺，不替代任何现实法律关系。</small>
+            <button id="ceremonyWithdrawButton" type="button">撤回仪式邀请</button>
+          </div>
+          <small id="familyNext">去蒲公英邮局，把一份祝福封进透明种子。</small>
+        </section>
+        <section class="memory-photo-tree is-hidden" id="memoryPhotoTree" aria-label="生命合影记忆树">
+          <span><i class="living-glyph glyph-archive" aria-hidden="true"></i>Memory Photo Tree / 生活过的痕迹</span>
+          <strong id="photoTreeHeadline">第一片合影树叶正在等待一次相遇。</strong>
+          <p id="photoTreeSignal">地点、天气、同行者、动作和生活物件会一起成为记忆种子的基因。</p>
+          <div class="photo-leaves" id="photoLeaves" aria-label="记忆照片树叶"></div>
+          <small id="photographerRank">见证者 · 还没有留下生命合影</small>
+        </section>
+        <div class="life-core-action">
+          <i class="living-glyph glyph-seed" aria-hidden="true"></i>
+          <span><b id="lifeCoreAction">走进世界，接住一颗现实种子。</b><small id="lifeCoreFeedback">你的行动会回到花园，最后成为一段记忆。</small></span>
+        </div>
+      </section>
+
+      <section class="companion-panel is-hidden" id="companionPanel" aria-label="陪你生活探索系统">
+        <span><i class="living-glyph glyph-companion" aria-hidden="true"></i>Living Paths</span>
+        <strong id="companionHeadline">今天只需要决定下一步。</strong>
+        <p id="companionReport">蒲公英不会替你生活，只替你看清风从哪里来。</p>
+        <div class="companion-grid" id="companionGrid"></div>
+        <ol class="companion-seeds" id="companionSeeds"></ol>
+      </section>
+
+      <section class="post-panel is-hidden" id="postPanel" aria-label="蒲公英邮局">
+        <span><i class="living-glyph glyph-mail" aria-hidden="true"></i>Dandelion Post / 蒲公英邮局</span>
+        <strong id="postHeadline">风里暂时没有未读消息。</strong>
+        <p id="postSignal">关系不是列表。每一次回应，都会让一颗种子找到归路。</p>
+        <div class="post-actions">
+          <button id="postBottleButton" type="button"><i class="living-glyph glyph-seed" aria-hidden="true"></i><span>接住一封风信</span></button>
+          <button id="postRealityButton" type="button"><i class="living-glyph glyph-friend" aria-hidden="true"></i><span>想起真实的人</span></button>
+        </div>
+        <small id="postStatus">没有红点，也没有必须回复的期限。</small>
+      </section>
+
+      <section class="life-ecology" id="lifeEcologyPanel" aria-label="生命环境模拟系统">
+        <span><i class="living-glyph glyph-world" aria-hidden="true"></i>Life Wreath</span>
+        <strong id="ecologyLoop">外部世界 → 感知 → 内部生命 → 行动 → 世界反馈</strong>
+        <div class="tree-grid" id="lifeTreeGrid"></div>
+        <p id="balanceAdvice">创造之花正在盛开，但根系需要补水。</p>
+      </section>
+
+      <section class="body-panel is-hidden" id="bodyPanel" aria-label="身体之树系统">
+        <span><i class="living-glyph glyph-body" aria-hidden="true"></i>Body Garden</span>
+        <strong id="bodyHeadline">不是责备身体，而是找到卡住的生命节律。</strong>
+        <p id="bodyAdvice">先记录 7 天真实输入，再种 14 天小种子。</p>
+        <div class="body-loop" id="bodyLoop"></div>
+        <div class="body-grid" id="bodyGrid"></div>
+        <div class="body-recipes" id="bodyRecipes"></div>
+        <ol class="body-tasks" id="bodyTasks"></ol>
+      </section>
+
+      <section class="gardener-panel is-hidden" id="gardenerPanel" aria-label="园艺师系统">
+        <span><i class="living-glyph glyph-gardener" aria-hidden="true"></i>Gardener Spirit</span>
+        <strong id="gardenerRank">Lv1 种子观察者 · Seed Observer</strong>
+        <p id="gardenerMission">让生命在正确的环境中成长。</p>
+        <div class="gardener-grid" id="gardenerGrid"></div>
+        <ol class="gardener-tasks" id="gardenerTasks"></ol>
+      </section>
+
+      <section class="cycle-panel is-hidden" id="cyclePanel" aria-label="Dedalion 世界生态总循环">
+        <span><i class="living-glyph glyph-cycle" aria-hidden="true"></i>Living Cycle</span>
+        <strong id="cycleHeadline">现实输入 → 蒲公英翻译 → 生命花园 → 世界生态 → 关系网络 → 创造贡献 → 回流现实</strong>
+        <p id="cyclePrinciple">输入生命 → 转化数据 → 产生关系 → 影响世界 → 反馈生命。</p>
+        <div class="cycle-track" id="cycleTrack"></div>
+        <div class="cycle-grid" id="cycleGrid"></div>
+      </section>
+
+      <section class="exchange-panel is-hidden" id="exchangePanel" aria-label="生命交换系统">
+        <span><i class="living-glyph glyph-exchange" aria-hidden="true"></i>Seed Passing</span>
+        <strong id="exchangeHeadline">世界不是商店，而是一场持续交换的生命循环。</strong>
+        <div class="exchange-values" id="exchangeValues"></div>
+        <div class="exchange-grid" id="exchangeGrid"></div>
+        <ol class="exchange-modes" id="exchangeModes"></ol>
+      </section>
+
+      <section class="tech-panel is-hidden" id="techPanel" aria-label="Dedalion 技术架构">
+        <span><i class="living-glyph glyph-tech" aria-hidden="true"></i>Root Protocol</span>
+        <strong id="techHeadline">Frontend + World + Memory + Translation + Network</strong>
+        <div class="tech-stack" id="techStack"></div>
+        <div class="tech-grid" id="techGrid"></div>
+        <ol class="tech-roadmap" id="techRoadmap"></ol>
+      </section>
+
+      <section class="world-atlas is-hidden" id="worldAtlasPanel" aria-label="蒲公英星球空间地图">
+        <span><i class="living-glyph glyph-map" aria-hidden="true"></i>Wind Map Spirit</span>
+        <strong>星球 → 地表世界 → 区域 → 建筑 → 功能点。概念是系统，地图是玩家走进去的空间。</strong>
+        <div class="atlas-map" id="atlasMap"></div>
+        <article class="atlas-detail" id="atlasDetail" aria-live="polite"></article>
+      </section>
+
+      <section class="nearby" id="nearbyPanel" aria-live="polite">
+        <span id="nearbyTitle">世界树花园</span>
+        <strong id="nearbyText">Dead Night 醒在蒲公英花海。靠近世界树根系按 E，让愿望、种子、水源和记忆开始流动。</strong>
+        <div class="nearby-actions" id="nearbyActions" aria-label="当前地点可以进行的动作"></div>
+      </section>
+
+      <section class="memory-log" aria-label="生命记忆">
+        <span><i class="living-glyph glyph-archive" aria-hidden="true"></i>Tree Hollow Memory</span>
+        <ol id="memoryList"></ol>
+      </section>
+
+      <section class="inventory" aria-label="生命背包">
+        <span><i class="living-glyph glyph-bag" aria-hidden="true"></i>Life Backpack / 生命背包</span>
+        <strong id="flowText">1. 去湖边按 E 钓鱼</strong>
+        <div id="inventoryList" class="inventory-list"></div>
+      </section>
+
+      <div class="living-scene-prompt is-hidden" id="livingScenePrompt" aria-label="当前生命场景动作">
+        <button id="sceneEmoteButton" type="button" title="切换生活动作">
+          <i class="scene-emote-glyph" aria-hidden="true"></i><span id="sceneEmoteLabel">挥手</span>
+        </button>
+        <button id="sceneCaptureButton" type="button" title="留下生命合影" aria-label="留下生命合影">
+          <i class="pixel-camera" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="player-emote-fx is-hidden" id="playerEmoteFx" aria-hidden="true"></div>
+
+      <section class="slow-life-away is-hidden" id="slowLifeAway" aria-label="现实生活邀请">
+        <div class="slow-life-horizon" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
+        <span id="slowLifeAwayKicker">THE SCREEN CAN WAIT</span>
+        <h2 id="slowLifeAwayTitle">让真实世界先发生。</h2>
+        <p id="slowLifeAwayPrompt">去窗边听一会儿雨。回来时，你不需要证明完成了什么。</p>
+        <small id="slowLifeAwayNote">蒲公英会留在这里替你看守花园。</small>
+        <div class="slow-life-return-actions">
+          <button id="slowLifeReturnButton" type="button">我回来了</button>
+          <button class="is-hidden" id="slowLifeRecordButton" type="button">留下一件发现</button>
+          <button class="is-hidden" id="slowLifeRestButton" type="button">只回来休息</button>
+        </div>
+      </section>
+
+      <div class="player-aura" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+      </div>
+      <img class="player-sprite" id="playerSprite" src="./assets/sprites/dead-night-sprout.png" alt="Dead Night" />
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
