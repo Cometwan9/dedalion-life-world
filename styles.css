@@ -8032,14 +8032,14 @@ body {
 }
 
 .is-focused-ui .scene-minimap {
-  width: clamp(190px, 20vw, 248px);
-  height: clamp(112px, 12vw, 146px);
+  width: 54px;
+  height: 54px;
   grid-template-rows: 1fr;
-  padding: 6px;
+  padding: 5px;
 }
 
 .is-focused-ui .world-rhythm {
-  top: calc(var(--safe-edge) + clamp(122px, 13vw, 156px));
+  top: calc(var(--safe-edge) + 62px);
   width: 48px;
   min-width: 48px;
   min-height: 48px;
@@ -8087,13 +8087,33 @@ body {
   grid-template-columns: repeat(3, 42px);
 }
 
-@media (max-width: 640px) {
-  .is-focused-ui .scene-minimap {
-    width: 132px;
-    height: 96px;
-  }
+.is-focused-ui .scene-minimap:not(.is-expanded) .scene-world-inset,
+.is-focused-ui .scene-minimap:not(.is-expanded) .scene-minimap-art > i {
+  display: none;
+}
 
-  .is-focused-ui .world-rhythm {
-    top: calc(var(--safe-edge) + 104px);
-  }
+.is-focused-ui .scene-minimap:not(.is-expanded) .scene-minimap-art::before {
+  left: 47%;
+  top: -10%;
+  width: 7px;
+  height: 120%;
+  border-width: 2px;
+  transform: rotate(25deg);
+}
+
+.is-focused-ui .scene-minimap:not(.is-expanded) .scene-minimap-art::after {
+  left: 4px;
+  top: 5px;
+  width: 12px;
+  height: 10px;
+  border-width: 2px;
+  box-shadow: 20px 18px 0 #d8c56d;
+}
+
+.is-focused-ui .scene-minimap:not(.is-expanded) .scene-local-player {
+  left: 54%;
+  top: 54%;
+  width: 7px;
+  height: 7px;
+  border-width: 2px;
 }
