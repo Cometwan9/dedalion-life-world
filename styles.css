@@ -8032,6 +8032,7 @@ body {
 }
 
 .is-focused-ui .scene-minimap {
+  top: calc(var(--safe-edge) + 56px);
   width: 54px;
   height: 54px;
   grid-template-rows: 1fr;
@@ -8039,7 +8040,7 @@ body {
 }
 
 .is-focused-ui .world-rhythm {
-  top: calc(var(--safe-edge) + 62px);
+  top: var(--safe-edge);
   width: 48px;
   min-width: 48px;
   min-height: 48px;
