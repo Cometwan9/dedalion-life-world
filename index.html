@@ -6,7 +6,7 @@
     <title>Dedalion: Dandelion Life Garden</title>
     <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
     <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
-    <link rel="stylesheet" href="./styles.css?v=minimap-large-1" />
+    <link rel="stylesheet" href="./styles.css?v=map-expand-1" />
   </head>
   <body class="is-focused-ui">
     <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
@@ -62,7 +62,7 @@
         </span>
       </button>
 
-      <button class="scene-minimap" id="sceneMinimapButton" type="button" aria-label="查看附近地图，点击打开世界地图" title="附近地图 · 点击查看世界">
+      <button class="scene-minimap" id="sceneMinimapButton" type="button" aria-label="展开岛屿地图" aria-expanded="false" title="展开岛屿地图">
         <span class="scene-minimap-art" aria-hidden="true">
           <i></i><i></i><i></i><i></i><i></i>
           <span class="scene-local-player"></span>
@@ -365,6 +365,6 @@
       <span class="player-sprite" id="playerSprite" role="img" aria-label="风芽"></span>
     </main>
 
-    <script src="./app.js?v=minimap-large-1"></script>
+    <script src="./app.js?v=map-expand-1"></script>
   </body>
 </html>

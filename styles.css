@@ -753,6 +753,85 @@
   }
 }
 
+.is-focused-ui .scene-minimap.is-expanded {
+  --expanded-map-size: min(76vw, 76vh, 760px);
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  right: auto;
+  top: 50%;
+  width: var(--expanded-map-size);
+  height: var(--expanded-map-size);
+  grid-template-rows: 1fr;
+  padding: 8px;
+  transform: translate(-50%, -50%);
+  border: 4px solid #304b3c;
+  border-radius: 4px;
+  background: #5aa8d2;
+  box-shadow:
+    0 0 0 100vmax rgba(25, 43, 36, 0.68),
+    8px 8px 0 rgba(30, 48, 38, 0.42);
+}
+
+.is-focused-ui .scene-minimap.is-expanded::after {
+  content: "×";
+  position: absolute;
+  z-index: 8;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 3px solid #304b3c;
+  border-radius: 2px;
+  background: #fff2bd;
+  color: #304b3c;
+  font: 900 1rem/1 monospace;
+}
+
+.is-focused-ui .scene-minimap.is-expanded .scene-minimap-art {
+  width: 100%;
+  height: 100%;
+  border-width: 3px;
+  background: #5aa8d2 url("./assets/maps/dandelion-island.png") center / contain no-repeat;
+  image-rendering: pixelated;
+}
+
+.is-focused-ui .scene-minimap.is-expanded .scene-minimap-art::before,
+.is-focused-ui .scene-minimap.is-expanded .scene-minimap-art::after,
+.is-focused-ui .scene-minimap.is-expanded .scene-minimap-art > i,
+.is-focused-ui .scene-minimap.is-expanded .scene-world-inset {
+  display: none;
+}
+
+.is-focused-ui .scene-minimap.is-expanded .scene-local-player {
+  left: var(--map-player-x, 50%);
+  top: var(--map-player-y, 50%);
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  rotate: 0deg;
+  border-width: 3px;
+  box-shadow:
+    0 0 0 3px rgba(52, 76, 54, 0.78),
+    0 0 14px rgba(255, 239, 137, 0.96);
+}
+
+@media (max-width: 640px) {
+  .is-focused-ui .scene-minimap.is-expanded {
+    --expanded-map-size: min(92vw, 72vh);
+    padding: 5px;
+  }
+
+  .is-focused-ui .scene-minimap.is-expanded::after {
+    top: 9px;
+    right: 9px;
+    width: 30px;
+    height: 30px;
+  }
+}
+
 /* Spirit actions and API response control. */
 .living-scene-prompt {
   grid-template-columns: 72px 42px 42px;

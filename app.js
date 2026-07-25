@@ -14650,6 +14650,7 @@ function renderHud() {
   sceneProfileStage.textContent = guidance.phase.form;
   sceneProfileTrust.textContent = `${skills.strongest.name} · ${skills.strongest.title}`;
   sceneMinimapLabel.textContent = state.near?.title || currentLifePlace();
+  syncSceneMinimapMarker();
   flowText.textContent = currentFlowText();
   renderSurfaceDock();
   renderInventory();
@@ -16753,6 +16754,11 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     return;
   }
+  if (sceneMinimapButton.classList.contains("is-expanded")) {
+    if (event.key === "Escape") setSceneMinimapExpanded(false);
+    event.preventDefault();
+    return;
+  }
   if (event.target.matches?.("input, textarea, select")) return;
   const movementKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"];
   if ([...movementKeys, "Shift", " "].includes(event.key)) {
@@ -16883,8 +16889,25 @@ sceneProfileButton.addEventListener("click", () => {
   showDandelionSurface();
   advanceFirstWindGuide("profile");
 });
+function syncSceneMinimapMarker() {
+  const x = Math.max(3, Math.min(97, ((state.x - illustratedMapBounds.x) / illustratedMapBounds.w) * 100));
+  const y = Math.max(3, Math.min(97, ((state.y - illustratedMapBounds.y) / illustratedMapBounds.h) * 100));
+  sceneMinimapButton.style.setProperty("--map-player-x", `${x.toFixed(2)}%`);
+  sceneMinimapButton.style.setProperty("--map-player-y", `${y.toFixed(2)}%`);
+}
+
+function setSceneMinimapExpanded(expanded) {
+  sceneMinimapButton.classList.toggle("is-expanded", expanded);
+  sceneMinimapButton.setAttribute("aria-expanded", String(expanded));
+  sceneMinimapButton.setAttribute("aria-label", expanded ? "收起岛屿地图" : "展开岛屿地图");
+  sceneMinimapButton.title = expanded ? "收起岛屿地图" : "展开岛屿地图";
+  document.body.classList.toggle("is-minimap-expanded", expanded);
+  keys.clear();
+  syncSceneMinimapMarker();
+}
+
 sceneMinimapButton.addEventListener("click", () => {
-  showWorldSurface();
+  setSceneMinimapExpanded(!sceneMinimapButton.classList.contains("is-expanded"));
   advanceFirstWindGuide("map");
 });
 sceneWeatherButton.addEventListener("click", () => {
