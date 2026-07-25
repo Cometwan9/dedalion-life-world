@@ -6294,7 +6294,7 @@ function applyPlayerIdentity() {
   playerIdentityState.skin = safeSkin;
   playerNameplateName.textContent = safeName;
   playerNameplateSignature.textContent = safeSignature;
-  playerSprite.alt = safeName;
+  playerSprite.setAttribute("aria-label", safeName);
   document.body.dataset.playerSkin = safeSkin;
 }
 
@@ -7224,7 +7224,7 @@ function drawLifeBalanceLayer() {
 function updateMovement() {
   let dx = 0;
   let dy = 0;
-  const speed = keys.has("Shift") ? 0.105 : 0.075;
+  const speed = keys.has("Shift") || keys.has(" ") ? 0.13 : 0.075;
   if (keys.has("ArrowLeft") || keys.has("a")) dx -= speed;
   if (keys.has("ArrowRight") || keys.has("d")) dx += speed;
   if (keys.has("ArrowUp") || keys.has("w")) dy -= speed;
@@ -16191,9 +16191,24 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     return;
   }
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "Shift"].includes(event.key)) {
+  if (event.target.matches?.("input, textarea, select")) return;
+  const movementKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"];
+  if ([...movementKeys, "Shift", " "].includes(event.key)) {
     event.preventDefault();
     keys.add(event.key);
+    if (movementKeys.includes(event.key) && !event.repeat) {
+      const nudge = event.key === "ArrowLeft" || event.key === "a"
+        ? [-0.16, 0]
+        : event.key === "ArrowRight" || event.key === "d"
+          ? [0.16, 0]
+          : event.key === "ArrowUp" || event.key === "w"
+            ? [0, -0.16]
+            : [0, 0.16];
+      state.x += nudge[0];
+      state.y += nudge[1];
+      state.direction = nudge[0] < 0 ? "left" : nudge[0] > 0 ? "right" : state.direction;
+      recordMovementTrace();
+    }
   }
 
   if (event.key.toLowerCase() === "e") {
@@ -16297,7 +16312,10 @@ sceneWeatherButton.addEventListener("click", () => {
   toggleLifeWeather();
   advanceFirstWindGuide("weather");
 });
-canvas.addEventListener("click", () => advanceFirstWindGuide("world"));
+canvas.addEventListener("click", () => {
+  canvas.focus({ preventScroll: true });
+  advanceFirstWindGuide("world");
+});
 firstWindNext.addEventListener("click", () => advanceFirstWindGuide());
 firstWindSkip.addEventListener("click", () => finishFirstWindGuide(false));
 postBottleButton.addEventListener("click", () => {

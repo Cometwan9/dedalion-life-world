@@ -608,6 +608,42 @@
   grid-template-columns: 72px 42px 42px;
 }
 
+/* Three-frame citizen sprite: center frame for idle, outer frames for walking. */
+.is-focused-ui .player-sprite {
+  width: 40px;
+  height: 58px;
+  background-image: url("./assets/sprites/dandelion-citizen.png");
+  background-repeat: no-repeat;
+  background-position: -39px 0;
+  background-size: 118px 58px;
+  image-rendering: pixelated;
+  animation: citizenIdle 1.5s steps(2, end) infinite;
+}
+
+.is-focused-ui .player-sprite.walking {
+  animation: citizenWalk 0.28s steps(1, end) infinite;
+}
+
+@keyframes citizenIdle {
+  0%, 100% {
+    background-position: -39px 0;
+  }
+
+  50% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes citizenWalk {
+  0%, 49% {
+    background-position: 0 0;
+  }
+
+  50%, 100% {
+    background-position: -78px 0;
+  }
+}
+
 /* Island terrain reset: remove legacy orbiting pixels and keep every dock icon in its own cell. */
 .is-focused-ui .player-aura {
   display: none;
@@ -7322,4 +7358,20 @@ body {
 
 .living-scene-prompt {
   grid-template-columns: 72px 42px 42px;
+}
+
+/* Final player asset override. */
+.is-focused-ui .player-sprite {
+  width: 40px;
+  height: 58px;
+  background-image: url("./assets/sprites/dandelion-citizen.png");
+  background-repeat: no-repeat;
+  background-position: -39px 0;
+  background-size: 118px 58px;
+  image-rendering: pixelated;
+  animation: none;
+}
+
+.is-focused-ui .player-sprite.walking {
+  animation: citizenWalk 0.28s steps(1, end) infinite;
 }

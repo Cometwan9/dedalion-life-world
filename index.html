@@ -6,7 +6,7 @@
     <title>Dedalion: Dandelion Life Garden</title>
     <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
     <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
-    <link rel="stylesheet" href="./styles.css?v=terrain-reset-2" />
+    <link rel="stylesheet" href="./styles.css?v=citizen-character-3" />
   </head>
   <body class="is-focused-ui">
     <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
@@ -51,7 +51,7 @@
     </section>
 
     <main class="game">
-      <canvas id="worldCanvas" class="world-canvas" width="960" height="640" aria-label="Dedalion 像素开放世界"></canvas>
+      <canvas id="worldCanvas" class="world-canvas" width="960" height="640" tabindex="0" aria-label="Dedalion 像素开放世界"></canvas>
 
       <button class="scene-profile" id="sceneProfileButton" type="button" aria-label="查看蒲公英成长与相信">
         <img src="./assets/sprites/dandelion-puff.png" alt="" />
@@ -357,9 +357,9 @@
         <b id="playerNameplateName">风芽</b>
         <small id="playerNameplateSignature">让风带我去看看</small>
       </button>
-      <img class="player-sprite" id="playerSprite" src="./assets/sprites/dead-night-sprout.png" alt="风芽" />
+      <span class="player-sprite" id="playerSprite" role="img" aria-label="风芽"></span>
     </main>
 
-    <script src="./app.js?v=terrain-reset-3"></script>
+    <script src="./app.js?v=citizen-character-2"></script>
   </body>
 </html>
