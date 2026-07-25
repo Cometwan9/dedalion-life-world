@@ -193,6 +193,11 @@ const illustratedMapPoints = [
   { id: "garden", x: 80, y: 87, label: "百草坡", kind: "garden" },
   { id: "wetland", x: 109, y: 87, label: "星露湿地", kind: "wetland" },
 ];
+const illustratedFlowerPatches = [
+  { id: "cloudfall-dandelion", x: 77, y: 52, speciesId: "dandelion", title: "风崖蒲公英", itemName: "蒲公英花瓣" },
+  { id: "herbslope-osmanthus", x: 79, y: 89, speciesId: "osmanthus", title: "百草坡桂花", itemName: "桂花" },
+  { id: "stardew-lotus", x: 110, y: 96, speciesId: "lotus", title: "星露湿地荷花", itemName: "荷花瓣" },
+];
 const memories = JSON.parse(localStorage.getItem("dedalionMemories") || "[]");
 const interacted = new Set(JSON.parse(localStorage.getItem("dedalionInteracted") || "[]"));
 const playerIdentityState = Object.assign(
@@ -707,16 +712,18 @@ livingCalendarState.commitments = livingCalendarState.commitments || [];
 livingCalendarState.claimedEvents = livingCalendarState.claimedEvents || [];
 const natureKnowledgeState = Object.assign(
   {
-    version: 1,
+    version: 2,
     records: {},
     observations: [],
     graph: [],
+    collectedFlowers: [],
   },
   JSON.parse(localStorage.getItem("dedalionNatureKnowledgeState") || "{}"),
 );
 natureKnowledgeState.records = natureKnowledgeState.records || {};
 natureKnowledgeState.observations = natureKnowledgeState.observations || [];
 natureKnowledgeState.graph = natureKnowledgeState.graph || [];
+natureKnowledgeState.collectedFlowers = natureKnowledgeState.collectedFlowers || [];
 const lifeRhythmState = Object.assign(
   {
     version: 1,
@@ -2557,6 +2564,7 @@ const backpackCategories = [
 
 let activeBackpackCategoryId = "seed";
 let selectedBackpackItemKey = null;
+let selectedNatureKnowledgeId = null;
 
 const craftingMaterialCatalog = {
   wood: { name: "树根材", property: "温暖、有纹理", origin: "古树森林边缘" },
@@ -4080,6 +4088,7 @@ function save() {
     ...natureKnowledgeState,
     observations: natureKnowledgeState.observations.slice(-80),
     graph: natureKnowledgeState.graph.slice(-160),
+    collectedFlowers: natureKnowledgeState.collectedFlowers.slice(-80),
   }));
   localStorage.setItem("dedalionLifeRhythmState", JSON.stringify({
     ...lifeRhythmState,
@@ -6444,6 +6453,40 @@ function drawIllustratedPetalsAndSeeds() {
   }
 }
 
+function flowerCollectionKey(patch, dateKey = livingDateKey()) {
+  return `flower-patch:${dateKey}:${patch.id}`;
+}
+
+function drawIllustratedFlowerCollectibles() {
+  illustratedFlowerPatches.forEach((patch, index) => {
+    const screen = worldToScreen(patch.x, patch.y);
+    if (screen.x < -28 || screen.y < -28 || screen.x > canvas.width + 28 || screen.y > canvas.height + 28) return;
+    const collected = interacted.has(flowerCollectionKey(patch));
+    const sway = collected ? 0 : Math.round(Math.sin(state.tick / 22 + index * 1.7) * 2);
+    const near = state.near?.id === patch.id;
+
+    ctx.fillStyle = collected ? "rgba(55, 101, 64, 0.48)" : "rgba(48, 111, 61, 0.9)";
+    ctx.fillRect(screen.x, screen.y + 3, 3, 12);
+    ctx.fillRect(screen.x - 4, screen.y + 9, 5, 3);
+    ctx.fillRect(screen.x + 2, screen.y + 7, 5, 3);
+
+    ctx.fillStyle = collected ? "rgba(232, 224, 182, 0.46)" : ["#fff7d5", "#f3b7ce", "#f6e96d"][index];
+    ctx.fillRect(screen.x - 5 + sway, screen.y - 5, 6, 6);
+    ctx.fillRect(screen.x + 3 + sway, screen.y - 5, 6, 6);
+    ctx.fillRect(screen.x - 1 + sway, screen.y - 9, 6, 6);
+    ctx.fillRect(screen.x - 1 + sway, screen.y - 1, 6, 6);
+    ctx.fillStyle = collected ? "rgba(214, 184, 97, 0.48)" : "#d9a83f";
+    ctx.fillRect(screen.x + sway, screen.y - 4, 4, 4);
+
+    if (!collected && Math.floor(state.tick / 20 + index) % 2 === 0) {
+      ctx.fillStyle = "rgba(255, 251, 211, 0.84)";
+      ctx.fillRect(screen.x + 11, screen.y - 13, 3, 3);
+      ctx.fillRect(screen.x + 12, screen.y - 16, 1, 9);
+    }
+    if (near) drawInteractMarker(screen.x + 1, screen.y - 19);
+  });
+}
+
 function drawIllustratedMapPoints() {
   illustratedMapPoints.forEach((point) => {
     if (point.id === "home" || point.id === "tavern") return;
@@ -6497,6 +6540,7 @@ function drawWorld() {
     const tavern = locations.find((location) => location.id === "tavern");
     if (cottage) drawGardenCottage(cottage);
     if (tavern) drawTavern(tavern);
+    drawIllustratedFlowerCollectibles();
     drawPlayerShadow();
   } else {
     drawWorldTerrainObjects(startX, endX, startY, endY);
@@ -7244,6 +7288,20 @@ function updateMovement() {
 }
 
 function findNearby() {
+  if (loadedSceneAssets.worldMap) {
+    const flowerPatch = illustratedFlowerPatches
+      .map((patch) => ({ patch, distance: Math.hypot(state.x - patch.x, state.y - patch.y) }))
+      .filter((item) => item.distance < 1.55)
+      .sort((left, right) => left.distance - right.distance)[0]?.patch;
+    if (flowerPatch) {
+      return {
+        ...flowerPatch,
+        kind: "flowerCollectible",
+        text: "先观察它与季节、天气和土地的关系，再决定是否采下一朵。",
+      };
+    }
+  }
+
   const nearbyResident = residents
     .map((resident, index) => ({
       resident,
@@ -7721,6 +7779,11 @@ function interact() {
   const target = state.near;
   if (!target) {
     interactWithGround();
+    return;
+  }
+
+  if (target.kind === "flowerCollectible") {
+    interactIllustratedFlower(target);
     return;
   }
 
@@ -10205,6 +10268,70 @@ function advanceNatureKnowledge(id) {
     actions.push(["去现实观察同类", () => startSlowLifeInvitation(invitation)]);
   }
   setPanelActions(actions);
+  save();
+  renderHud();
+}
+
+function openNatureKnowledgeJournal(id = null) {
+  closeAllSurfacePanels();
+  state.backpackOpen = true;
+  activeBackpackCategoryId = "knowledge";
+  selectedBackpackItemKey = null;
+  selectedNatureKnowledgeId = id || selectedNatureKnowledgeId;
+  setPanel("自然知识档案", "花朵的名称、来处、关系、观察阶段和有限采集记录都保存在这里。");
+  save();
+  renderHud();
+}
+
+function interactIllustratedFlower(patch) {
+  const { item, record } = natureKnowledgeRecord(patch.speciesId);
+  const collected = interacted.has(flowerCollectionKey(patch));
+  const stage = natureKnowledgeStages[record.stage] || natureKnowledgeStages[0];
+  setPanel(
+    patch.title,
+    collected
+      ? `今天已经采过一朵，余下花朵继续留给授粉昆虫。${item.summary}`
+      : `${item.summary} 当前认识：${stage.name}。可以先观察，也可以有限采集一朵。`,
+  );
+  const actions = [
+    [record.stage ? `继续认识${item.name}` : `观察${item.name}`, () => advanceNatureKnowledge(item.id)],
+    ["打开知识档案", () => openNatureKnowledgeJournal(item.id)],
+  ];
+  if (!collected) actions.splice(1, 0, ["采集一朵", () => collectIllustratedFlower(patch)]);
+  setPanelActions(actions);
+}
+
+function collectIllustratedFlower(patch) {
+  const collectionKey = flowerCollectionKey(patch);
+  const { item, record } = natureKnowledgeRecord(patch.speciesId);
+  if (interacted.has(collectionKey)) {
+    interactIllustratedFlower(patch);
+    return;
+  }
+
+  if (record.stage === 0) advanceNatureKnowledge(item.id);
+  interacted.add(collectionKey);
+  inventory.flowers += 1;
+  natureKnowledgeState.collectedFlowers.push({
+    id: `${collectionKey}:${natureKnowledgeState.collectedFlowers.length}`,
+    patchId: patch.id,
+    itemId: item.id,
+    itemName: patch.itemName,
+    date: livingDateKey(),
+    place: currentLifePlace(),
+    weather: currentWeatherProfile().weather,
+    term: currentSolarTerm().name,
+  });
+  natureKnowledgeState.collectedFlowers = natureKnowledgeState.collectedFlowers.slice(-80);
+  registerNatureGraphEdge(patch.itemName, "有限采集于", currentLifePlace());
+  recordWorldObservation(patch.title, `只采一朵${patch.itemName}，并把花期、天气与地点写入自然知识档案。`, collectionKey);
+  recordLifeGrowthAction("observation", `有限采集${patch.itemName}`, 1, { place: currentLifePlace() });
+  addMemory(`花朵采集：${patch.itemName} · ${currentLifePlace()}`);
+  setPanel("花朵已入档", `获得一朵${patch.itemName}。${currentSolarTerm().name}、${currentWeatherProfile().weather}与采集地点已经一起写入${item.name}知识档案；这处花丛今天不再重复采集。`);
+  setPanelActions([
+    [`继续认识${item.name}`, () => advanceNatureKnowledge(item.id)],
+    ["查看知识档案", () => openNatureKnowledgeJournal(item.id)],
+  ]);
   save();
   renderHud();
 }
@@ -15421,6 +15548,78 @@ function backpackLifeState(categoryId, key, amount) {
   return key === "failureArchive" ? "等待重生" : "已留下痕迹";
 }
 
+function renderNatureKnowledgeJournal() {
+  const discoveredItems = natureKnowledgeCatalog.filter((item) => (natureKnowledgeState.records[item.id]?.stage || 0) > 0);
+  const visibleItems = natureKnowledgeCatalog.filter((item) => (
+    (natureKnowledgeState.records[item.id]?.stage || 0) > 0
+    || item.id === selectedNatureKnowledgeId
+  ));
+  if (!visibleItems.some((item) => item.id === selectedNatureKnowledgeId)) {
+    selectedNatureKnowledgeId = visibleItems[0]?.id || null;
+  }
+
+  const journal = document.createElement("section");
+  journal.className = "nature-knowledge-journal";
+  journal.setAttribute("aria-label", "自然知识档案");
+
+  const header = document.createElement("header");
+  header.innerHTML = `
+    <span><i class="living-glyph glyph-archive" aria-hidden="true"></i><b>自然知识档案</b></span>
+    <small>${discoveredItems.length}/${natureKnowledgeCatalog.length} 种生命已相遇 · ${natureKnowledgeState.collectedFlowers.length} 条花朵采集记录</small>
+  `;
+  journal.appendChild(header);
+
+  if (!visibleItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "nature-knowledge-empty";
+    empty.textContent = "知识档案还是空的。靠近地图上的发光花朵，按 E 先观察它。";
+    journal.appendChild(empty);
+    inventoryList.appendChild(journal);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.className = "nature-knowledge-list";
+  visibleItems.forEach((item) => {
+    const record = natureKnowledgeRecord(item.id).record;
+    const stage = natureKnowledgeStages[record.stage] || natureKnowledgeStages[0];
+    const collectionCount = natureKnowledgeState.collectedFlowers.filter((entry) => entry.itemId === item.id).length;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = item.id === selectedNatureKnowledgeId ? "is-selected" : "";
+    button.setAttribute("aria-pressed", String(item.id === selectedNatureKnowledgeId));
+    button.innerHTML = `
+      <span><b>${item.name}</b><small>${natureKindName(item.kind)} · ${stage.name}</small></span>
+      <em>${collectionCount ? `${collectionCount}次采集` : "只观察"}</em>
+    `;
+    button.addEventListener("click", () => {
+      selectedNatureKnowledgeId = item.id;
+      renderInventory();
+    });
+    list.appendChild(button);
+  });
+  journal.appendChild(list);
+
+  const selectedItem = natureKnowledgeItem(selectedNatureKnowledgeId);
+  const selectedRecord = natureKnowledgeRecord(selectedItem.id).record;
+  const selectedStage = natureKnowledgeStages[selectedRecord.stage] || natureKnowledgeStages[0];
+  const latestCollection = [...natureKnowledgeState.collectedFlowers].reverse().find((entry) => entry.itemId === selectedItem.id);
+  const detail = document.createElement("article");
+  detail.className = "nature-knowledge-detail";
+  detail.innerHTML = `
+    <div class="nature-knowledge-progress" aria-label="${selectedItem.name}认识阶段：${selectedStage.name}">
+      ${natureKnowledgeStages.map((stage, index) => `<i class="${index < selectedRecord.stage ? "is-active" : ""}" title="${stage.name}"></i>`).join("")}
+    </div>
+    <b>${selectedItem.name} · ${selectedStage.name}</b>
+    <p>${selectedRecord.stage >= 2 ? selectedItem.details : selectedItem.summary}</p>
+    <small>关系：${selectedItem.relations.join(" · ")}</small>
+    <small>守护：${selectedItem.protectAction}</small>
+    ${latestCollection ? `<em>最近采集：${latestCollection.term} · ${latestCollection.weather} · ${latestCollection.place}</em>` : "<em>尚未采集，观察也会增长知识。</em>"}
+  `;
+  journal.appendChild(detail);
+  inventoryList.appendChild(journal);
+}
+
 function renderPixelBackpack() {
   const category = backpackCategories.find((item) => item.id === activeBackpackCategoryId) || backpackCategories[0];
   const items = category.items.filter((key) => inventory[key] > 0);
@@ -15450,7 +15649,8 @@ function renderPixelBackpack() {
   grid.className = "backpack-grid";
   grid.setAttribute("role", "grid");
   grid.setAttribute("aria-label", `${category.name}物品格`);
-  const slotCount = Math.max(20, Math.ceil(items.length / 5) * 5);
+  const minimumSlots = category.id === "knowledge" ? 5 : 20;
+  const slotCount = Math.max(minimumSlots, Math.ceil(items.length / 5) * 5);
   for (let index = 0; index < slotCount; index += 1) {
     const key = items[index];
     if (!key) {
@@ -15497,6 +15697,7 @@ function renderPixelBackpack() {
 
   flowText.textContent = `${category.name} · ${items.length}类正在同行`;
   inventoryList.append(tabs, grid, detail);
+  if (category.id === "knowledge") renderNatureKnowledgeJournal();
 }
 
 function renderInventory() {
@@ -16284,6 +16485,16 @@ window.addEventListener("keyup", (event) => {
     return;
   }
   keys.delete(event.key);
+});
+
+function stopPlayerMovement() {
+  keys.clear();
+  playerSprite.classList.remove("walking");
+}
+
+window.addEventListener("blur", stopPlayerMovement);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopPlayerMovement();
 });
 
 window.addEventListener("resize", () => {
