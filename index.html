@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dedalion: Dandelion Life Garden</title>
+    <meta name="theme-color" content="#315946" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
     <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
-    <link rel="stylesheet" href="./styles.css?v=map-icon-4" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=device-app-1" />
   </head>
   <body class="is-focused-ui">
     <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
@@ -365,6 +369,8 @@
       <span class="player-sprite" id="playerSprite" role="img" aria-label="风芽"></span>
     </main>
 
-    <script src="./app.js?v=map-icon-4"></script>
+    <script src="./device-bridge.js?v=device-app-1"></script>
+    <script src="./device-client.js?v=device-app-1"></script>
+    <script src="./app.js?v=device-app-1"></script>
   </body>
 </html>

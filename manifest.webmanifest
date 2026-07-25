@@ -1,0 +1,28 @@
+{
+  "name": "Dedalion 蒲公英生活岛",
+  "short_name": "Dedalion",
+  "description": "一个把共同生活、照料和现实行动带回日常的像素生命世界。",
+  "id": "/?device=1",
+  "start_url": "/?device=1",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
+  "orientation": "landscape",
+  "background_color": "#5aa8d2",
+  "theme_color": "#315946",
+  "categories": ["games", "lifestyle", "education"],
+  "icons": [
+    {
+      "src": "/assets/icons/dedalion-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/dedalion-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

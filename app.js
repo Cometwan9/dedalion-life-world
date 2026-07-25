@@ -6354,6 +6354,10 @@ function closeProfileEditor(saveChanges = false) {
 let interiorTransitionTimer = null;
 let interiorAudioContext = null;
 
+function interiorSoundEnabled() {
+  return globalThis.DedalionDevice?.soundEnabled !== false;
+}
+
 function setInteriorActions(actions) {
   const buttons = [...buildingInterior.querySelectorAll("[data-interior-action]")];
   actions.forEach(([action, label, icon], index) => {
@@ -6368,6 +6372,35 @@ function setInteriorActions(actions) {
     else button.textContent = label;
     if (iconNode) iconNode.className = `living-glyph ${icon}`;
   });
+}
+
+function playDoorOpenSound() {
+  if (!interiorSoundEnabled()) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  interiorAudioContext = interiorAudioContext || new AudioContextClass();
+  const audioContext = interiorAudioContext;
+  const now = audioContext.currentTime;
+  const master = audioContext.createGain();
+  const hinge = audioContext.createOscillator();
+  const latch = audioContext.createOscillator();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.exponentialRampToValueAtTime(0.045, now + 0.018);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+  hinge.type = "triangle";
+  hinge.frequency.setValueAtTime(84, now);
+  hinge.frequency.exponentialRampToValueAtTime(132, now + 0.24);
+  latch.type = "sine";
+  latch.frequency.setValueAtTime(360, now + 0.03);
+  latch.frequency.exponentialRampToValueAtTime(190, now + 0.12);
+  hinge.connect(master);
+  latch.connect(master);
+  master.connect(audioContext.destination);
+  hinge.start(now);
+  latch.start(now + 0.03);
+  hinge.stop(now + 0.3);
+  latch.stop(now + 0.14);
+  audioContext.resume?.();
 }
 
 function openBuildingInterior(buildingId = "home") {
@@ -6400,11 +6433,14 @@ function openBuildingInterior(buildingId = "home") {
       ]);
   document.body.classList.add("is-interior-open");
   keys.clear();
+  playDoorOpenSound();
+  globalThis.DedalionDevice?.vibrate?.(18);
   requestAnimationFrame(() => buildingInterior.classList.add("is-entering"));
-  interiorTransitionTimer = setTimeout(() => buildingInterior.classList.remove("is-entering"), 720);
+  interiorTransitionTimer = setTimeout(() => buildingInterior.classList.remove("is-entering"), 620);
 }
 
 function playDoorCloseSound() {
+  if (!interiorSoundEnabled()) return;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return;
   interiorAudioContext = interiorAudioContext || new AudioContextClass();
