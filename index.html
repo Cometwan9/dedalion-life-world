@@ -6,7 +6,7 @@
     <title>Dedalion: Dandelion Life Garden</title>
     <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
     <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
-    <link rel="stylesheet" href="./styles.css?v=flower-knowledge-1" />
+    <link rel="stylesheet" href="./styles.css?v=living-scene-3" />
   </head>
   <body class="is-focused-ui">
     <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
@@ -302,6 +302,11 @@
       <div class="player-emote-fx is-hidden" id="playerEmoteFx" aria-hidden="true"></div>
 
       <section class="building-interior is-hidden" id="buildingInterior" aria-label="建筑室内">
+        <div class="building-door-transition" aria-hidden="true">
+          <i class="door-leaf door-leaf-left"></i>
+          <i class="door-leaf door-leaf-right"></i>
+          <b class="door-latch"></b>
+        </div>
         <article class="building-interior-shell">
           <header>
             <span><b id="buildingInteriorTitle">听风小院</b><small id="buildingInteriorSubtitle">一间已经开始生活的房间</small></span>
@@ -311,10 +316,10 @@
             <img id="buildingInteriorImage" src="./assets/sprites/cottage-interior-v2.png" alt="听风小院室内缩略图" />
           </div>
           <div class="building-interior-actions">
-            <button type="button" data-interior-action="rest">休息</button>
-            <button type="button" data-interior-action="tea">泡茶</button>
-            <button type="button" data-interior-action="seeds">整理种子</button>
-            <button type="button" data-interior-action="leave">返回地图</button>
+            <button type="button" data-interior-action="rest" title="休息" aria-label="休息"><i class="living-glyph glyph-home" aria-hidden="true"></i><span>休息</span></button>
+            <button type="button" data-interior-action="tea" title="泡茶" aria-label="泡茶"><i class="living-glyph glyph-seed" aria-hidden="true"></i><span>泡茶</span></button>
+            <button type="button" data-interior-action="seeds" title="整理种子" aria-label="整理种子"><i class="living-glyph glyph-archive" aria-hidden="true"></i><span>整理种子</span></button>
+            <button type="button" data-interior-action="leave" title="返回地图" aria-label="返回地图"><i class="living-glyph glyph-world" aria-hidden="true"></i><span>返回地图</span></button>
           </div>
         </article>
       </section>
@@ -360,6 +365,6 @@
       <span class="player-sprite" id="playerSprite" role="img" aria-label="风芽"></span>
     </main>
 
-    <script src="./app.js?v=flower-knowledge-1"></script>
+    <script src="./app.js?v=living-scene-3"></script>
   </body>
 </html>

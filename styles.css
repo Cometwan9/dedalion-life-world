@@ -7606,6 +7606,401 @@ body {
   animation: none;
 }
 
+.is-focused-ui .player-sprite.up {
+  background-position: 0 0;
+  transform: translate(-50%, -70%);
+}
+
+.is-focused-ui .player-sprite.down {
+  background-position: -39px 0;
+  transform: translate(-50%, -70%);
+}
+
+.is-focused-ui .player-sprite.right {
+  background-position: -79px 0;
+  transform: translate(-50%, -70%);
+}
+
+.is-focused-ui .player-sprite.left {
+  background-position: -79px 0;
+  transform: translate(-50%, -70%) scaleX(-1);
+}
+
 .is-focused-ui .player-sprite.walking {
-  animation: citizenWalk 0.28s steps(1, end) infinite;
+  animation: citizenStep 0.3s steps(2, end) infinite;
+}
+
+.is-focused-ui .player-sprite.walking.left {
+  animation-name: citizenStepLeft;
+}
+
+@keyframes citizenStep {
+  0%, 100% {
+    transform: translate(-50%, -70%);
+  }
+
+  50% {
+    transform: translate(-50%, -74%);
+  }
+}
+
+@keyframes citizenStepLeft {
+  0%, 100% {
+    transform: translate(-50%, -70%) scaleX(-1);
+  }
+
+  50% {
+    transform: translate(-50%, -74%) scaleX(-1);
+  }
+}
+
+/* Building entry stays compact: one room image, four pixel actions, no extra copy. */
+.building-interior {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow: hidden;
+  background: rgba(28, 48, 40, 0.58);
+}
+
+.building-interior.is-hidden {
+  display: none;
+}
+
+.building-interior-shell {
+  position: relative;
+  z-index: 2;
+  width: min(620px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr) 64px;
+  border: 4px solid #334f40;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f6e9bf;
+  box-shadow: 8px 8px 0 rgba(30, 48, 38, 0.42);
+}
+
+.building-interior-shell header {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+  border-bottom: 3px solid #6d7752;
+  background: #e8d39a;
+}
+
+.building-interior-shell header span,
+.building-interior-shell header b {
+  min-width: 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.building-interior-shell header b {
+  color: #304b3c;
+  font-size: 0.9rem;
+}
+
+.building-interior-shell header small {
+  display: none;
+}
+
+#buildingInteriorClose {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 3px solid #304b3c;
+  border-radius: 2px;
+  background: #fff2bd;
+  color: #304b3c;
+  font: 900 1rem/1 monospace;
+  cursor: pointer;
+}
+
+.building-interior-scene {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  overflow: hidden;
+  background: #b8d49c;
+}
+
+.building-interior-scene img {
+  width: 100%;
+  height: 100%;
+  max-height: min(62vh, 480px);
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.building-interior.is-tavern .building-interior-scene {
+  background: #afd2ca;
+}
+
+.building-interior-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 48px);
+  align-content: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 7px;
+  border-top: 3px solid #6d7752;
+  background: #e8d39a;
+}
+
+.building-interior-actions button {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 3px solid #304b3c;
+  border-radius: 2px;
+  background: #fff2bd;
+  box-shadow: 3px 3px 0 rgba(48, 75, 60, 0.28);
+  cursor: pointer;
+}
+
+.building-interior-actions button:hover,
+.building-interior-actions button:focus-visible,
+#buildingInteriorClose:hover,
+#buildingInteriorClose:focus-visible {
+  background: #d9f0c5;
+  outline: 0;
+}
+
+.building-interior-actions .living-glyph {
+  width: 30px;
+  height: 30px;
+  image-rendering: pixelated;
+}
+
+.building-interior-actions span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.building-door-transition {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.building-door-transition .door-leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  border: 8px solid #263f34;
+  background: #4f755d;
+  box-shadow:
+    inset 0 0 0 10px #78946d,
+    inset 0 0 0 18px #365947;
+}
+
+.door-leaf-left {
+  left: 0;
+  transform: translateX(0);
+}
+
+.door-leaf-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.door-latch {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border: 4px solid #5a482f;
+  background: #e0bb58;
+  transform: translate(-50%, -50%);
+}
+
+.building-interior.is-entering .building-door-transition,
+.building-interior.is-leaving .building-door-transition {
+  visibility: visible;
+}
+
+.building-interior.is-entering .door-leaf-left {
+  animation: doorOpenLeft 0.72s steps(7, end) both;
+}
+
+.building-interior.is-entering .door-leaf-right {
+  animation: doorOpenRight 0.72s steps(7, end) both;
+}
+
+.building-interior.is-entering .door-latch {
+  animation: doorLatchOpen 0.72s steps(7, end) both;
+}
+
+.building-interior.is-leaving .door-leaf-left {
+  animation: doorCloseLeft 0.52s steps(6, end) both;
+}
+
+.building-interior.is-leaving .door-leaf-right {
+  animation: doorCloseRight 0.52s steps(6, end) both;
+}
+
+.building-interior.is-leaving .door-latch {
+  animation: doorLatchClose 0.52s steps(6, end) both;
+}
+
+@keyframes doorOpenLeft {
+  to { transform: translateX(-100%); }
+}
+
+@keyframes doorOpenRight {
+  to { transform: translateX(100%); }
+}
+
+@keyframes doorCloseLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes doorCloseRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes doorLatchOpen {
+  to { opacity: 0; }
+}
+
+@keyframes doorLatchClose {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .building-interior {
+    padding: 8px;
+  }
+
+  .building-interior-shell {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    grid-template-rows: 40px minmax(0, 1fr) 58px;
+  }
+
+  .building-interior-actions {
+    grid-template-columns: repeat(4, 42px);
+    gap: 7px;
+  }
+
+  .building-interior-actions button {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .building-interior.is-entering .door-leaf,
+  .building-interior.is-entering .door-latch,
+  .building-interior.is-leaving .door-leaf,
+  .building-interior.is-leaving .door-latch {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* Icon-first HUD: keep scene controls readable without permanent copy over the map. */
+.is-focused-ui .scene-profile {
+  width: 52px;
+  height: 52px;
+  grid-template-columns: 1fr;
+  padding: 4px;
+}
+
+.is-focused-ui .scene-profile-copy,
+.is-focused-ui .scene-minimap > small,
+.is-focused-ui .scene-world-inset b,
+.is-focused-ui .world-rhythm > span,
+.is-focused-ui .surface-button b,
+.is-focused-ui .surface-button span,
+.is-focused-ui #surfaceDandelionButton b,
+.is-focused-ui #surfaceDandelionButton span,
+.is-focused-ui .living-scene-prompt button span,
+.is-focused-ui .player-nameplate,
+.is-focused-ui .nearby > span,
+.is-focused-ui .nearby > strong {
+  display: none;
+}
+
+.is-focused-ui .scene-profile img {
+  width: 40px;
+  height: 40px;
+}
+
+.is-focused-ui .scene-minimap {
+  height: clamp(72px, 9vw, 96px);
+  grid-template-rows: 1fr;
+}
+
+.is-focused-ui .world-rhythm {
+  width: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 5px;
+}
+
+.is-focused-ui .world-rhythm::after {
+  display: none;
+}
+
+.is-focused-ui .world-rhythm .rhythm-sun {
+  display: block;
+}
+
+.is-focused-ui .surface-dock {
+  width: min(350px, calc(100vw - var(--safe-edge) * 2));
+  min-height: 64px;
+  padding: 7px;
+}
+
+.is-focused-ui .surface-button,
+.is-focused-ui #surfaceDandelionButton {
+  height: 48px;
+  min-height: 48px;
+  grid-template-rows: 1fr;
+  padding: 4px;
+}
+
+.is-focused-ui .nearby {
+  width: auto;
+  min-width: 0;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.is-focused-ui .nearby:not(:has(.nearby-actions button)) {
+  display: none;
+}
+
+.is-focused-ui .living-scene-prompt {
+  grid-template-columns: repeat(3, 42px);
 }

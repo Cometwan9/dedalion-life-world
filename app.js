@@ -272,6 +272,22 @@ const inventory = Object.assign(
 );
 const wordFishProgress = JSON.parse(localStorage.getItem("dedalionWordFishProgress") || "{}");
 const memoryTreeProgress = JSON.parse(localStorage.getItem("dedalionMemoryTreeProgress") || "{}");
+const weeklyEventState = Object.assign(
+  {
+    version: 1,
+    weekKey: "",
+    points: 0,
+    fishPoints: 0,
+    orchardPoints: 0,
+    doubleClaims: [],
+    orchardClaims: [],
+    history: [],
+  },
+  JSON.parse(localStorage.getItem("dedalionWeeklyEventState") || "{}"),
+);
+weeklyEventState.doubleClaims = Array.isArray(weeklyEventState.doubleClaims) ? weeklyEventState.doubleClaims : [];
+weeklyEventState.orchardClaims = Array.isArray(weeklyEventState.orchardClaims) ? weeklyEventState.orchardClaims : [];
+weeklyEventState.history = Array.isArray(weeklyEventState.history) ? weeklyEventState.history : [];
 const dandelionWishes = JSON.parse(localStorage.getItem("dedalionWishes") || "[]");
 const lifeSeeds = JSON.parse(localStorage.getItem("dedalionLifeSeeds") || "[]");
 const dandelionProtocol = Object.assign(
@@ -973,7 +989,7 @@ const worldTreeV2 = localStorage.getItem("dedalionWorldTreeV2") === "1";
 const state = {
   x: worldTreeV2 ? Number(localStorage.getItem("dedalionWorldX") || 101) : 101,
   y: worldTreeV2 ? Number(localStorage.getItem("dedalionWorldY") || 61) : 61,
-  direction: "right",
+  direction: "down",
   tick: 0,
   seed: Number(localStorage.getItem("dedalionWorldSeed") || 0),
   eco: Number(localStorage.getItem("dedalionEco") || 0),
@@ -4013,6 +4029,12 @@ function save() {
   localStorage.setItem("dedalionInventory", JSON.stringify(inventory));
   localStorage.setItem("dedalionWordFishProgress", JSON.stringify(wordFishProgress));
   localStorage.setItem("dedalionMemoryTreeProgress", JSON.stringify(memoryTreeProgress));
+  localStorage.setItem("dedalionWeeklyEventState", JSON.stringify({
+    ...weeklyEventState,
+    doubleClaims: weeklyEventState.doubleClaims.slice(-24),
+    orchardClaims: weeklyEventState.orchardClaims.slice(-24),
+    history: weeklyEventState.history.slice(-80),
+  }));
   localStorage.setItem("dedalionWeatherOpen", state.weatherOpen ? "1" : "0");
   localStorage.setItem("dedalionLifeCoreOpen", state.lifeCoreOpen ? "1" : "0");
   localStorage.setItem("dedalionBackpackOpen", state.backpackOpen ? "1" : "0");
@@ -6329,28 +6351,114 @@ function closeProfileEditor(saveChanges = false) {
   profileEditor.classList.add("is-hidden");
 }
 
+let interiorTransitionTimer = null;
+let interiorAudioContext = null;
+
+function setInteriorActions(actions) {
+  const buttons = [...buildingInterior.querySelectorAll("[data-interior-action]")];
+  actions.forEach(([action, label, icon], index) => {
+    const button = buttons[index];
+    if (!button) return;
+    button.dataset.interiorAction = action;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    const labelNode = button.querySelector("span");
+    const iconNode = button.querySelector("i");
+    if (labelNode) labelNode.textContent = label;
+    else button.textContent = label;
+    if (iconNode) iconNode.className = `living-glyph ${icon}`;
+  });
+}
+
 function openBuildingInterior(buildingId = "home") {
-  if (buildingId !== "home") {
-    interactTavern();
-    return;
-  }
   const geography = currentGeography();
-  buildingInteriorTitle.textContent = "听风小院";
-  buildingInteriorSubtitle.textContent = `${geography.country} · ${geography.region} · ${geography.district}`;
-  buildingInteriorImage.src = "./assets/sprites/cottage-interior-v2.png";
-  buildingInterior.classList.remove("is-hidden");
+  const tavern = buildingId === "tavern";
+  clearTimeout(interiorTransitionTimer);
+  buildingInterior.dataset.buildingId = tavern ? "tavern" : "home";
+  buildingInterior.classList.remove("is-hidden", "is-leaving", "is-entering");
+  buildingInterior.classList.toggle("is-tavern", tavern);
+  buildingInteriorTitle.textContent = tavern ? "种种酒馆" : "听风小院";
+  buildingInteriorSubtitle.textContent = tavern
+    ? `${weeklyEventProfile().name} · 玻璃屋里正温着茶和果饮`
+    : `${geography.country} · ${geography.region} · ${geography.district}`;
+  buildingInteriorImage.src = tavern
+    ? "./assets/sprites/greenhouse-tavern-v2.png"
+    : "./assets/sprites/cottage-interior-v2.png";
+  buildingInteriorImage.alt = tavern ? "种种酒馆玻璃屋" : "听风小院室内缩略图";
+  setInteriorActions(tavern
+    ? [
+        ["story", "听故事", "glyph-archive"],
+        ["tea", "点花茶", "glyph-seed"],
+        ["commission", "今日委托", "glyph-world"],
+        ["leave", "返回地图", "glyph-home"],
+      ]
+    : [
+        ["rest", "休息", "glyph-home"],
+        ["tea", "泡茶", "glyph-seed"],
+        ["seeds", "整理种子", "glyph-archive"],
+        ["leave", "返回地图", "glyph-world"],
+      ]);
   document.body.classList.add("is-interior-open");
   keys.clear();
+  requestAnimationFrame(() => buildingInterior.classList.add("is-entering"));
+  interiorTransitionTimer = setTimeout(() => buildingInterior.classList.remove("is-entering"), 720);
+}
+
+function playDoorCloseSound() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  interiorAudioContext = interiorAudioContext || new AudioContextClass();
+  const audioContext = interiorAudioContext;
+  const now = audioContext.currentTime;
+  const master = audioContext.createGain();
+  const thud = audioContext.createOscillator();
+  const latch = audioContext.createOscillator();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.exponentialRampToValueAtTime(0.07, now + 0.012);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+  thud.type = "triangle";
+  thud.frequency.setValueAtTime(118, now);
+  thud.frequency.exponentialRampToValueAtTime(58, now + 0.2);
+  latch.type = "square";
+  latch.frequency.setValueAtTime(420, now + 0.08);
+  latch.frequency.exponentialRampToValueAtTime(170, now + 0.16);
+  thud.connect(master);
+  latch.connect(master);
+  master.connect(audioContext.destination);
+  thud.start(now);
+  latch.start(now + 0.08);
+  thud.stop(now + 0.24);
+  latch.stop(now + 0.17);
+  audioContext.resume?.();
 }
 
 function closeBuildingInterior() {
-  buildingInterior.classList.add("is-hidden");
-  document.body.classList.remove("is-interior-open");
+  if (buildingInterior.classList.contains("is-hidden") || buildingInterior.classList.contains("is-leaving")) return;
+  clearTimeout(interiorTransitionTimer);
+  playDoorCloseSound();
+  buildingInterior.classList.remove("is-entering");
+  buildingInterior.classList.add("is-leaving");
+  interiorTransitionTimer = setTimeout(() => {
+    buildingInterior.classList.add("is-hidden");
+    buildingInterior.classList.remove("is-leaving", "is-tavern");
+    document.body.classList.remove("is-interior-open");
+  }, 520);
 }
 
 function runInteriorAction(action) {
   if (action === "leave") {
     closeBuildingInterior();
+    return;
+  }
+  const tavern = buildingInterior.dataset.buildingId === "tavern";
+  if (tavern && action === "story") {
+    interactTavern();
+    buildingInteriorSubtitle.textContent = compactPanelText(state.lastSignal, 34);
+    return;
+  }
+  if (tavern && action === "commission") {
+    interactTavern();
+    buildingInteriorSubtitle.textContent = `今日委托已写在吧台旁 · ${weeklyEventProfile().schedule}`;
     return;
   }
   if (action === "rest") {
@@ -6361,7 +6469,9 @@ function runInteriorAction(action) {
   if (action === "tea") {
     setSceneEmote("tea", false);
     addLifeValue("memory", 1);
-    buildingInteriorSubtitle.textContent = "茶壶温着，圆窗外的水声慢了下来。";
+    buildingInteriorSubtitle.textContent = tavern
+      ? "一杯桂花茶和一杯青梅饮放在木吧台上。"
+      : "茶壶温着，圆窗外的水声慢了下来。";
   }
   if (action === "seeds") {
     inventory.seeds += 1;
@@ -6438,11 +6548,14 @@ function drawIllustratedWaterMotion() {
 }
 
 function drawIllustratedPetalsAndSeeds() {
+  const weather = currentWeatherProfile();
+  if (weather.isRain || weather.isSnow || weather.isThunder) return;
+  const windReach = 1.2 + Math.min(2.2, weather.windSpeed * 0.16);
   for (let index = 0; index < 18; index += 1) {
     const baseX = 66 + ((index * 17) % 60);
     const baseY = 39 + ((index * 23) % 62);
     const drift = (state.tick / 190 + index * 0.071) % 1;
-    const screen = worldToScreen(baseX + drift * 2.4, baseY + drift * 1.3);
+    const screen = worldToScreen(baseX + drift * windReach, baseY + drift * 0.9);
     const flutter = Math.sin(state.tick / 18 + index) * 6;
     ctx.fillStyle = index % 3 === 0 ? "rgba(247, 167, 191, 0.76)" : "rgba(255, 251, 226, 0.78)";
     ctx.fillRect(Math.round(screen.x + flutter), Math.round(screen.y), index % 4 === 0 ? 5 : 3, 3);
@@ -6451,6 +6564,106 @@ function drawIllustratedPetalsAndSeeds() {
       ctx.fillRect(Math.round(screen.x + flutter + 3), Math.round(screen.y + 3), 2, 4);
     }
   }
+}
+
+function drawIllustratedFishSchool() {
+  const weather = currentWeatherProfile();
+  const schools = [
+    { x: 116.5, y: 69.5, w: 8, h: 5, count: 10 },
+    { x: 94, y: 96.5, w: 10, h: 5, count: 8 },
+  ];
+  const fishCountScale = weather.isThunder ? 0.45 : weather.isRain ? 0.72 : 1;
+  schools.forEach((school, schoolIndex) => {
+    const count = Math.max(4, Math.round(school.count * fishCountScale));
+    for (let index = 0; index < count; index += 1) {
+      const travel = (state.tick * (0.006 + (index % 3) * 0.0015) + index * 0.17) % 1;
+      const direction = index % 2 === 0 ? 1 : -1;
+      const worldX = school.x + (direction > 0 ? travel : 1 - travel) * school.w;
+      const worldY = school.y + ((index * 1.73 + Math.sin(state.tick / 45 + index)) % school.h + school.h) % school.h;
+      const screen = worldToScreen(worldX, worldY);
+      const x = Math.round(screen.x);
+      const y = Math.round(screen.y);
+      const color = ["rgba(255, 241, 158, 0.84)", "rgba(255, 178, 130, 0.8)", "rgba(205, 247, 225, 0.82)"][(index + schoolIndex) % 3];
+      ctx.fillStyle = color;
+      ctx.fillRect(x - 4, y - 2, 9, 5);
+      ctx.fillRect(x + (direction > 0 ? -7 : 5), y - 3, 4, 7);
+      ctx.fillStyle = "rgba(43, 79, 74, 0.82)";
+      ctx.fillRect(x + (direction > 0 ? 3 : -3), y - 1, 1, 1);
+    }
+  });
+}
+
+function drawIllustratedGardenFences() {
+  ctx.save();
+  ctx.globalAlpha = 0.72;
+  drawFenceLine(75, 84, 8, "horizontal");
+  drawFenceLine(75, 92, 8, "horizontal");
+  drawFenceLine(75, 84, 8, "vertical");
+  drawFenceLine(83, 84, 8, "vertical");
+  ctx.restore();
+}
+
+function drawIllustratedWindLife() {
+  const weather = currentWeatherProfile();
+  if (weather.isRain || weather.isSnow || weather.isThunder) return;
+  const leafAnchors = [[73, 47], [87, 45], [102, 47], [120, 48], [92, 68], [105, 86]];
+  const reach = Math.max(0.5, Math.min(3.2, weather.windSpeed * 0.24));
+  leafAnchors.forEach(([x, y], index) => {
+    const screen = worldToScreen(x, y);
+    const sway = Math.round(Math.sin(state.tick / 42 + index * 1.4) * reach);
+    ctx.fillStyle = index % 2 ? "rgba(217, 239, 112, 0.72)" : "rgba(116, 193, 91, 0.76)";
+    ctx.fillRect(screen.x + sway, screen.y, 6, 3);
+    ctx.fillRect(screen.x + 5 + sway, screen.y + 4, 4, 3);
+  });
+  drawIllustratedPetalsAndSeeds();
+}
+
+function drawIllustratedChildren() {
+  const weather = currentWeatherProfile();
+  if (weather.isRain || weather.isSnow || weather.isThunder || weather.isNight || weather.period.id === "dream") return;
+  const children = [
+    { x: 94.8, y: 72.8, shirt: "#f2b46e", hair: "#6d4932" },
+    { x: 97.2, y: 74.4, shirt: "#77bfc5", hair: "#503c35" },
+    { x: 99.6, y: 72.9, shirt: "#e68da2", hair: "#8b5a39" },
+  ];
+  children.forEach((child, index) => {
+    const screen = worldToScreen(child.x, child.y);
+    const bob = Math.round(Math.sin(state.tick / 48 + index * 2.1));
+    const x = screen.x;
+    const y = screen.y + bob;
+    ctx.fillStyle = "rgba(38, 61, 48, 0.22)";
+    ctx.fillRect(x - 7, y + 20, 16, 4);
+    ctx.fillStyle = child.shirt;
+    ctx.fillRect(x - 6, y + 8, 13, 12);
+    ctx.fillStyle = "#f5d7ad";
+    ctx.fillRect(x - 5, y - 2, 11, 11);
+    ctx.fillStyle = child.hair;
+    ctx.fillRect(x - 5, y - 4, 11, 4);
+    ctx.fillRect(x - 6, y - 1, 3, 5);
+    ctx.fillStyle = "#4f4036";
+    ctx.fillRect(x - 2, y + 2, 2, 2);
+    ctx.fillRect(x + 3, y + 2, 2, 2);
+    ctx.fillRect(x, y + 6, 4, 1);
+    ctx.fillRect(x + 1, y + 7, 2, 1);
+  });
+}
+
+function drawIllustratedNightLamps() {
+  const weather = currentWeatherProfile();
+  if (!weather.isNight && weather.period.id !== "dream") return;
+  [[81, 65], [109, 65], [96, 74], [105, 88]].forEach(([x, y], index) => {
+    const screen = worldToScreen(x, y);
+    const pulse = 0.78 + Math.sin(state.tick / 34 + index) * 0.08;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.shadowColor = "rgba(255, 222, 104, 0.9)";
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = `rgba(255, 228, 116, ${pulse})`;
+    ctx.fillRect(screen.x - 3, screen.y - 7, 7, 9);
+    ctx.restore();
+    ctx.fillStyle = "#604a34";
+    ctx.fillRect(screen.x, screen.y + 2, 2, 12);
+  });
 }
 
 function flowerCollectionKey(patch, dateKey = livingDateKey()) {
@@ -6538,9 +6751,15 @@ function drawWorld() {
   if (loadedSceneAssets.worldMap) {
     const cottage = locations.find((location) => location.id === "home");
     const tavern = locations.find((location) => location.id === "tavern");
+    drawIllustratedWaterMotion();
+    drawIllustratedFishSchool();
+    drawIllustratedGardenFences();
+    drawIllustratedWindLife();
+    drawIllustratedChildren();
     if (cottage) drawGardenCottage(cottage);
     if (tavern) drawTavern(tavern);
     drawIllustratedFlowerCollectibles();
+    drawIllustratedNightLamps();
     drawPlayerShadow();
   } else {
     drawWorldTerrainObjects(startX, endX, startY, endY);
@@ -7151,15 +7370,21 @@ function drawWeatherLayer() {
   }
 
   if (weather.isRainbow) {
-    const centerX = canvas.width * 0.68;
-    const centerY = canvas.height * 0.62;
-    ["rgba(217, 92, 78, 0.5)", "rgba(239, 186, 71, 0.5)", "rgba(87, 171, 111, 0.5)", "rgba(73, 151, 176, 0.5)"].forEach((color, index) => {
+    const centerX = canvas.width * 0.7;
+    const centerY = canvas.height * 0.72;
+    const radius = Math.min(canvas.width * 0.43, canvas.height * 0.58);
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    ctx.shadowColor = "rgba(255, 244, 180, 0.72)";
+    ctx.shadowBlur = 16;
+    ["rgba(230, 103, 91, 0.62)", "rgba(244, 190, 76, 0.62)", "rgba(103, 190, 118, 0.62)", "rgba(80, 166, 191, 0.62)"].forEach((color, index) => {
       ctx.strokeStyle = color;
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 9;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 128 - index * 7, Math.PI, Math.PI * 2);
+      ctx.arc(centerX, centerY, radius - index * 12, Math.PI, Math.PI * 2);
       ctx.stroke();
     });
+    ctx.restore();
   }
 
   if (weather.isThunder && state.tick % 180 < 7) {
@@ -7265,6 +7490,12 @@ function drawLifeBalanceLayer() {
   }
 }
 
+function syncPlayerFacing() {
+  ["up", "down", "left", "right"].forEach((direction) => {
+    playerSprite.classList.toggle(direction, state.direction === direction);
+  });
+}
+
 function updateMovement() {
   let dx = 0;
   let dy = 0;
@@ -7279,12 +7510,18 @@ function updateMovement() {
     state.x += dx * diagonal;
     state.y += dy * diagonal;
     recordMovementTrace();
-    state.direction = dx < 0 ? "left" : dx > 0 ? "right" : state.direction;
+    state.direction = dx < 0
+      ? "left"
+      : dx > 0
+        ? "right"
+        : dy < 0
+          ? "up"
+          : "down";
     playerSprite.classList.add("walking");
-    playerSprite.classList.toggle("left", state.direction === "left");
   } else {
     playerSprite.classList.remove("walking");
   }
+  syncPlayerFacing();
 }
 
 function findNearby() {
@@ -7800,8 +8037,13 @@ function interact() {
     return;
   }
 
+  if (target.kind === "house") {
+    openBuildingInterior("home");
+    return;
+  }
+
   if (target.kind === "tavern") {
-    interactTavern();
+    openBuildingInterior("tavern");
     return;
   }
 
@@ -7975,6 +8217,115 @@ function markGenesisRoute(target) {
   return true;
 }
 
+function weeklyWeekKey(date = new Date()) {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayOffset = (monday.getDay() + 6) % 7;
+  monday.setDate(monday.getDate() - dayOffset);
+  return livingDateKey(monday);
+}
+
+function weeklyEventProfile(date = new Date()) {
+  const day = date.getDay();
+  if (day === 3) return { id: "fishing", name: "周三钓鱼赛", schedule: "鱼塘积分双倍", multiplier: 2 };
+  if (day === 4) return { id: "crazy-thursday", name: "疯狂星期四", schedule: "Double 额外收获与积分双倍", multiplier: 2 };
+  if (day === 5) return { id: "orchard", name: "周五果树争霸", schedule: "果树积分双倍", multiplier: 2 };
+  return { id: "daily", name: "岛屿日常", schedule: "周三钓鱼 · 周四 Double · 周五果树", multiplier: 1 };
+}
+
+function ensureWeeklyEventState() {
+  const key = weeklyWeekKey();
+  if (weeklyEventState.weekKey === key) return;
+  weeklyEventState.weekKey = key;
+  weeklyEventState.points = 0;
+  weeklyEventState.fishPoints = 0;
+  weeklyEventState.orchardPoints = 0;
+  weeklyEventState.doubleClaims = [];
+  weeklyEventState.orchardClaims = [];
+  weeklyEventState.history = [];
+}
+
+function awardWeeklyEventPoints(kind, basePoints, source) {
+  ensureWeeklyEventState();
+  const event = weeklyEventProfile();
+  const matchesEvent = event.id === "crazy-thursday"
+    || (event.id === "fishing" && kind === "fish")
+    || (event.id === "orchard" && kind === "orchard");
+  const points = basePoints * (matchesEvent ? event.multiplier : 1);
+  weeklyEventState.points += points;
+  if (kind === "fish") weeklyEventState.fishPoints += points;
+  if (kind === "orchard") weeklyEventState.orchardPoints += points;
+  weeklyEventState.history.push({ kind, points, source, date: livingDateKey() });
+  weeklyEventState.history = weeklyEventState.history.slice(-80);
+  return points;
+}
+
+function weeklyLeaderboard() {
+  ensureWeeklyEventState();
+  const entries = [
+    { name: playerIdentityState.name, points: weeklyEventState.points, self: true },
+    { name: "芽芽", points: 46 },
+    { name: "蒲小邮", points: 34 },
+    { name: "蜂蜜", points: 27 },
+  ].sort((left, right) => right.points - left.points || Number(right.self) - Number(left.self));
+  return entries;
+}
+
+function showWeeklyLeaderboard() {
+  const board = weeklyLeaderboard();
+  const rank = board.findIndex((entry) => entry.self) + 1;
+  const leaders = board.slice(0, 3).map((entry, index) => `${index + 1}.${entry.name} ${entry.points}`).join(" · ");
+  setPanel(`周榜 #${rank}`, `${leaders} · ${weeklyEventProfile().schedule}`);
+}
+
+function wordFishBaseScore(fish) {
+  return fish.rarity === "Legendary" ? 30 : fish.rarity === "Rare" ? 18 : 10;
+}
+
+function doubleFishClaimKey(fish) {
+  return `${livingDateKey()}:${fish.id}`;
+}
+
+function claimDoubleFishCatch(fish) {
+  ensureWeeklyEventState();
+  const key = doubleFishClaimKey(fish);
+  if (weeklyEventState.doubleClaims.includes(key)) {
+    setPanel("Double 已完成", `${fish.word} 今天已经获得过双份。`);
+    setPanelActions([["周排行榜", showWeeklyLeaderboard]]);
+    return;
+  }
+  weeklyEventState.doubleClaims.push(key);
+  inventory.wordFish += 1;
+  inventory.fish += 1;
+  const points = awardWeeklyEventPoints("fish", wordFishBaseScore(fish), `${fish.word} Double`);
+  setPanel("Double ×2", `${fish.word} +1 · 周积分 +${points}`);
+  setPanelActions([["周排行榜", showWeeklyLeaderboard], ["放生一条", releaseFish]]);
+  addMemory(`词鱼池：Double 收获 ${fish.word}`);
+  save();
+}
+
+function runFridayOrchardContest(tree) {
+  ensureWeeklyEventState();
+  const event = weeklyEventProfile();
+  if (event.id !== "orchard") {
+    setPanel("果树争霸", "每周五开放。");
+    setPanelActions([["周排行榜", showWeeklyLeaderboard]]);
+    return;
+  }
+  const key = `${livingDateKey()}:${tree.id}`;
+  if (weeklyEventState.orchardClaims.includes(key)) {
+    setPanel("果树争霸", "本轮已经完成。");
+    setPanelActions([["周排行榜", showWeeklyLeaderboard]]);
+    return;
+  }
+  weeklyEventState.orchardClaims.push(key);
+  inventory.memoryFruit += 1;
+  const points = awardWeeklyEventPoints("orchard", 20, tree.fruit);
+  setPanel("果树争霸", `${tree.fruit} +1 · 周积分 +${points}`);
+  setPanelActions([["周排行榜", showWeeklyLeaderboard]]);
+  addMemory(`周五果树争霸：${tree.fruit}`);
+  save();
+}
+
 function fishAtLake() {
   const fish = currentWordFish();
   const stage = wordFishProgress[fish.id] || 0;
@@ -8016,14 +8367,21 @@ function fishAtLake() {
     addLifeValue("growth", 2);
     if (fish.word.toLowerCase().includes("star") || currentTimeLabel() === "Night") inventory.starWater += 1;
     state.seed += fish.rarity === "Legendary" ? 5 : fish.rarity === "Rare" ? 3 : 1;
+    const weeklyPoints = awardWeeklyEventPoints("fish", wordFishBaseScore(fish), fish.word);
     advanceDemo(2);
-    setPanel("入池", `${fish.word} · ${grams}g`);
+    setPanel("词鱼入池", `${fish.word} · ${grams}g · +${weeklyPoints}`);
+    setPanelActions([["Double 再得一条", () => claimDoubleFishCatch(fish)], ["周排行榜", showWeeklyLeaderboard]]);
     addMemory(`词鱼池：捕获 ${fish.word}`);
     save();
     return;
   }
 
   setPanel("词鱼池", `${fish.rootMeaning} · ${fish.word} · ${grams}g`);
+  const actions = [["周排行榜", showWeeklyLeaderboard]];
+  if (!weeklyEventState.doubleClaims.includes(doubleFishClaimKey(fish))) {
+    actions.unshift(["Double 再得一条", () => claimDoubleFishCatch(fish)]);
+  }
+  setPanelActions(actions);
   save();
 }
 
@@ -9073,7 +9431,9 @@ function learnSkill() {
     recordTavernDiscovery("knowledge", `让${tree.fruit}进入地方树谱`, 1, { place: tree.place });
     state.seed += tree.rarity === "Legendary" ? 5 : tree.rarity === "Rare" ? 3 : 1;
     state.eco += 1;
-    setPanel("知识果实", `你摘下「${tree.fruit}」。它不是资源，而是一段扎根土地的知识：地方、历史、植物和人的生活方式。`);
+    const weeklyPoints = awardWeeklyEventPoints("orchard", 12, tree.fruit);
+    setPanel("知识果实", `${tree.fruit} · 周积分 +${weeklyPoints}`);
+    setPanelActions([["果树争霸", () => runFridayOrchardContest(tree)], ["周排行榜", showWeeklyLeaderboard]]);
     addMemory(`Memory Tree：获得 ${tree.fruit}`);
     updateWorldUnlocks();
     save();
@@ -9081,6 +9441,7 @@ function learnSkill() {
   }
 
   setPanel("地方树谱", `「${tree.fruit}」已经进入你的 Regional Tree Archive。以后玩家可以贡献老照片、方言声音、食谱和家乡故事，让它长出新枝条。`);
+  setPanelActions([["果树争霸", () => runFridayOrchardContest(tree)], ["周排行榜", showWeeklyLeaderboard]]);
   save();
 }
 
@@ -16347,7 +16708,7 @@ function frame() {
   updateMovement();
   state.near = findNearby();
   drawWorld();
-  renderHud();
+  if (state.tick % 6 === 0) renderHud();
   if (state.tick - lastSavedTick > 45) {
     lastSavedTick = state.tick;
     save();
@@ -16407,7 +16768,14 @@ window.addEventListener("keydown", (event) => {
             : [0, 0.16];
       state.x += nudge[0];
       state.y += nudge[1];
-      state.direction = nudge[0] < 0 ? "left" : nudge[0] > 0 ? "right" : state.direction;
+      state.direction = nudge[0] < 0
+        ? "left"
+        : nudge[0] > 0
+          ? "right"
+          : nudge[1] < 0
+            ? "up"
+            : "down";
+      syncPlayerFacing();
       recordMovementTrace();
     }
   }
@@ -16523,9 +16891,18 @@ sceneWeatherButton.addEventListener("click", () => {
   toggleLifeWeather();
   advanceFirstWindGuide("weather");
 });
-canvas.addEventListener("click", () => {
+canvas.addEventListener("click", (event) => {
   canvas.focus({ preventScroll: true });
+  const building = buildingAtPointer(event);
+  if (building) {
+    openBuildingInterior(building.id);
+    return;
+  }
   advanceFirstWindGuide("world");
+});
+buildingInteriorClose.addEventListener("click", closeBuildingInterior);
+buildingInterior.querySelectorAll("[data-interior-action]").forEach((button) => {
+  button.addEventListener("click", () => runInteriorAction(button.dataset.interiorAction));
 });
 firstWindNext.addEventListener("click", () => advanceFirstWindGuide());
 firstWindSkip.addEventListener("click", () => finishFirstWindGuide(false));
