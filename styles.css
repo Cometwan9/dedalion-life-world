@@ -8032,11 +8032,15 @@ body {
 }
 
 .is-focused-ui .scene-minimap {
-  top: calc(var(--safe-edge) + 56px);
   width: 54px;
   height: 54px;
   grid-template-rows: 1fr;
   padding: 5px;
+}
+
+.is-focused-ui .scene-minimap:not(.is-expanded) {
+  top: auto;
+  bottom: calc(var(--console-bottom) + 82px);
 }
 
 .is-focused-ui .world-rhythm {
