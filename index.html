@@ -6,7 +6,7 @@
     <title>Dedalion: Dandelion Life Garden</title>
     <meta name="description" content="Dedalion：一个像星露谷一样可移动、可生活、可交互的蒲公英生命花园原型。" />
     <link rel="icon" type="image/png" href="./assets/sprites/dandelion-puff.png" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=terrain-reset-2" />
   </head>
   <body class="is-focused-ui">
     <section class="genesis-ritual" id="genesisRitual" aria-label="Dedalion 世界起点仪式">
@@ -53,31 +53,57 @@
     <main class="game">
       <canvas id="worldCanvas" class="world-canvas" width="960" height="640" aria-label="Dedalion 像素开放世界"></canvas>
 
+      <button class="scene-profile" id="sceneProfileButton" type="button" aria-label="查看蒲公英成长与相信">
+        <img src="./assets/sprites/dandelion-puff.png" alt="" />
+        <span class="scene-profile-copy">
+          <b id="sceneProfileStage">看见 · 种子</b>
+          <small id="sceneProfileTrust">第一段痕迹正在生长</small>
+          <span class="scene-profile-skills" id="sceneProfileSkills" aria-label="技能点"></span>
+        </span>
+      </button>
+
+      <button class="scene-minimap" id="sceneMinimapButton" type="button" aria-label="查看附近地图，点击打开世界地图" title="附近地图 · 点击查看世界">
+        <span class="scene-minimap-art" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+          <span class="scene-local-player"></span>
+          <span class="scene-world-inset">
+            <em></em><em></em><em></em>
+            <b>世界</b>
+          </span>
+        </span>
+        <small id="sceneMinimapLabel">世界树花园</small>
+      </button>
+
+      <button class="world-rhythm" id="sceneWeatherButton" type="button" aria-label="观察今日节气与天气">
+        <i class="rhythm-sun" aria-hidden="true"></i>
+        <span><b id="visualSeason">大暑 · 第23日</b><small id="visualWeather">杭州 · 小雨</small></span>
+      </button>
+
       <section class="hud" aria-label="生命状态">
         <strong><i class="living-glyph glyph-home" aria-hidden="true"></i>Dedalion</strong>
         <span class="hud-stat"><i class="living-glyph glyph-seed" aria-hidden="true"></i>未来种 <b id="seedValue">0</b></span>
         <span class="hud-stat"><i class="living-glyph glyph-archive" aria-hidden="true"></i>记忆树 <b id="memoryValue">0</b></span>
         <span class="hud-stat"><i class="living-glyph glyph-world" aria-hidden="true"></i>生态花 <b id="ecoValue">0</b></span>
-        <span class="hud-stat"><i class="living-glyph glyph-friend" aria-hidden="true"></i>藤蔓友 <b id="friendValue">0</b></span>
+        <span class="hud-stat"><i class="living-glyph glyph-friend" aria-hidden="true"></i>关系 <b id="friendValue">相遇种子</b></span>
         <span class="hud-stat"><i class="living-glyph glyph-map" aria-hidden="true"></i>风域 <b id="areaValue">1</b></span>
         <span class="hud-stat"><i class="living-glyph glyph-wish" aria-hidden="true"></i>生命种 <b id="wishValue">0</b></span>
         <span><i class="living-glyph glyph-weather" aria-hidden="true"></i><em id="timeLabel">Morning</em></span>
       </section>
 
       <nav class="surface-dock" aria-label="Dedalion 五个核心入口">
-        <button class="surface-button" id="surfaceGardenButton" type="button" aria-pressed="false">
+        <button class="surface-button" id="surfaceGardenButton" type="button" aria-label="花园" title="花园" aria-pressed="false">
           <i class="living-glyph glyph-home" aria-hidden="true"></i><b>花园</b><span>我的生命</span>
         </button>
-        <button class="surface-button is-active" id="surfaceDepartButton" type="button" aria-pressed="true">
+        <button class="surface-button is-active" id="surfaceDepartButton" type="button" aria-label="世界" title="世界" aria-pressed="true">
           <i class="living-glyph glyph-map" aria-hidden="true"></i><b>世界</b><span>去看看</span>
         </button>
-        <button class="surface-button" id="surfaceBackpackButton" type="button" aria-pressed="false">
+        <button class="surface-button" id="surfaceBackpackButton" type="button" aria-label="背包" title="背包" aria-pressed="false">
           <i class="living-glyph glyph-bag" aria-hidden="true"></i><b>背包</b><span>相遇之物</span>
         </button>
-        <button class="surface-button" id="surfacePostButton" type="button" aria-pressed="false">
+        <button class="surface-button" id="surfacePostButton" type="button" aria-label="邮局" title="邮局" aria-pressed="false">
           <i class="living-glyph glyph-mail" aria-hidden="true"></i><b>邮局</b><span>谁在连接</span>
         </button>
-        <button class="surface-button" id="surfaceDandelionButton" type="button" aria-pressed="false">
+        <button class="surface-button" id="surfaceDandelionButton" type="button" aria-label="蒲公英" title="蒲公英" aria-pressed="false">
           <i class="living-glyph glyph-companion" aria-hidden="true"></i><b>蒲公英</b><span>下一步</span>
         </button>
       </nav>
@@ -167,6 +193,10 @@
         <span><i class="living-glyph glyph-mail" aria-hidden="true"></i>Dandelion Post / 蒲公英邮局</span>
         <strong id="postHeadline">风里暂时没有未读消息。</strong>
         <p id="postSignal">关系不是列表。每一次回应，都会让一颗种子找到归路。</p>
+        <div class="bond-visual" id="postBondVisual" data-stage="0" aria-label="关系花园当前生长状态">
+          <div class="bond-sigil" aria-hidden="true"><i></i><i></i><b></b></div>
+          <div><strong id="postBondStage">相遇种子</strong><small id="postBondMeta">两颗种子仍在各自的风里。</small></div>
+        </div>
         <div class="post-actions">
           <button id="postBottleButton" type="button"><i class="living-glyph glyph-seed" aria-hidden="true"></i><span>接住一封风信</span></button>
           <button id="postRealityButton" type="button"><i class="living-glyph glyph-friend" aria-hidden="true"></i><span>想起真实的人</span></button>
@@ -224,38 +254,85 @@
       </section>
 
       <section class="world-atlas is-hidden" id="worldAtlasPanel" aria-label="蒲公英星球空间地图">
-        <span><i class="living-glyph glyph-map" aria-hidden="true"></i>Wind Map Spirit</span>
-        <strong>星球 → 地表世界 → 区域 → 建筑 → 功能点。概念是系统，地图是玩家走进去的空间。</strong>
+        <span><i class="living-glyph glyph-map" aria-hidden="true"></i>世界</span>
+        <strong>一树 · 八境</strong>
         <div class="atlas-map" id="atlasMap"></div>
         <article class="atlas-detail" id="atlasDetail" aria-live="polite"></article>
       </section>
 
       <section class="nearby" id="nearbyPanel" aria-live="polite">
         <span id="nearbyTitle">世界树花园</span>
-        <strong id="nearbyText">Dead Night 醒在蒲公英花海。靠近世界树根系按 E，让愿望、种子、水源和记忆开始流动。</strong>
+        <strong id="nearbyText">风芽醒来，第一阵风正在经过。</strong>
         <div class="nearby-actions" id="nearbyActions" aria-label="当前地点可以进行的动作"></div>
       </section>
 
       <section class="memory-log" aria-label="生命记忆">
-        <span><i class="living-glyph glyph-archive" aria-hidden="true"></i>Tree Hollow Memory</span>
+        <span><i class="living-glyph glyph-archive" aria-hidden="true"></i>记忆</span>
         <ol id="memoryList"></ol>
       </section>
 
       <section class="inventory" aria-label="生命背包">
-        <span><i class="living-glyph glyph-bag" aria-hidden="true"></i>Life Backpack / 生命背包</span>
-        <strong id="flowText">1. 去湖边按 E 钓鱼</strong>
+        <span><i class="living-glyph glyph-bag" aria-hidden="true"></i>蒲公英背包</span>
+        <strong id="flowText">六类生命行囊</strong>
         <div id="inventoryList" class="inventory-list"></div>
+      </section>
+
+      <div class="first-wind-focus is-hidden" id="firstWindFocus" aria-hidden="true" hidden></div>
+      <section class="first-wind-guide is-hidden" id="firstWindGuide" aria-live="polite" aria-label="第一阵风指引" hidden>
+        <span id="firstWindProgress">● ○ ○</span>
+        <strong id="firstWindTitle">看自己</strong>
+        <p id="firstWindText">点一下</p>
+        <div>
+          <button id="firstWindSkip" type="button" aria-label="关闭指引">×</button>
+          <button id="firstWindNext" type="button" aria-label="下一步">›</button>
+        </div>
       </section>
 
       <div class="living-scene-prompt is-hidden" id="livingScenePrompt" aria-label="当前生命场景动作">
         <button id="sceneEmoteButton" type="button" title="切换生活动作">
           <i class="scene-emote-glyph" aria-hidden="true"></i><span id="sceneEmoteLabel">挥手</span>
         </button>
+        <button id="sceneSpiritButton" type="button" title="让风芽回应" aria-label="让风芽回应">
+          <i class="spirit-spark-glyph" aria-hidden="true"></i>
+        </button>
         <button id="sceneCaptureButton" type="button" title="留下生命合影" aria-label="留下生命合影">
           <i class="pixel-camera" aria-hidden="true"></i>
         </button>
       </div>
       <div class="player-emote-fx is-hidden" id="playerEmoteFx" aria-hidden="true"></div>
+
+      <section class="building-interior is-hidden" id="buildingInterior" aria-label="建筑室内">
+        <article class="building-interior-shell">
+          <header>
+            <span><b id="buildingInteriorTitle">听风小院</b><small id="buildingInteriorSubtitle">一间已经开始生活的房间</small></span>
+            <button id="buildingInteriorClose" type="button" aria-label="返回地图" title="返回地图">×</button>
+          </header>
+          <div class="building-interior-scene">
+            <img id="buildingInteriorImage" src="./assets/sprites/cottage-interior-v2.png" alt="听风小院室内缩略图" />
+          </div>
+          <div class="building-interior-actions">
+            <button type="button" data-interior-action="rest">休息</button>
+            <button type="button" data-interior-action="tea">泡茶</button>
+            <button type="button" data-interior-action="seeds">整理种子</button>
+            <button type="button" data-interior-action="leave">返回地图</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="profile-editor is-hidden" id="profileEditor" aria-label="名牌与皮肤">
+        <article>
+          <header><b>风芽名牌</b><button id="profileEditorClose" type="button" aria-label="关闭">×</button></header>
+          <label>名字<input id="playerNameInput" maxlength="8" /></label>
+          <label>个性签名<input id="playerSignatureInput" maxlength="24" /></label>
+          <div class="skin-picker" role="group" aria-label="选择皮肤">
+            <button type="button" data-skin="sage" aria-label="嫩芽绿" title="嫩芽绿"></button>
+            <button type="button" data-skin="sky" aria-label="天空蓝" title="天空蓝"></button>
+            <button type="button" data-skin="blossom" aria-label="花瓣粉" title="花瓣粉"></button>
+            <button type="button" data-skin="night" aria-label="星夜紫" title="星夜紫"></button>
+          </div>
+          <button class="profile-editor-save" id="profileEditorSave" type="button">保存名牌</button>
+        </article>
+      </section>
 
       <section class="slow-life-away is-hidden" id="slowLifeAway" aria-label="现实生活邀请">
         <div class="slow-life-horizon" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
@@ -276,9 +353,13 @@
         <i></i>
         <i></i>
       </div>
-      <img class="player-sprite" id="playerSprite" src="./assets/sprites/dead-night-sprout.png" alt="Dead Night" />
+      <button class="player-nameplate" id="playerNameplateButton" type="button" title="编辑名牌与皮肤">
+        <b id="playerNameplateName">风芽</b>
+        <small id="playerNameplateSignature">让风带我去看看</small>
+      </button>
+      <img class="player-sprite" id="playerSprite" src="./assets/sprites/dead-night-sprout.png" alt="风芽" />
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=terrain-reset-3"></script>
   </body>
 </html>

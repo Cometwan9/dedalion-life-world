@@ -8,6 +8,22 @@ const friendValue = document.querySelector("#friendValue");
 const areaValue = document.querySelector("#areaValue");
 const wishValue = document.querySelector("#wishValue");
 const timeLabel = document.querySelector("#timeLabel");
+const visualSeason = document.querySelector("#visualSeason");
+const visualWeather = document.querySelector("#visualWeather");
+const sceneProfileButton = document.querySelector("#sceneProfileButton");
+const sceneProfileStage = document.querySelector("#sceneProfileStage");
+const sceneProfileTrust = document.querySelector("#sceneProfileTrust");
+const sceneProfileSkills = document.querySelector("#sceneProfileSkills");
+const sceneMinimapButton = document.querySelector("#sceneMinimapButton");
+const sceneMinimapLabel = document.querySelector("#sceneMinimapLabel");
+const sceneWeatherButton = document.querySelector("#sceneWeatherButton");
+const firstWindFocus = document.querySelector("#firstWindFocus");
+const firstWindGuide = document.querySelector("#firstWindGuide");
+const firstWindProgress = document.querySelector("#firstWindProgress");
+const firstWindTitle = document.querySelector("#firstWindTitle");
+const firstWindText = document.querySelector("#firstWindText");
+const firstWindSkip = document.querySelector("#firstWindSkip");
+const firstWindNext = document.querySelector("#firstWindNext");
 const nearbyTitle = document.querySelector("#nearbyTitle");
 const nearbyText = document.querySelector("#nearbyText");
 const nearbyActions = document.querySelector("#nearbyActions");
@@ -96,6 +112,9 @@ const postPanel = document.querySelector("#postPanel");
 const postHeadline = document.querySelector("#postHeadline");
 const postSignal = document.querySelector("#postSignal");
 const postStatus = document.querySelector("#postStatus");
+const postBondVisual = document.querySelector("#postBondVisual");
+const postBondStage = document.querySelector("#postBondStage");
+const postBondMeta = document.querySelector("#postBondMeta");
 const postBottleButton = document.querySelector("#postBottleButton");
 const postRealityButton = document.querySelector("#postRealityButton");
 const genesisRitual = document.querySelector("#genesisRitual");
@@ -122,8 +141,22 @@ const photographerRank = document.querySelector("#photographerRank");
 const livingScenePrompt = document.querySelector("#livingScenePrompt");
 const sceneEmoteButton = document.querySelector("#sceneEmoteButton");
 const sceneEmoteLabel = document.querySelector("#sceneEmoteLabel");
+const sceneSpiritButton = document.querySelector("#sceneSpiritButton");
 const sceneCaptureButton = document.querySelector("#sceneCaptureButton");
 const playerEmoteFx = document.querySelector("#playerEmoteFx");
+const buildingInterior = document.querySelector("#buildingInterior");
+const buildingInteriorTitle = document.querySelector("#buildingInteriorTitle");
+const buildingInteriorSubtitle = document.querySelector("#buildingInteriorSubtitle");
+const buildingInteriorImage = document.querySelector("#buildingInteriorImage");
+const buildingInteriorClose = document.querySelector("#buildingInteriorClose");
+const playerNameplateButton = document.querySelector("#playerNameplateButton");
+const playerNameplateName = document.querySelector("#playerNameplateName");
+const playerNameplateSignature = document.querySelector("#playerNameplateSignature");
+const profileEditor = document.querySelector("#profileEditor");
+const profileEditorClose = document.querySelector("#profileEditorClose");
+const profileEditorSave = document.querySelector("#profileEditorSave");
+const playerNameInput = document.querySelector("#playerNameInput");
+const playerSignatureInput = document.querySelector("#playerSignatureInput");
 const slowLifeGate = document.querySelector("#slowLifeGate");
 const slowLifeHeadline = document.querySelector("#slowLifeHeadline");
 const slowLifePrompt = document.querySelector("#slowLifePrompt");
@@ -141,9 +174,31 @@ const slowLifeRecordButton = document.querySelector("#slowLifeRecordButton");
 const slowLifeRestButton = document.querySelector("#slowLifeRestButton");
 
 const TILE = 32;
+const VIEW_ZOOM = 0.86;
 const keys = new Set();
+const illustratedMapBounds = { x: 60, y: 35, w: 72, h: 72 };
+const illustratedBuildingIds = new Set(["home", "tavern"]);
+const worldGeography = [
+  { id: "cloudfall", country: "蒲公英国", region: "风芽群岛", district: "云瀑岭", feature: "瀑布、针叶林与高崖", x1: 60, y1: 35, x2: 84, y2: 58 },
+  { id: "cherrywind", country: "蒲公英国", region: "风芽群岛", district: "樱风高地", feature: "樱树、溪谷与花坡", x1: 84, y1: 35, x2: 108, y2: 58 },
+  { id: "sunnybay", country: "蒲公英国", region: "风芽群岛", district: "晴沙湾", feature: "沙岸、礁石与浅海", x1: 108, y1: 35, x2: 132, y2: 64 },
+  { id: "springcourt", country: "蒲公英国", region: "风芽群岛", district: "中央泉庭", feature: "泉眼、十字风路与公共庭院", x1: 82, y1: 58, x2: 110, y2: 82 },
+  { id: "herbslope", country: "蒲公英国", region: "风芽群岛", district: "百草坡", feature: "花田、药草与缓坡", x1: 60, y1: 72, x2: 96, y2: 107 },
+  { id: "stardew", country: "蒲公英国", region: "风芽群岛", district: "星露湿地", feature: "池塘、湿地与星光草甸", x1: 96, y1: 72, x2: 132, y2: 107 },
+];
+const illustratedMapPoints = [
+  { id: "home", x: 78, y: 59, label: "听风小院", kind: "home" },
+  { id: "tavern", x: 110, y: 59, label: "种种酒馆", kind: "tavern" },
+  { id: "spring", x: 96, y: 71, label: "中央泉庭", kind: "spring" },
+  { id: "garden", x: 80, y: 87, label: "百草坡", kind: "garden" },
+  { id: "wetland", x: 109, y: 87, label: "星露湿地", kind: "wetland" },
+];
 const memories = JSON.parse(localStorage.getItem("dedalionMemories") || "[]");
 const interacted = new Set(JSON.parse(localStorage.getItem("dedalionInteracted") || "[]"));
+const playerIdentityState = Object.assign(
+  { name: "风芽", signature: "让风带我去看看", skin: "sage" },
+  JSON.parse(localStorage.getItem("dedalionPlayerIdentity") || "{}"),
+);
 const defaultInventory = {
   fish: 0,
   furniture: 0,
@@ -188,6 +243,19 @@ const defaultInventory = {
   foodLeftovers: 0,
   compost: 0,
   familyRecipe: 0,
+  planks: 0,
+  fiber: 0,
+  stone: 0,
+  resin: 0,
+  crystal: 0,
+  fossilRubbing: 0,
+  morningDew: 0,
+  rainSample: 0,
+  thunderCrystal: 0,
+  snowWater: 0,
+  rainbowSeed: 0,
+  sunlightShard: 0,
+  windThread: 0,
 };
 const inventory = Object.assign(
   {},
@@ -234,6 +302,13 @@ const worldRuleState = Object.assign(
     memory: [],
     failures: [],
     ratified: [],
+    mystery: {
+      activeRuleId: "genesis-seed",
+      rules: {},
+      permissions: [],
+      deviations: [],
+      archive: [],
+    },
     lifeBalance: {
       body: 0,
       emotion: 0,
@@ -259,6 +334,20 @@ worldRuleState.environment = Object.assign(
 worldRuleState.memory = worldRuleState.memory || [];
 worldRuleState.failures = worldRuleState.failures || [];
 worldRuleState.ratified = worldRuleState.ratified || [];
+worldRuleState.mystery = Object.assign(
+  {
+    activeRuleId: "genesis-seed",
+    rules: {},
+    permissions: [],
+    deviations: [],
+    archive: [],
+  },
+  worldRuleState.mystery || {},
+);
+worldRuleState.mystery.rules = worldRuleState.mystery.rules || {};
+worldRuleState.mystery.permissions = worldRuleState.mystery.permissions || [];
+worldRuleState.mystery.deviations = worldRuleState.mystery.deviations || [];
+worldRuleState.mystery.archive = worldRuleState.mystery.archive || [];
 worldRuleState.lifeBalance = Object.assign(
   {
     body: 0,
@@ -381,6 +470,52 @@ const worldTreeState = Object.assign(
   },
   JSON.parse(localStorage.getItem("dedalionWorldTreeState") || "{}"),
 );
+const goddessGardenState = Object.assign(
+  {
+    version: 1,
+    selectedAspectId: null,
+    offering: null,
+    activeWish: null,
+    completedWishes: [],
+    helpSeeds: [
+      {
+        id: "help-seed-community-water",
+        owner: "蒲公英村居民",
+        kind: "repair",
+        title: "雨后水渠需要重新疏通",
+        detail: "需要一位愿意把水路还给土地的人。",
+        care: 0,
+        status: "waiting",
+      },
+    ],
+    blessing: 0,
+    spring: { water: 0, community: 0 },
+    archive: [],
+  },
+  JSON.parse(localStorage.getItem("dedalionGoddessGardenState") || "{}"),
+);
+goddessGardenState.completedWishes = goddessGardenState.completedWishes || [];
+goddessGardenState.helpSeeds = goddessGardenState.helpSeeds || [];
+goddessGardenState.spring = Object.assign({ water: 0, community: 0 }, goddessGardenState.spring || {});
+goddessGardenState.archive = goddessGardenState.archive || [];
+const traceSystemState = Object.assign(
+  {
+    version: 1,
+    trail: [],
+    events: [],
+    processes: [],
+    placeMarks: {},
+    capsules: [],
+    lastTrailPoint: null,
+  },
+  JSON.parse(localStorage.getItem("dedalionTraceSystemState") || "{}"),
+);
+traceSystemState.trail = traceSystemState.trail || [];
+traceSystemState.events = traceSystemState.events || [];
+traceSystemState.processes = traceSystemState.processes || [];
+traceSystemState.placeMarks = traceSystemState.placeMarks || {};
+traceSystemState.capsules = traceSystemState.capsules || [];
+traceSystemState.lastTrailPoint = traceSystemState.trail[traceSystemState.trail.length - 1] || null;
 const federationState = Object.assign(
   {
     version: 2,
@@ -390,7 +525,7 @@ const federationState = Object.assign(
     tokenCare: 0,
     rooted: false,
     communityFamilies: 0,
-    members: [{ id: "dead-night", name: "Dead Night", bond: "种子携带者" }],
+    members: [{ id: "dead-night", name: "风芽", bond: "种子携带者" }],
     roles: { gardener: 0, archivist: 0, messenger: 0, keeper: 0 },
     archive: [],
     history: [],
@@ -415,7 +550,7 @@ const federationState = Object.assign(
   },
   JSON.parse(localStorage.getItem("dedalionFederationState") || "{}"),
 );
-federationState.members = federationState.members || [{ id: "dead-night", name: "Dead Night", bond: "种子携带者" }];
+federationState.members = federationState.members || [{ id: "dead-night", name: "风芽", bond: "种子携带者" }];
 federationState.roles = Object.assign({ gardener: 0, archivist: 0, messenger: 0, keeper: 0 }, federationState.roles || {});
 federationState.archive = federationState.archive || [];
 federationState.history = federationState.history || [];
@@ -495,6 +630,49 @@ const livingSceneState = Object.assign(
 livingSceneState.photos = livingSceneState.photos || [];
 livingSceneState.furniture = livingSceneState.furniture || [];
 livingSceneState.worldHistory = livingSceneState.worldHistory || [];
+const craftingState = Object.assign(
+  {
+    version: 1,
+    selectedRecipeId: "root-board",
+    discoveredRecipeIds: ["root-board", "star-lamp"],
+    materialLedger: [],
+    structures: [],
+    experiments: [],
+    professionActions: {
+      carpenter: 0,
+      gardener: 0,
+      artisan: 0,
+      cook: 0,
+      architect: 0,
+      researcher: 0,
+    },
+    publicProject: {
+      recipeId: null,
+      pooled: {},
+      contributors: [],
+    },
+    ecologyDebt: 0,
+    history: [],
+  },
+  JSON.parse(localStorage.getItem("dedalionCraftingState") || "{}"),
+);
+craftingState.discoveredRecipeIds = craftingState.discoveredRecipeIds || ["root-board", "star-lamp"];
+if (!craftingState.discoveredRecipeIds.includes("root-board")) craftingState.discoveredRecipeIds.unshift("root-board");
+if (!craftingState.discoveredRecipeIds.includes("star-lamp")) craftingState.discoveredRecipeIds.push("star-lamp");
+craftingState.materialLedger = craftingState.materialLedger || [];
+craftingState.structures = craftingState.structures || [];
+craftingState.experiments = craftingState.experiments || [];
+craftingState.professionActions = Object.assign(
+  { carpenter: 0, gardener: 0, artisan: 0, cook: 0, architect: 0, researcher: 0 },
+  craftingState.professionActions || {},
+);
+craftingState.publicProject = Object.assign(
+  { recipeId: null, pooled: {}, contributors: [] },
+  craftingState.publicProject || {},
+);
+craftingState.publicProject.pooled = craftingState.publicProject.pooled || {};
+craftingState.publicProject.contributors = craftingState.publicProject.contributors || [];
+craftingState.history = craftingState.history || [];
 const slowLifeState = Object.assign(
   {
     version: 1,
@@ -549,6 +727,22 @@ const lifeRhythmState = Object.assign(
 );
 lifeRhythmState.dailySeeds = lifeRhythmState.dailySeeds || {};
 lifeRhythmState.history = lifeRhythmState.history || [];
+const weatherObservatoryState = Object.assign(
+  {
+    version: 1,
+    observations: [],
+    archives: [],
+    collectedKeys: [],
+    forecasts: [],
+    correctForecasts: 0,
+    attempts: 0,
+  },
+  JSON.parse(localStorage.getItem("dedalionWeatherObservatoryState") || "{}"),
+);
+weatherObservatoryState.observations = weatherObservatoryState.observations || [];
+weatherObservatoryState.archives = weatherObservatoryState.archives || [];
+weatherObservatoryState.collectedKeys = weatherObservatoryState.collectedKeys || [];
+weatherObservatoryState.forecasts = weatherObservatoryState.forecasts || [];
 const foodLifeState = Object.assign(
   {
     version: 1,
@@ -672,6 +866,83 @@ lifeGrowthState.garden = Object.assign({ stage: 0, name: "一块土地" }, lifeG
 lifeGrowthState.community = Object.assign({ stage: 0, name: "个人蒲公英" }, lifeGrowthState.community || {});
 lifeGrowthState.world = Object.assign({ stage: 0, name: "初生原野" }, lifeGrowthState.world || {});
 lifeGrowthState.history = lifeGrowthState.history || [];
+const growthGuidanceState = Object.assign(
+  {
+    version: 1,
+    dailySeeds: {},
+    dormantSeeds: [],
+    trust: { self: 0, others: 0, world: 0 },
+    sharedExperienceIds: [],
+    kindnessSeeds: [],
+    powerMarks: [],
+    friendshipBoxes: [],
+    winterSeeds: [],
+    courageTraces: [],
+    skillPractice: [],
+    skillStyles: {},
+    encounterSeed: null,
+    encounters: [],
+    friendshipChronicle: {
+      lifeBirthday: null,
+      encounterDay: null,
+      friendshipDay: null,
+      lastInteractionAt: null,
+      dormant: false,
+      celebrations: [],
+    },
+    bondGarden: {
+      distance: "space",
+      permission: "passing",
+      dimensions: { time: 0, trust: 0, memories: 0, mutualHelp: 0, growth: 0 },
+      token: null,
+      conflict: null,
+      history: [],
+    },
+    history: [],
+  },
+  JSON.parse(localStorage.getItem("dedalionGrowthGuidanceState") || "{}"),
+);
+growthGuidanceState.dailySeeds = growthGuidanceState.dailySeeds || {};
+growthGuidanceState.dormantSeeds = growthGuidanceState.dormantSeeds || [];
+growthGuidanceState.trust = Object.assign({ self: 0, others: 0, world: 0 }, growthGuidanceState.trust || {});
+growthGuidanceState.sharedExperienceIds = growthGuidanceState.sharedExperienceIds || [];
+growthGuidanceState.kindnessSeeds = growthGuidanceState.kindnessSeeds || [];
+growthGuidanceState.powerMarks = growthGuidanceState.powerMarks || [];
+growthGuidanceState.friendshipBoxes = growthGuidanceState.friendshipBoxes || [];
+growthGuidanceState.winterSeeds = growthGuidanceState.winterSeeds || [];
+growthGuidanceState.courageTraces = growthGuidanceState.courageTraces || [];
+growthGuidanceState.skillPractice = growthGuidanceState.skillPractice || [];
+growthGuidanceState.skillStyles = growthGuidanceState.skillStyles || {};
+growthGuidanceState.encounters = growthGuidanceState.encounters || [];
+growthGuidanceState.friendshipChronicle = Object.assign(
+  {
+    lifeBirthday: null,
+    encounterDay: null,
+    friendshipDay: null,
+    lastInteractionAt: null,
+    dormant: false,
+    celebrations: [],
+  },
+  growthGuidanceState.friendshipChronicle || {},
+);
+growthGuidanceState.friendshipChronicle.celebrations = growthGuidanceState.friendshipChronicle.celebrations || [];
+growthGuidanceState.bondGarden = Object.assign(
+  {
+    distance: "space",
+    permission: "passing",
+    dimensions: { time: 0, trust: 0, memories: 0, mutualHelp: 0, growth: 0 },
+    token: null,
+    conflict: null,
+    history: [],
+  },
+  growthGuidanceState.bondGarden || {},
+);
+growthGuidanceState.bondGarden.dimensions = Object.assign(
+  { time: 0, trust: 0, memories: 0, mutualHelp: 0, growth: 0 },
+  growthGuidanceState.bondGarden.dimensions || {},
+);
+growthGuidanceState.bondGarden.history = growthGuidanceState.bondGarden.history || [];
+growthGuidanceState.history = growthGuidanceState.history || [];
 const generatedWorldState = Object.assign(
   {
     version: 1,
@@ -715,71 +986,90 @@ const state = {
   exchangeOpen: false,
   techOpen: false,
   atlasOpen: false,
-  atlasIndex: Number(localStorage.getItem("dedalionAtlasIndex") || 2),
+  atlasIndex: Number(localStorage.getItem("dedalionAtlasIndex") || 4),
+  atlasRuleId: null,
   lastSignal: "天气是今天进入世界的第一条生命信号。",
 };
 
 const colors = {
-  grassA: "#7ede55",
-  grassB: "#6bd448",
-  grassC: "#9aec76",
-  grassDeep: "#45b84a",
-  grassLight: "#b7f58a",
-  pathA: "#dfc978",
-  pathB: "#f2e59c",
-  pathDark: "#bda45f",
-  mud: "#b89a58",
-  waterA: "#4ecbd2",
-  waterB: "#2e9bb7",
-  waterDeep: "#1e789a",
-  waterC: "#9ef3ef",
-  outline: "#27562f",
-  trunk: "#7b4c24",
-  stone: "#9cb4a8",
-  roof: "#d87031",
-  roofDark: "#a84a28",
-  wall: "#fff3bb",
-  yellow: "#ffd92f",
-  purple: "#8d7bd6",
-  pink: "#f3a2c8",
-  white: "#fffce7",
-  dark: "#173b24",
+  grassA: "#6e9f54",
+  grassB: "#5f914b",
+  grassC: "#9bc66d",
+  grassDeep: "#365f3f",
+  grassLight: "#b9d681",
+  pathA: "#c7aa70",
+  pathB: "#e4d2a0",
+  pathDark: "#9f8257",
+  mud: "#99784f",
+  waterA: "#4ca8a3",
+  waterB: "#3b858f",
+  waterDeep: "#285e70",
+  waterC: "#a7ded1",
+  outline: "#30473b",
+  trunk: "#755032",
+  stone: "#9aa99b",
+  roof: "#4b8075",
+  roofDark: "#305d58",
+  wall: "#eadba9",
+  yellow: "#e6bb3f",
+  purple: "#8b7cab",
+  pink: "#d98f91",
+  white: "#fff8dd",
+  cream: "#f5e9c8",
+  dark: "#263c31",
 };
 
 const wordFishCatalog = [
   {
-    id: "apple",
-    word: "apple",
-    clue: "🍎 + 🌳 + 一个孩子的午后",
-    meaning: "apple 不是一个孤立单词，它连接水果、苹果树、分享食物和日常生活经验。",
+    id: "growth",
+    word: "growth",
+    root: "grow",
+    parts: ["grow", "-th"],
+    clue: "🌱 → 🌿",
+    rootMeaning: "grow · 生长",
+    meaning: "growth：生长留下的结果。",
     rarity: "Common",
     water: "村庄池塘",
   },
   {
     id: "ecology",
     word: "ecology",
-    clue: "🌿 + 水 + 昆虫 + 森林互相照顾",
-    meaning: "ecology 表示生命之间互相影响的关系网：水、植物、动物、人和土地都在同一个系统里。",
+    root: "eco",
+    parts: ["eco", "-logy"],
+    clue: "🌿 + 💧 + 🐝",
+    rootMeaning: "eco · 家园",
+    meaning: "ecology：研究生命与家园的关系。",
     rarity: "Rare",
     water: "森林湖",
   },
   {
-    id: "serendipity",
-    word: "serendipity",
-    clue: "迷路时遇见一朵没有计划的花",
-    meaning: "serendipity 是意外发现美好事物的能力。它适合探索者，也适合 Dedalion 的开放世界。",
+    id: "biology",
+    word: "biology",
+    root: "bio",
+    parts: ["bio", "-logy"],
+    clue: "🌱 + 📖",
+    rootMeaning: "bio · 生命",
+    meaning: "biology：研究生命。",
     rarity: "Rare",
     water: "云端水路",
   },
   {
-    id: "ubuntu",
-    word: "Ubuntu",
-    clue: "我，因为我们存在",
-    meaning: "Ubuntu 是一种非洲哲学：人的存在来自人与人之间的关系。它是传说级语言生命。",
+    id: "transport",
+    word: "transport",
+    root: "port",
+    parts: ["trans-", "port"],
+    clue: "🌬 + 📦 + →",
+    rootMeaning: "port · 携带",
+    meaning: "transport：携带并穿越。",
     rarity: "Legendary",
     water: "记忆网络",
   },
 ];
+
+function wordFishWeight(fish) {
+  const partCount = Math.max(1, fish.parts?.length || 1);
+  return 24 + fish.word.length * 12 + fish.root.length * 6 + (partCount - 1) * 10;
+}
 
 const memoryTreeCatalog = [
   {
@@ -875,6 +1165,93 @@ const worldWishTemplates = [
   },
 ];
 
+const goddessAspects = {
+  flower: {
+    name: "花神",
+    symbol: "花",
+    meaning: "生命、生长与美",
+    care: "植物、创造与家庭",
+    color: "#d98f91",
+    seedType: "dream",
+    value: "growth",
+    offerings: [
+      { key: "flowers", name: "自己种的一束花" },
+      { key: "herbs", name: "亲手采集的香草" },
+      { key: "meals", name: "自己做的一份茶点" },
+    ],
+    actions: ["plant", "create", "connect"],
+  },
+  water: {
+    name: "水女神",
+    symbol: "水",
+    meaning: "恢复、清洁与生命流动",
+    care: "身体、情绪与休息",
+    color: "#7bc8c4",
+    seedType: "memory",
+    value: "harmony",
+    offerings: [
+      { key: "morningDew", name: "清晨收集的露水" },
+      { key: "rainSample", name: "气象站保存的雨滴" },
+      { key: "water", name: "花园里的一瓶生命水" },
+    ],
+    actions: ["rest", "reality", "connect"],
+  },
+  earth: {
+    name: "大地母灵",
+    symbol: "地",
+    meaning: "土地、包容与养育",
+    care: "农业、家庭与根基",
+    color: "#79a85b",
+    seedType: "place",
+    value: "contribution",
+    offerings: [
+      { key: "seeds", name: "自己培育的一颗种子" },
+      { key: "compost", name: "重新回到土地的堆肥" },
+      { key: "grain", name: "当季收获的一捧谷物" },
+    ],
+    actions: ["restore", "plant", "connect"],
+  },
+  light: {
+    name: "光明女神",
+    symbol: "光",
+    meaning: "希望、方向与行动勇气",
+    care: "未来、创造与真实出发",
+    color: "#e6bb3f",
+    seedType: "dream",
+    value: "growth",
+    offerings: [
+      { key: "sunlightShard", name: "观象台保存的日光碎片" },
+      { key: "creationSeed", name: "一件创作留下的种子" },
+      { key: "starWater", name: "夜里收集的星光水" },
+    ],
+    actions: ["create", "reality", "plant"],
+  },
+};
+
+const goddessWishActions = {
+  plant: { name: "照料一株生命", place: "去百草园种下或照顾一颗种子", growth: "observation", ability: "perception" },
+  create: { name: "完成一件小作品", place: "去天工坊，让一个想法真正成形", growth: "creation", ability: "creation" },
+  connect: { name: "回应一段真实关系", place: "去风信驿写信，或联系现实中重要的人", growth: "relation", ability: "empathy" },
+  rest: { name: "让身体获得恢复", place: "回听风小院休息并整理今天", growth: "observation", ability: "perception" },
+  reality: { name: "离开屏幕去生活", place: "接受蒲公英的现实邀请，回来时可以记录，也可以只休息", growth: "exploration", ability: "exploration" },
+  restore: { name: "把一份生命还给土地", place: "去古树森林，在采集之后补种一颗本地种子", growth: "restoration", ability: "stewardship" },
+};
+
+const traceKindCatalog = {
+  movement: { name: "走过", color: "#8fc66e", mark: "leaf" },
+  perception: { name: "观察", color: "#6dbb78", mark: "leaf" },
+  creation: { name: "创造", color: "#e2a75a", mark: "spark" },
+  empathy: { name: "关系", color: "#d98f91", mark: "bloom" },
+  learning: { name: "理解", color: "#62b7b0", mark: "water" },
+  stewardship: { name: "守护", color: "#4f9062", mark: "sprout" },
+  exploration: { name: "探索", color: "#9b89b5", mark: "wind" },
+  memory: { name: "记忆", color: "#d6bd78", mark: "ring" },
+  failure: { name: "未完成", color: "#8f8779", mark: "scar" },
+  ritual: { name: "愿望过程", color: "#e6bb3f", mark: "bloom" },
+  food: { name: "食物循环", color: "#c79352", mark: "seed" },
+  object: { name: "生活物", color: "#9f8257", mark: "ring" },
+};
+
 const lifeSeedTypes = {
   memory: { name: "记忆种子", inventoryKey: "memorySeed", growth: "记忆花", nutrient: "roots" },
   knowledge: { name: "知识种子", inventoryKey: "knowledgeSeed", growth: "知识树", nutrient: "sunlight" },
@@ -893,7 +1270,7 @@ const originRules = Object.freeze([
 const evolutionPaths = {
   origin: { name: "蒲公英原野", short: "ORIGIN", color: "#ffd92f", result: "保持多方向生长" },
   nature: { name: "森林文明", short: "FOREST", color: "#45b84a", result: "植物密度、雨水与生态修复增强" },
-  knowledge: { name: "生物机械知识城", short: "TECH", color: "#4ecbd2", result: "词语鱼、档案符号与研究节点增强" },
+  knowledge: { name: "词鱼国", short: "TECH", color: "#4ecbd2", result: "词语鱼、档案符号与研究节点增强" },
   creation: { name: "创造之城", short: "ART", color: "#f3a2c8", result: "星光材料、工坊痕迹与新配方增强" },
   relation: { name: "跨文化花园", short: "BOND", color: "#8bd36d", result: "双生花、来信与共同花园增强" },
 };
@@ -1274,6 +1651,160 @@ const lifeGrowthCommunityStages = [
   { name: "文明枝条", short: "CIVILIZATION" },
 ];
 
+const growthGuidancePhases = [
+  { id: "see", name: "看见", form: "种子", note: "先看见已经发生的微小变化。" },
+  { id: "believe", name: "相信", form: "芽", note: "让真实痕迹替空洞鼓励说话。" },
+  { id: "try", name: "尝试", form: "花", note: "不决定整个人生，只照顾下一步。" },
+  { id: "grow", name: "成长", form: "果", note: "能力开始改变花园与精灵的样子。" },
+  { id: "share", name: "传递", form: "森林", note: "把走过的路变成另一颗生命的养分。" },
+];
+
+const growthGuidanceSeedCatalog = {
+  perception: { name: "观察种子", action: "认真看一片叶子的边缘，或今天的天空", destination: "forest", mode: "action" },
+  creation: { name: "小作品种子", action: "用已有材料做一个足够小的变化", destination: "forest", mode: "action" },
+  empathy: { name: "回应种子", action: "回应一封没有期限的风信", destination: "post", mode: "action" },
+  learning: { name: "理解种子", action: "理解并使用一条知识鱼", destination: "lake", mode: "action" },
+  stewardship: { name: "照顾种子", action: "给一株植物或一块土地补回一点养分", destination: "forest", mode: "action" },
+  exploration: { name: "一步种子", action: "走一小段没有走过的路", destination: "forest", mode: "action" },
+  rest: { name: "根系种子", action: "把屏幕留在这里，给身体一点没有目标的时间", destination: "home", mode: "rest" },
+};
+
+const trustGardenStages = {
+  self: ["等待一次小承诺", "相信芽", "坚持之叶", "自己的树"],
+  others: ["远方种子", "伙伴芽", "共生花", "关系林"],
+  world: ["地下根", "季节芽", "循环叶", "世界年轮"],
+};
+
+const powerBondCatalog = {
+  encouragement: { name: "鼓励之力", mark: "勇气种子", kindness: "encouragement" },
+  companionship: { name: "陪伴之力", mark: "安心水源", kindness: "gratitude" },
+  creation: { name: "创造之力", mark: "灵感火种", kindness: "creation" },
+  exploration: { name: "探索之力", mark: "旅行风种", kindness: "knowledge" },
+  guardianship: { name: "守护之力", mark: "生命根系", kindness: "gratitude" },
+};
+
+const kindnessSeedCatalog = {
+  encouragement: { name: "勇气种子", flower: "勇气花", message: "你已经走到这里了。", kind: "relationship", power: "encouragement" },
+  knowledge: { name: "知识种子", flower: "智慧树苗", message: "把一条真正有用的经验交给需要它的人。", kind: "knowledge", power: "exploration" },
+  gratitude: { name: "感恩种子", flower: "感恩花", message: "谢谢你曾经在这里。", kind: "relationship", power: "companionship" },
+  creation: { name: "创造种子", flower: "创造之花", message: "让一个尚未完成的想法获得第一次呼吸。", kind: "creation", power: "creation" },
+};
+
+const courageFormCatalog = {
+  exploration: { name: "探索勇气", result: "探索之风" },
+  creation: { name: "创造勇气", result: "创造火花" },
+  empathy: { name: "关系勇气", result: "友谊花" },
+  perception: { name: "生活勇气", result: "生命根系" },
+  learning: { name: "生活勇气", result: "生命根系" },
+  stewardship: { name: "守护勇气", result: "守护树" },
+};
+
+const winterSeedCatalog = {
+  lost: { name: "迷路种子", future: "新的道路", color: "紫灰" },
+  failure: { name: "伤痕种子", future: "智慧树", color: "深蓝" },
+  loneliness: { name: "荒芜种子", future: "陪伴之花", color: "冬土" },
+  pause: { name: "寒冬种子", future: "重新生长", color: "冬季白" },
+};
+
+const lifeSkillTitles = ["种子", "发芽", "生长", "开花", "传承"];
+
+const lifeSkillCatalog = {
+  gardening: { name: "园艺", tree: "生命技能", place: "植物学院", style: "绿色叶片", words: /种植|播种|育苗|花|植物|土壤|浇水|修剪|生态田|温室/ },
+  cooking: { name: "烹饪", tree: "生命技能", place: "生命厨房", style: "料理香气", words: /料理|烹饪|食谱|食物|厨房|做饭|汤|餐桌|食材/ },
+  animalCare: { name: "饲养", tree: "生命技能", place: "生态农场", style: "动物伙伴印记", words: /动物|蜜蜂|授粉|牧场|饲养|鱼群/ },
+  botany: { name: "植物学", tree: "知识技能", place: "植物学院", style: "叶脉纹理", words: /植物档案|古植物|辨认植物|植物知识|濒危植物|叶片/ },
+  geography: { name: "地理学", tree: "知识技能", place: "野外学院", style: "土地纹路", words: /地理|地图|岩石|矿|地貌|土层|路线|区域/ },
+  language: { name: "语言学", tree: "知识技能", place: "知识城", style: "鱼语花纹", words: /词语|语言|翻译|单词|知识鱼|理解一个词/ },
+  history: { name: "历史档案", tree: "知识技能", place: "古树档案馆", style: "年轮印记", words: /档案|遗迹|古树|历史|地方记忆|保存.*记忆/ },
+  painting: { name: "绘画", tree: "创造技能", place: "像素学院", style: "色彩花粉", words: /绘画|画下|像素|构图|色彩/ },
+  music: { name: "音乐", tree: "创造技能", place: "声音花园", style: "声音风铃", words: /音乐|声音|旋律|编曲|雨声/ },
+  handcraft: { name: "手工", tree: "创造技能", place: "创造工坊", style: "手作花粉", words: /手工|陶艺|编织|家具|制作|修复.*椅|木工/ },
+  architecture: { name: "建筑", tree: "创造技能", place: "建筑工坊", style: "空间枝条", words: /建筑|建造|房屋|庭院|村庄|工作台/ },
+  observation: { name: "观察", tree: "探索技能", place: "野外学院", style: "细节之眼", words: /观察|发现|记录.*自然|看见|辨认/ },
+  survival: { name: "生存", tree: "探索技能", place: "野外学院", style: "天气披风", words: /天气|资源管理|生存|适应|寒潮|暴雨/ },
+  adventure: { name: "冒险", tree: "探索技能", place: "野外学院", style: "旅行背包", words: /探索|旅行|未知|隐藏路线|洞穴|森林初遇/ },
+  communication: { name: "沟通", tree: "关系技能", place: "种种酒馆", style: "风信藤蔓", words: /沟通|回应|写信|风信|倾听|表达感谢|道歉/ },
+  teaching: { name: "教导", tree: "关系技能", place: "种种酒馆", style: "知识花冠", words: /教会|教导|导师|分享知识|传承/ },
+  cooperation: { name: "合作", tree: "关系技能", place: "共同花园", style: "伙伴枝", words: /共同|合作|伙伴|项目|社区|一起/ },
+  care: { name: "照顾", tree: "关系技能", place: "共同花园", style: "守护光环", words: /照顾|陪伴|帮助|守护.*朋友|家庭|关系树/ },
+  woodworking: { name: "木工", tree: "工匠技能", place: "创造工坊", style: "木纹护腕", words: /木材|木板|木工|木椅|木屋|家具/ },
+  smelting: { name: "冶炼", tree: "工匠技能", place: "创造工坊", style: "矿火微光", words: /冶炼|矿石|金属|晶体|工具/ },
+  textile: { name: "纺织", tree: "工匠技能", place: "创造工坊", style: "纤维披肩", words: /纺织|纤维|染料|衣物|编织/ },
+  construction: { name: "建造", tree: "工匠技能", place: "创造工坊", style: "工匠腰包", words: /建造|结构|公共建筑|世界图书馆|施工/ },
+};
+
+const encounterArchetypes = [
+  {
+    id: "forest-recorder",
+    name: "古树记录者",
+    place: "古树森林",
+    need: "寻找一份家乡植物档案",
+    offers: "愿意分享地方记忆与植物观察方法",
+    skills: ["gardening", "botany", "history", "observation"],
+    complement: "creation",
+    event: "共同植物探索",
+  },
+  {
+    id: "tavern-maker",
+    name: "酒馆里的创造伙伴",
+    place: "种种酒馆",
+    need: "寻找能把故事做成生活物件的人",
+    offers: "愿意分享一段尚未完成的故事",
+    skills: ["handcraft", "architecture", "communication", "cooperation"],
+    complement: "empathy",
+    event: "共同修复一件旧物",
+  },
+  {
+    id: "lake-learner",
+    name: "湖边知识旅者",
+    place: "语言湖",
+    need: "寻找能让知识进入真实生活的同伴",
+    offers: "愿意分享一条知识鱼与远方路线",
+    skills: ["language", "geography", "adventure", "teaching"],
+    complement: "learning",
+    event: "交换一条生活里的词语鱼",
+  },
+  {
+    id: "winter-keeper",
+    name: "寒冬花园守望者",
+    place: "世界树根部",
+    need: "寻找愿意安静陪一颗种子过冬的人",
+    offers: "不催促，也不替别人决定何时发芽",
+    skills: ["care", "communication", "gardening", "history"],
+    complement: "stewardship",
+    event: "共同守护一颗休眠种子",
+  },
+];
+
+const bondLifeStages = [
+  { id: "encounter", name: "相遇种子", note: "好奇，但仍保留完整边界。" },
+  { id: "sprout", name: "共生芽", note: "开始互相影响，不替对方决定。" },
+  { id: "flower", name: "友谊花", note: "共同经历让信任开花。" },
+  { id: "tree", name: "伙伴树", note: "长期连接开始支持彼此成长。" },
+  { id: "forest", name: "家园森林", note: "共享一部分生活，根仍然属于自己。" },
+];
+
+const bondDimensionCatalog = {
+  time: { name: "时间牵绊", symbol: "年轮", note: "重要时刻，不是在线时长" },
+  trust: { name: "信任牵绊", symbol: "双叶", note: "守信、尊重边界与允许说不" },
+  memories: { name: "共同记忆", symbol: "金叶", note: "真正一起经历过的生活" },
+  mutualHelp: { name: "互助牵绊", symbol: "水源", note: "需要时出现，也接受对方拒绝" },
+  growth: { name: "成长牵绊", symbol: "新枝", note: "让彼此拥有更多独立生长的力量" },
+};
+
+const bondDistanceCatalog = {
+  near: { name: "靠近", note: "愿意分享与合作，也随时保留退出空间。" },
+  space: { name: "留出空间", note: "不需要每天联系，根系仍然记得彼此。" },
+  dormant: { name: "暂时休眠", note: "关系进入冬季，不删除共同记忆。" },
+};
+
+const bondPermissionCatalog = {
+  passing: { name: "路过", note: "只看见公开花，不进入私人根系。" },
+  friend: { name: "朋友", note: "可以进入部分区域，不能替你改变花园。" },
+  partner: { name: "伙伴", note: "经双方同意，共同管理一小块土地。" },
+  family: { name: "家人", note: "共享部分根系，也保留各自私人花园。" },
+};
+
 const allianceStageCatalog = [
   { name: "独立生命", short: "SELF" },
   { name: "伙伴关系", short: "BOND" },
@@ -1337,17 +1868,17 @@ const allianceRoleCatalog = {
 };
 
 const generatedWorldStageCatalog = [
-  { name: "尚未出现", short: "DORMANT" },
-  { name: "方向微光", short: "TRACE" },
-  { name: "地图萌芽", short: "SPROUT" },
-  { name: "共同建造", short: "BUILD" },
-  { name: "开放区域", short: "OPEN" },
+  { name: "沉睡", short: "○" },
+  { name: "微光", short: "·" },
+  { name: "萌芽", short: "芽" },
+  { name: "共建", short: "枝" },
+  { name: "开放", short: "花" },
 ];
 
 const generatedWorldRouteCatalog = {
   botany: {
-    name: "植物学院",
-    mark: "BOTANY",
+    name: "草木国",
+    mark: "草",
     color: "#65b957",
     accent: "#dff08a",
     abilities: ["perception", "learning"],
@@ -1367,8 +1898,8 @@ const generatedWorldRouteCatalog = {
     practice: "参加一节林缘观察课",
   },
   agriculture: {
-    name: "生态农场地区",
-    mark: "ECO FARM",
+    name: "大地国",
+    mark: "田",
     color: "#bf934b",
     accent: "#f4df86",
     abilities: ["stewardship", "perception"],
@@ -1388,8 +1919,8 @@ const generatedWorldRouteCatalog = {
     practice: "完成一次土壤循环检查",
   },
   art: {
-    name: "创作者学院",
-    mark: "PIXEL LAB",
+    name: "创造国",
+    mark: "创",
     color: "#dd756f",
     accent: "#ffd36c",
     abilities: ["creation", "learning"],
@@ -1409,8 +1940,8 @@ const generatedWorldRouteCatalog = {
     practice: "带一件生活作品进入像素课堂",
   },
   earth: {
-    name: "地球探索中心",
-    mark: "EARTH LAB",
+    name: "探索国",
+    mark: "路",
     color: "#638a86",
     accent: "#b8e3c7",
     abilities: ["exploration", "learning"],
@@ -1430,8 +1961,8 @@ const generatedWorldRouteCatalog = {
     practice: "整理一次地貌与路线证据",
   },
   social: {
-    name: "友谊城市",
-    mark: "COMMONS",
+    name: "友谊国",
+    mark: "友",
     color: "#d87fa6",
     accent: "#ffe0a3",
     abilities: ["empathy", "creation"],
@@ -1560,35 +2091,35 @@ let genesisAudio = null;
 const gardenerRanks = [
   {
     min: 0,
-    name: "Lv1 种子观察者",
+    name: "种子园丁",
     english: "Seed Observer",
     abilities: ["认识植物", "采集种子", "记录天气", "学习基础园艺"],
     unlock: "个人小花园",
   },
   {
     min: 4,
-    name: "Lv2 芽芽园丁",
+    name: "嫩芽园丁",
     english: "Sprout Gardener",
     abilities: ["种植植物", "浇水施肥", "照顾小精灵", "打开植物图鉴"],
     unlock: "植物图鉴",
   },
   {
     min: 9,
-    name: "Lv3 花园设计师",
+    name: "花园匠",
     english: "Garden Designer",
     abilities: ["设计花园布局", "建造生态区域", "培育特殊植物"],
     unlock: "公共花园建设",
   },
   {
     min: 15,
-    name: "Lv4 生态园艺师",
+    name: "生态园丁",
     english: "Ecology Gardener",
     abilities: ["修复环境", "调节生态", "保护稀有物种", "创造微气候"],
     unlock: "自然区域管理",
   },
   {
     min: 24,
-    name: "Lv5 世界园丁",
+    name: "世界园丁",
     english: "World Gardener",
     abilities: ["改变地区生态", "创建新区域", "培育新的生命种类"],
     unlock: "世界公共花园治理",
@@ -1742,6 +2273,137 @@ const sceneEmotes = [
   { id: "dance", name: "跳舞", mark: "DANCE", memory: "一起庆祝" },
   { id: "toast", name: "举杯", mark: "CHEERS", memory: "为相遇举杯" },
 ];
+const spiritActionIds = new Set(sceneEmotes.map((emote) => emote.id));
+let sceneActionTimer = 0;
+let spiritApiBusy = false;
+
+function spiritApiEndpoint() {
+  return String(
+    globalThis.DEDALION_SPIRIT_API_URL
+    || document.querySelector('meta[name="dedalion-spirit-api"]')?.content
+    || "",
+  ).trim();
+}
+
+function restartSpiritAction(durationMs = 1200) {
+  window.clearTimeout(sceneActionTimer);
+  playerSprite.classList.remove("action-pulse");
+  void playerSprite.offsetWidth;
+  playerSprite.classList.add("action-pulse");
+  sceneActionTimer = window.setTimeout(() => playerSprite.classList.remove("action-pulse"), durationMs);
+}
+
+function localSpiritDirective(intent = "respond") {
+  const weather = currentWeatherProfile();
+  const location = nearestSceneLocation();
+  const participants = nearbySceneParticipants(location);
+  let action = "wave";
+  let message = "风芽抬起叶片，向正在经过的风打招呼。";
+
+  if (weather.isRain) {
+    action = "tea";
+    message = "雨声靠近了，风芽捧起一小杯热茶。";
+  } else if (location?.kind === "lake") {
+    action = "fish";
+    message = "水面亮了一下，风芽安静地看向涟漪。";
+  } else if (currentTimeLabel() === "Night") {
+    action = "read";
+    message = "夜色慢下来，风芽翻开一页发光的叶书。";
+  } else if (participants.length) {
+    action = intent === "comfort" ? "hug" : "wave";
+    message = `风芽看见了${participants[0]}，认真回应这次相遇。`;
+  } else if (weather.energy >= 75) {
+    action = "dance";
+    message = "阳光很有力，风芽跟着风跳了两步。";
+  }
+
+  return { action, message, durationMs: 1400, source: "local" };
+}
+
+function normalizeSpiritDirective(payload, fallback) {
+  const candidate = payload?.directive || payload || {};
+  const action = spiritActionIds.has(candidate.action) ? candidate.action : fallback.action;
+  const message = typeof candidate.message === "string" && candidate.message.trim()
+    ? candidate.message.trim().slice(0, 120)
+    : fallback.message;
+  const durationMs = Math.max(700, Math.min(5000, Number(candidate.durationMs) || fallback.durationMs));
+  return { action, message, durationMs, source: candidate.source || "api" };
+}
+
+function applySpiritDirective(directive) {
+  const safeDirective = normalizeSpiritDirective(directive, localSpiritDirective());
+  setSceneEmote(safeDirective.action, false);
+  restartSpiritAction(safeDirective.durationMs);
+  setPanel("风芽回应", safeDirective.message);
+  window.dispatchEvent(new CustomEvent("dedalion:spirit-action", { detail: safeDirective }));
+  return safeDirective;
+}
+
+function spiritRequestContext(intent) {
+  const weather = currentWeatherProfile();
+  const location = nearestSceneLocation();
+  return {
+    intent,
+    companion: {
+      name: lifeGrowthState.companion?.name || "风芽",
+      currentAction: currentSceneEmote().id,
+    },
+    scene: {
+      place: location?.title || currentLifePlace(),
+      kind: location?.kind || "world",
+      participants: nearbySceneParticipants(location),
+      weather: weather.weather,
+      temperature: weather.temperature,
+      time: currentTimeLabel(),
+    },
+    allowedActions: [...spiritActionIds],
+  };
+}
+
+async function requestSpiritAction(intent = "respond") {
+  if (spiritApiBusy) return null;
+  spiritApiBusy = true;
+  sceneSpiritButton.disabled = true;
+  sceneSpiritButton.classList.add("is-thinking");
+  sceneSpiritButton.setAttribute("aria-busy", "true");
+  const fallback = localSpiritDirective(intent);
+  const endpoint = spiritApiEndpoint();
+
+  try {
+    if (!endpoint) return applySpiritDirective(fallback);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 6000);
+    let response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        signal: controller.signal,
+        body: JSON.stringify(spiritRequestContext(intent)),
+      });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+    if (!response.ok) throw new Error(`Spirit API ${response.status}`);
+    return applySpiritDirective(normalizeSpiritDirective(await response.json(), fallback));
+  } catch (error) {
+    console.info("Spirit API fallback:", error instanceof Error ? error.message : error);
+    return applySpiritDirective(fallback);
+  } finally {
+    spiritApiBusy = false;
+    sceneSpiritButton.disabled = false;
+    sceneSpiritButton.classList.remove("is-thinking");
+    sceneSpiritButton.setAttribute("aria-busy", "false");
+  }
+}
+
+globalThis.DedalionSpiritAPI = Object.freeze({
+  actions: Object.freeze([...spiritActionIds]),
+  request: requestSpiritAction,
+  apply: (directive) => applySpiritDirective(directive),
+  endpoint: spiritApiEndpoint,
+});
 
 const sceneLocationProfiles = {
   worldTree: { type: "祝福记忆", growth: "祝福叶", value: "harmony" },
@@ -1757,6 +2419,8 @@ const sceneLocationProfiles = {
   seedNursery: { type: "生命出生", growth: "新芽叶", value: "growth" },
   seedEvolution: { type: "培育尝试", growth: "变体叶", value: "creation" },
   rural: { type: "农场日常", growth: "生态叶", value: "contribution" },
+  craft: { type: "手作记忆", growth: "工艺叶", value: "creation" },
+  buildSite: { type: "建造记忆", growth: "家园年轮", value: "contribution" },
 };
 
 const slowLifeInvitations = [
@@ -1867,14 +2531,175 @@ const livingInventoryIcons = {
   foodLeftovers: ["glyph-cycle", "料理余料"],
   compost: ["glyph-cycle", "生命堆肥"],
   familyRecipe: ["glyph-archive", "家庭食谱"],
+  planks: ["glyph-home", "根纹木板"],
+  fiber: ["glyph-gardener", "花叶纤维"],
+  stone: ["glyph-archive", "河根石"],
+  resin: ["glyph-seed", "树脂露"],
+  crystal: ["glyph-wish", "共鸣晶"],
+  fossilRubbing: ["glyph-archive", "古海床拓印"],
+  morningDew: ["glyph-weather", "晨露"],
+  rainSample: ["glyph-weather", "雨水样本"],
+  thunderCrystal: ["glyph-weather", "雷晶"],
+  snowWater: ["glyph-weather", "雪水"],
+  rainbowSeed: ["glyph-seed", "虹光种子"],
+  sunlightShard: ["glyph-wish", "日光片"],
+  windThread: ["glyph-mail", "风丝"],
 };
 
 const backpackCategories = [
-  { id: "seed", name: "种子", icon: "glyph-seed", items: ["originSeed", "seeds", "memorySeed", "knowledgeSeed", "relationSeed", "placeSeed", "dreamSeed", "creationSeed", "wishSeed"] },
-  { id: "gift", name: "礼物", icon: "glyph-friend", items: ["dandelionToken", "letters", "furniture", "meals"] },
-  { id: "material", name: "材料", icon: "glyph-gardener", items: ["wateringCan", "wood", "flowers", "mushrooms", "herbs", "starWater", "grain", "freshProduce", "foodLeftovers", "compost"] },
-  { id: "archive", name: "档案", icon: "glyph-archive", items: ["blankBottle", "driftBottle", "rareBottle", "memoryFruit", "familyArchive", "familyRecipe", "failureArchive", "archive", "fish"] },
-  { id: "special", name: "特殊", icon: "glyph-wish", items: ["wordFish", "spirits", "blueprints", "starLamp"] },
+  { id: "seed", name: "种子", icon: "glyph-seed", items: ["originSeed", "seeds", "memorySeed", "knowledgeSeed", "relationSeed", "placeSeed", "dreamSeed", "creationSeed", "wishSeed", "rainbowSeed"] },
+  { id: "plant", name: "植物", icon: "glyph-gardener", items: ["flowers", "mushrooms", "herbs", "grain", "freshProduce"] },
+  { id: "knowledge", name: "知识", icon: "glyph-fish", items: ["wordFish", "fish", "fossilRubbing", "familyRecipe", "blueprints"] },
+  { id: "token", name: "信物", icon: "glyph-friend", items: ["dandelionToken", "letters", "blankBottle", "driftBottle", "rareBottle", "furniture", "meals", "starLamp"] },
+  { id: "material", name: "材料", icon: "glyph-exchange", items: ["wateringCan", "wood", "planks", "fiber", "stone", "resin", "crystal", "starWater", "morningDew", "rainSample", "thunderCrystal", "snowWater", "sunlightShard", "windThread", "foodLeftovers", "compost"] },
+  { id: "memory", name: "记忆", icon: "glyph-archive", items: ["memoryFruit", "familyArchive", "failureArchive", "archive", "spirits"] },
+];
+
+let activeBackpackCategoryId = "seed";
+let selectedBackpackItemKey = null;
+
+const craftingMaterialCatalog = {
+  wood: { name: "树根材", property: "温暖、有纹理", origin: "古树森林边缘" },
+  planks: { name: "根纹木板", property: "可连接、可承重", origin: "星愿工作室" },
+  herbs: { name: "药芽灵", property: "柔韧、有生命气味", origin: "当季林下层" },
+  flowers: { name: "生态花", property: "轻盈、会保存情绪", origin: "私人花园" },
+  fiber: { name: "花叶纤维", property: "柔软、可编织", origin: "星愿工作室" },
+  stone: { name: "河根石", property: "稳定、耐久", origin: "森林根边与河岸" },
+  resin: { name: "树脂露", property: "透明、可粘合", origin: "古树自然分泌" },
+  starWater: { name: "星水滴", property: "折射记忆与声音", origin: "夜晚水域" },
+  crystal: { name: "共鸣晶", property: "透明、会回应声音", origin: "星水滴与河根石的实验" },
+  archive: { name: "树洞档", property: "保存来处与故事", origin: "世界记忆网络" },
+  water: { name: "生命水", property: "流动、滋养", origin: "天气与关系水源" },
+  compost: { name: "生命堆肥", property: "来自旧物与余料的再生", origin: "农场循环" },
+  relationSeed: { name: "藤蔓种", property: "需要双方共同照料", origin: "关系网络" },
+};
+
+const lifeBuildingStages = [
+  { tier: 0, id: "land", name: "一块土地", short: "LAND", meaning: "未来仍然开放" },
+  { tier: 1, id: "furniture", name: "一件家具", short: "OBJECT", meaning: "材料第一次进入生活" },
+  { tier: 2, id: "room", name: "一个房间", short: "ROOM", meaning: "生活开始形成空间" },
+  { tier: 3, id: "house", name: "一座房子", short: "HOME", meaning: "记忆有了可以返回的地方" },
+  { tier: 4, id: "courtyard", name: "一个庭院", short: "GARDEN", meaning: "建筑开始照顾生态" },
+  { tier: 5, id: "village", name: "一个村庄", short: "VILLAGE", meaning: "不同责任共同维持日常" },
+  { tier: 6, id: "city", name: "一座城市", short: "CITY", meaning: "多个社区形成公共生活" },
+  { tier: 7, id: "civilization", name: "一个文明区域", short: "CIV", meaning: "共同价值写进世界规则" },
+];
+
+const lifeCraftingRecipes = [
+  {
+    id: "root-board",
+    name: "根纹木板",
+    kind: "process",
+    tier: 0,
+    cost: { wood: 1 },
+    output: { planks: 2 },
+    profession: "carpenter",
+    story: "落枝被顺着纹理加工，来处仍然留在每一块木板上。",
+    discover: () => true,
+  },
+  {
+    id: "leaf-fiber",
+    name: "花叶纤维",
+    kind: "process",
+    tier: 0,
+    cost: { herbs: 1, resin: 1 },
+    output: { fiber: 2 },
+    profession: "artisan",
+    story: "药草纤维与自然树脂结合，形成可以编织的柔软材料。",
+    discover: () => inventory.herbs > 0 && inventory.resin > 0,
+  },
+  {
+    id: "resonance-crystal",
+    name: "共鸣晶",
+    kind: "process",
+    tier: 0,
+    cost: { starWater: 1, stone: 1 },
+    output: { crystal: 1 },
+    profession: "researcher",
+    story: "星水渗入河根石，形成会保存声音与夜色的透明晶体。",
+    discover: () => inventory.starWater > 0 && inventory.stone > 0,
+  },
+  {
+    id: "star-lamp",
+    name: "星愿灯",
+    kind: "item",
+    tier: 0,
+    cost: { seeds: 1, starWater: 1, wood: 1 },
+    output: { starLamp: 1, creationSeed: 1 },
+    profession: "artisan",
+    story: "一颗未来种、一道夜水和一段木纹共同成为可以照亮记忆的生活物。",
+    discover: () => true,
+  },
+  {
+    id: "wind-stool",
+    name: "风纹矮凳",
+    kind: "build",
+    tier: 1,
+    cost: { planks: 2, fiber: 1 },
+    profession: "carpenter",
+    story: "第一件家具不是装饰，而是邀请一个人真正坐下来。",
+    discover: () => inventory.planks >= 2 && inventory.fiber > 0,
+  },
+  {
+    id: "memory-room",
+    name: "记忆角",
+    kind: "build",
+    tier: 2,
+    cost: { planks: 3, fiber: 2, archive: 1 },
+    profession: "architect",
+    story: "一个房间围绕被允许保存的生活痕迹长出来。",
+    discover: () => highestLifeBuildingTier() >= 1 && inventory.archive > 0,
+  },
+  {
+    id: "seed-house",
+    name: "种子小屋",
+    kind: "build",
+    tier: 3,
+    cost: { planks: 4, stone: 2, resin: 1 },
+    profession: "architect",
+    story: "屋顶接住雨，墙体保留树与石头的地理来源。",
+    discover: () => highestLifeBuildingTier() >= 2,
+  },
+  {
+    id: "life-courtyard",
+    name: "共生庭院",
+    kind: "build",
+    tier: 4,
+    cost: { planks: 4, stone: 2, flowers: 2, water: 1 },
+    profession: "gardener",
+    story: "建筑把水还给土地，为植物、昆虫和居民同时留下位置。",
+    discover: () => highestLifeBuildingTier() >= 3 && state.eco >= 2,
+  },
+  {
+    id: "common-village",
+    name: "共同工坊村",
+    kind: "build",
+    tier: 5,
+    cost: { planks: 6, stone: 4, fiber: 2, compost: 1, relationSeed: 1 },
+    profession: "architect",
+    story: "木匠、园艺师、料理师、记录者和连接者共同维持一个村庄。",
+    discover: () => highestLifeBuildingTier() >= 4 && allianceDerivedStage() >= 2,
+  },
+  {
+    id: "living-city",
+    name: "生命共创城",
+    kind: "build",
+    tier: 6,
+    cost: { planks: 8, stone: 6, crystal: 2, water: 2, relationSeed: 2 },
+    profession: "architect",
+    story: "多个社区共享水、档案和公共工坊，城市因此拥有自己的节律。",
+    discover: () => highestLifeBuildingTier() >= 5 && allianceDerivedStage() >= 4,
+  },
+  {
+    id: "civilization-garden",
+    name: "蒲公英文明花园",
+    kind: "build",
+    tier: 7,
+    cost: { planks: 10, stone: 8, crystal: 3, archive: 3, relationSeed: 3 },
+    profession: "architect",
+    story: "一代人的材料、共识和生活痕迹成为可继续演化的世界区域。",
+    discover: () => highestLifeBuildingTier() >= 6 && allianceDerivedStage() >= 6,
+  },
 ];
 
 const companionPaths = [
@@ -1935,7 +2760,7 @@ const bodyGardenSignals = [
   {
     name: "水分 Hydration",
     icon: "glyph-weather",
-    score: () => Math.min(100, 48 + inventory.starWater * 12 + (currentWeatherProfile().weather === "小雨" ? 10 : 0)),
+    score: () => Math.min(100, 48 + inventory.starWater * 12 + (currentWeatherProfile().isRain ? 10 : 0)),
     detail: "高温、长时间坐着和运动后，都需要补水。",
   },
   {
@@ -2151,7 +2976,7 @@ const lifeContinent = [
     resource: "镜片碎片 / 可能性卡",
     unlock: "完成 7 条 Life Memory",
     gameplay: ["进入镜屋", "遇见另一个可能的自己", "比较选择路径"],
-    demo: "根据玩家偏好生成“另一个可能的 Dead Night”，展示艺术家和学者两条成长路径。",
+    demo: "根据玩家偏好生成“另一个可能的 风芽”，展示艺术家和学者两条成长路径。",
   },
   {
     slot: 16,
@@ -2498,10 +3323,10 @@ const overworldMap = [
     terrain: "高草坡、风车塔、蒲公英机场、云路起点、天气观测台",
     connects: "蒲公英城 / 天空区域 / 风之森林",
     districts: ["山坡路", "风车塔", "蒲公英机场", "云路入口"],
-    buildings: ["风之车站", "天气观测台", "漂流瓶发射台"],
-    systems: ["风向系统", "天气观察", "漂流瓶传播", "天空解锁"],
-    items: ["风票", "蒲公英翼", "天气记录", "远方地址"],
-    functions: ["调整风向", "发送漂流瓶", "观察天气", "进入天空岛"],
+    buildings: ["风之车站", "听天观象台", "漂流瓶发射台"],
+    systems: ["小时天气", "风向预测", "天气样本", "漂流瓶传播", "天空解锁"],
+    items: ["风票", "蒲公英翼", "天气档案", "晨露", "雷晶", "远方地址"],
+    functions: ["读取天气球", "观云辨风", "收集天气样本", "发送漂流瓶", "进入天空岛"],
     path: "蒲公英城北门 -> 风坡小路 -> 风之高地 -> 天空区域",
   },
   {
@@ -2670,67 +3495,470 @@ const overworldMap = [
   },
 ];
 
-const weatherProfiles = {
-  Morning: {
-    place: "杭州",
-    weather: "小雨",
-    world: "安静生长",
-    spirit: "雨精灵",
-    energy: 65,
-    create: 85,
-    social: 40,
-    focus: 72,
-    advice: "今天空气里的水分很高，适合整理、阅读和创造，不适合安排过多外出任务。",
-    tasks: ["打开一个重要项目 10 分钟", "给朋友回复一条消息", "记录一个雨声或水声"],
+const worldSpatialMap = [
+  {
+    slot: 0,
+    id: "wind-islands",
+    name: "风之群岛",
+    icon: "glyph-mail",
+    layer: "传播与连接",
+    role: "让种子、信件与旅行找到方向",
+    terrain: "浮岛、云路、风车塔与蒲公英候车台",
+    connects: "世界树 / 蒲公英城 / 星辰花园",
+    districts: ["漂流瓶码头", "世界邮路", "旅行风站", "天空气象台"],
+    buildings: ["风之车站", "蒲公英邮局", "听天观象台"],
+    systems: ["漂流瓶", "邮路", "旅行", "世界交流"],
+    items: ["风丝", "天气档案", "远方地址"],
+    functions: ["观察风向", "寄出一颗种子", "前往远方"],
+    path: "世界树树冠 -> 风桥 -> 风之群岛",
+    ruleIds: ["forest-wind"],
   },
-  Day: {
-    place: "杭州",
+  {
+    slot: 1,
+    id: "ancient-continent",
+    name: "古树大陆",
+    icon: "glyph-archive",
+    layer: "记忆与古老生命",
+    role: "保存土地、文化与生命来处",
+    terrain: "古树根道、苔藓谷、地方书院与记忆果园",
+    connects: "世界树 / 蒲公英城 / 深海秘境",
+    districts: ["苔藓谷", "植物档案馆", "地方文化馆", "古生命遗迹", "记忆果园"],
+    buildings: ["草木书院", "万年档案树", "根之档案馆"],
+    systems: ["自然知识", "地方文化", "痕迹档案", "生命年轮"],
+    items: ["苔藓观察页", "地方卷轴", "记忆果"],
+    functions: ["观察古老陆生植物", "读取物品来处", "保存地方故事"],
+    path: "世界树西根 -> 苔藓谷 -> 古树大陆",
+    ruleIds: ["forest-wind"],
+  },
+  {
+    slot: 2,
+    id: "dream-forest",
+    name: "梦境森林",
+    icon: "glyph-wish",
+    layer: "内心与未知",
+    role: "允许情绪、迷茫与新方向暂时没有答案",
+    terrain: "迷雾小径、冬季林地、镜像水面与新芽学院",
+    connects: "世界树 / 风之群岛 / 知识海洋",
+    districts: ["迷雾森林", "寒冬花园", "生命罗盘", "新芽学院"],
+    buildings: ["梦境门", "回望亭", "微小行动屋"],
+    systems: ["情绪天气", "苦难种子", "重新开始", "生命决策"],
+    items: ["回望种子", "尝试种子", "相遇种子"],
+    functions: ["找到下一步", "让种子休眠", "重新播种"],
+    path: "世界树东冠 -> 月光藤桥 -> 梦境森林",
+    ruleIds: ["mist-path"],
+  },
+  {
+    slot: 3,
+    id: "dandelion-city",
+    name: "蒲公英城",
+    icon: "glyph-companion",
+    layer: "生活与关系",
+    role: "让相遇进入日常，让关系保持边界",
+    terrain: "酒馆街、邮局街、集市、礼堂与家庭花园",
+    connects: "八个区域共同抵达的生活中心",
+    districts: ["种种酒馆", "蒲公英邮局", "关系花园", "庆典广场", "家园入口"],
+    buildings: ["种种酒馆", "蒲公英礼堂", "友谊档案馆"],
+    systems: ["相遇", "友谊生日", "关系牵绊", "家庭花园"],
+    items: ["友谊种子", "关系信物", "记忆礼盒"],
+    functions: ["听一段故事", "交换信物", "举行关系庆典"],
+    path: "世界树南门 -> 生活石径 -> 蒲公英城",
+    current: true,
+    ruleIds: ["tavern-night", "friendship-boundary"],
+  },
+  {
+    slot: 4,
+    id: "world-tree-garden",
+    name: "世界树花园",
+    icon: "glyph-world",
+    layer: "世界中心",
+    role: "连接愿望、关系、规则、节气与共同世界",
+    terrain: "古树树冠连接星辰，根系连接八个区域",
+    connects: "蒲公英城与八大区域",
+    districts: ["创世蒲公英", "星辰花园", "规则档案馆", "世界庆典台"],
+    buildings: ["世界树", "规则档案馆", "愿望台"],
+    systems: ["创世仪式", "世界规则", "节日庆典", "种子传播"],
+    items: ["初始生命种", "古老档案页", "世界记忆果"],
+    functions: ["回看第一阵风", "理解世界规则", "见证共同变化"],
+    path: "所有道路最终回到世界树根系",
+    center: true,
+    ruleIds: ["genesis-seed", "winter-solstice"],
+  },
+  {
+    slot: 5,
+    id: "knowledge-ocean",
+    name: "知识海洋",
+    icon: "glyph-fish",
+    layer: "学习与理解",
+    role: "让知识进入生活，也让生活帮助记忆",
+    terrain: "语言鱼塘、图书岛、科学馆与翻译港",
+    connects: "世界树 / 梦境森林 / 深海秘境",
+    districts: ["语言鱼塘", "图书岛", "科学馆", "翻译中心"],
+    buildings: ["鱼语研究站", "生活词典馆", "知识灯塔"],
+    systems: ["语言种子", "自然知识", "做中学", "个人词典"],
+    items: ["知识鱼", "观察页", "生活词语"],
+    functions: ["遇见一个词", "理解一段经验", "把知识传给别人"],
+    path: "世界树东根 -> 语言湖 -> 知识海洋",
+    ruleIds: [],
+  },
+  {
+    slot: 6,
+    id: "deep-sea-mystery",
+    name: "深海秘境",
+    icon: "glyph-cycle",
+    layer: "地理与未知",
+    role: "读取地层、化石、宝石与失落文明",
+    terrain: "水下洞穴、珊瑚城、古海床与根系暗河",
+    connects: "古树大陆 / 知识海洋 / 世界树地下根系",
+    districts: ["化石海床", "地理洞穴", "宝石暗河", "古文明遗迹"],
+    buildings: ["海底档案馆", "声音灯塔", "根系升降站"],
+    systems: ["地理观察", "化石档案", "隐藏路径", "古文明记忆"],
+    items: ["古海床拓印", "声音贝壳", "地层标本"],
+    functions: ["观察岩层", "读取古海记忆", "发现地下连接"],
+    path: "古树根道 / 知识海深水区 -> 深海秘境",
+    ruleIds: ["mist-path"],
+  },
+  {
+    slot: 7,
+    id: "earth-farm",
+    name: "大地农场",
+    icon: "glyph-gardener",
+    layer: "食物与生态",
+    role: "让种子经过土地、天气、劳动与文化成为料理",
+    terrain: "种子田、育苗温室、生态田、厨房与食物档案馆",
+    connects: "蒲公英城 / 世界树 / 创造工坊",
+    districts: ["种子田", "育苗温室", "堆肥区", "畜牧区", "生命厨房", "食物档案馆"],
+    buildings: ["种子仓", "料理屋", "食物档案馆"],
+    systems: ["种植", "烹饪", "生态循环", "食物记忆"],
+    items: ["地方种子", "田野果蔬", "家庭食谱", "生命料理"],
+    functions: ["照顾幼苗", "共同做饭", "分享一桌记忆"],
+    path: "蒲公英城西南门 -> 农田小路 -> 大地农场",
+    ruleIds: ["forest-wind"],
+  },
+  {
+    slot: 8,
+    id: "creation-workshop",
+    name: "创造工坊",
+    icon: "glyph-exchange",
+    layer: "创造与建造",
+    role: "把材料、知识、关系和时间建造成生活空间",
+    terrain: "木工坊、像素学院、建筑工坊、音乐室与展览馆",
+    connects: "大地农场 / 蒲公英城 / 世界树",
+    districts: ["木工坊", "像素学院", "建筑工坊", "音乐室", "展览馆"],
+    buildings: ["天工坊", "生命建造地", "共同项目树"],
+    systems: ["手工制作", "配方发现", "多人建造", "文明区域生长"],
+    items: ["根纹木板", "设计图", "生活家具"],
+    functions: ["修复一件旧物", "建造生活空间", "留下创造痕迹"],
+    path: "蒲公英城工坊街 -> 根纹桥 -> 创造工坊",
+    ruleIds: [],
+  },
+];
+
+const livingRuleMysteryCatalog = {
+  "genesis-seed": {
+    id: "genesis-seed",
+    category: "创世规则",
+    name: "《第一颗蒲公英》",
+    place: "世界树花园",
+    clauses: ["不要吹走所有种子", "留下一颗给自己", "记住第一阵风"],
+    clues: ["风把未来带向远方", "脚边的种子成为个人花园", "第一条路线记住了你的选择"],
+    meaning: "传播与扎根必须同时发生，未来才不会吞掉现在。",
+    permission: "初始生命种",
+    rewardKey: "memorySeed",
+  },
+  "forest-wind": {
+    id: "forest-wind",
+    category: "自然规则",
+    name: "《蒲公英森林守则》",
+    place: "古树大陆",
+    clauses: ["无风时不要吹蒲公英", "白色蒲公英不要全部采摘", "先观察苔藓，再判断水从哪里来"],
+    clues: ["静止的种子正在寻找落点", "一朵白花保存着森林记忆", "苔藓记录潮湿、阴影与微小水路"],
+    meaning: "自然不是资源列表。观察和保留，才让生命继续传播。",
+    permission: "风感知",
+    rewardKey: "placeSeed",
+  },
+  "tavern-night": {
+    id: "tavern-night",
+    category: "精灵规则",
+    name: "《种种酒馆夜晚规则》",
+    place: "蒲公英城",
+    clauses: ["十点后不要先问无名客人的名字", "先递一杯水", "等它自己说出来自哪里"],
+    clues: ["无名客人没有可读取的档案", "水会让灰色花粉恢复颜色", "迷路种子只在被尊重时开口"],
+    meaning: "先照顾，再定义。名字不应该成为获得帮助的门槛。",
+    permission: "迷途精灵信物",
+    rewardKey: "dandelionToken",
+  },
+  "friendship-boundary": {
+    id: "friendship-boundary",
+    category: "关系规则",
+    name: "《友谊花园规则》",
+    place: "蒲公英城",
+    clauses: ["不偷看未开放的花", "不替别人浇灭愿望", "先询问，再修剪朋友的枯枝"],
+    clues: ["私人花园的门会回应同意", "愿望火光不是需要被消灭的异常", "枯叶可能代表休息而不是死亡"],
+    meaning: "连接不等于占有，帮助也必须尊重边界。",
+    permission: "关系守护",
+    rewardKey: "relationSeed",
+  },
+  "winter-solstice": {
+    id: "winter-solstice",
+    category: "时间规则",
+    name: "《冬至世界树规则》",
+    place: "世界树花园",
+    clauses: ["冬至夜不种普通种子", "可以种下一个愿望", "给过去的自己留一封信"],
+    clues: ["最长的夜把普通生长按下暂停", "愿望会在根系里保存一年", "旧信让年轮看见变化"],
+    meaning: "有些时间适合生长，有些时间适合保存和回望。",
+    permission: "未来种子",
+    rewardKey: "wishSeed",
+  },
+  "mist-path": {
+    id: "mist-path",
+    category: "未知规则",
+    name: "《迷雾森林》",
+    place: "梦境森林",
+    clauses: ["三条路里先走没有花的那条", "听见自己的声音时先不要回应", "找到一片没有影子的叶子"],
+    clues: ["最安静的小路没有用奖励引诱你", "回声会重复焦虑而不是提供答案", "无影叶标记着雾外的真实光源"],
+    meaning: "迷路时先确认自己在哪里，再寻找下一步。",
+    permission: "梦境进入",
+    rewardKey: "dreamSeed",
+  },
+};
+
+const worldRhythmPeriods = [
+  { id: "dawn", name: "晨雾", hours: "05:00–08:00", hour: 6, legacy: "Morning", baseWeather: "mist", activity: "收集晨露、观察叶片与稀有植物" },
+  { id: "morning", name: "向阳", hours: "08:00–12:00", hour: 10, legacy: "Morning", baseWeather: "sunny", activity: "采集、探索与照顾田地" },
+  { id: "noon", name: "午风", hours: "12:00–15:00", hour: 14, legacy: "Day", baseWeather: "wind", activity: "制作、室内研究与补充水分" },
+  { id: "dusk", name: "晚霞", hours: "15:00–19:00", hour: 17, legacy: "Day", baseWeather: "sunset", activity: "摄影、声音采集与相遇" },
+  { id: "night", name: "星夜", hours: "19:00–24:00", hour: 21, legacy: "Night", baseWeather: "starry", activity: "月光植物、星尘与记忆整理" },
+  { id: "dream", name: "梦候", hours: "00:00–05:00", hour: 2, legacy: "Night", baseWeather: "dreamFog", activity: "休息、梦境天气与地下水声" },
+];
+
+const weatherConditionCatalog = {
+  mist: {
+    weather: "晨雾",
+    world: "露水苏醒",
+    spirit: "雾精灵",
+    energy: 58,
+    create: 74,
+    social: 34,
+    focus: 82,
+    temperature: 18,
+    humidity: 92,
+    windSpeed: 1,
+    resource: "晨露",
+    sampleKey: "morningDew",
+    advice: "能见度很低，不必赶路。沿熟悉的小径观察露水、叶脉和刚醒来的植物。",
+    tasks: ["收集一滴晨露", "观察一片带水的叶子", "等雾散后再走远路"],
+    isFog: true,
+  },
+  sunny: {
+    weather: "晴天",
+    world: "明亮生长",
+    spirit: "太阳花精灵",
+    energy: 82,
+    create: 68,
+    social: 72,
+    focus: 66,
+    temperature: 25,
+    humidity: 54,
+    windSpeed: 2,
+    resource: "日光片",
+    sampleKey: "sunlightShard",
+    advice: "光合作用和动物活动都在增强，适合短途探索、采集和照顾需要阳光的植物。",
+    tasks: ["去田野观察授粉", "为植物检查水分", "完成一段短途探索"],
+    isSunny: true,
+  },
+  heat: {
+    weather: "热浪",
+    world: "水分消耗",
+    spirit: "暑光精灵",
+    energy: 54,
+    create: 62,
+    social: 44,
+    focus: 52,
+    temperature: 34,
+    humidity: 48,
+    windSpeed: 1,
+    resource: "日光片",
+    sampleKey: "sunlightShard",
+    advice: "午后水分消耗很快。减少远行，先补水，再去阴凉工坊完成一件小制作。",
+    tasks: ["补充生命水", "检查温室通风", "把远行改到傍晚"],
+    isSunny: true,
+    isHeat: true,
+  },
+  wind: {
     weather: "有风",
-    world: "适合旅行",
+    world: "消息旅行",
     spirit: "风精灵",
     energy: 76,
     create: 68,
     social: 62,
     focus: 58,
-    advice: "今天适合跑动、采集、寄信和短时间协作。把大任务拆成能完成的小路线。",
-    tasks: ["去邮局投递一封信", "采集一份森林材料", "整理一个 20 分钟任务"],
+    temperature: 27,
+    humidity: 56,
+    windSpeed: 5,
+    resource: "风丝",
+    sampleKey: "windThread",
+    advice: "风路已经打开，适合寄信、传播种子和短时间协作；幼苗则需要低矮支撑。",
+    tasks: ["观察风向标", "寄出一封风信", "给幼苗增加支撑"],
+    isWind: true,
   },
-  Night: {
-    place: "杭州",
+  sunset: {
+    weather: "晚霞",
+    world: "声音回流",
+    spirit: "霞光精灵",
+    energy: 64,
+    create: 88,
+    social: 78,
+    focus: 62,
+    temperature: 24,
+    humidity: 61,
+    windSpeed: 2,
+    resource: "日光片",
+    sampleKey: "sunlightShard",
+    advice: "光线和声音都在变柔，适合合影、记录环境声，或在酒馆与别人交换一天的发现。",
+    tasks: ["拍一张生命合影", "记录一段傍晚声音", "把发现带回酒馆"],
+    isSunset: true,
+  },
+  starry: {
     weather: "晴夜",
     world: "星光回忆",
     spirit: "星光精灵",
     energy: 42,
     create: 78,
     social: 35,
-    focus: 64,
-    advice: "晚上适合收束，不适合强迫自己高强度输出。整理记忆，给明天留一颗种子。",
-    tasks: ["回家生成 Life Memory", "写下明天第一颗任务种子", "去湖边看看星光鱼"],
+    focus: 70,
+    temperature: 19,
+    humidity: 68,
+    windSpeed: 1,
+    resource: "星水滴",
+    sampleKey: "starWater",
+    advice: "月光植物正在开放。适合收束、观星和整理记忆，不必强迫自己继续高强度输出。",
+    tasks: ["观察月光植物", "收集一滴星水", "给明天留一颗种子"],
+    isNight: true,
+  },
+  dreamFog: {
+    weather: "梦雾",
+    world: "世界休眠",
+    spirit: "梦精灵",
+    energy: 28,
+    create: 72,
+    social: 18,
+    focus: 46,
+    temperature: 17,
+    humidity: 88,
+    windSpeed: 1,
+    resource: "晨露",
+    sampleKey: "morningDew",
+    advice: "世界进入休眠，不再要求产出。留下一个梦的线索，然后让身体真正休息。",
+    tasks: ["记录一句梦的线索", "关闭不必要的消息", "回到小屋休息"],
+    isFog: true,
+    isNight: true,
+    isDream: true,
+  },
+  rain: {
+    weather: "小雨",
+    world: "安静恢复",
+    spirit: "雨精灵",
+    energy: 62,
+    create: 84,
+    social: 42,
+    focus: 76,
+    temperature: 20,
+    humidity: 96,
+    windSpeed: 2,
+    resource: "雨水样本",
+    sampleKey: "rainSample",
+    advice: "雨水正在补充河流和根系。适合整理、阅读、采集雨菇，并带一个容器去观察排水。",
+    tasks: ["收集一份雨水样本", "查看河流水位", "在林下寻找雨菇"],
+    isRain: true,
+  },
+  thunder: {
+    weather: "雷雨",
+    world: "能量爆发",
+    spirit: "雷鸣精灵",
+    energy: 48,
+    create: 74,
+    social: 24,
+    focus: 44,
+    temperature: 23,
+    humidity: 98,
+    windSpeed: 7,
+    resource: "雷晶",
+    sampleKey: "thunderCrystal",
+    advice: "道路和高地暂时不安全。进入有遮蔽的空间，等雷声远去后再记录落雷留下的矿物变化。",
+    tasks: ["回到酒馆或小屋", "不要前往高塔", "雨停后检查道路"],
+    isRain: true,
+    isThunder: true,
+    isWind: true,
+  },
+  snow: {
+    weather: "落雪",
+    world: "沉睡保存",
+    spirit: "雪精灵",
+    energy: 36,
+    create: 66,
+    social: 48,
+    focus: 78,
+    temperature: -2,
+    humidity: 82,
+    windSpeed: 2,
+    resource: "雪水",
+    sampleKey: "snowWater",
+    advice: "地表正在休眠，足迹和声音会保留得更久。适合保存档案、检查温室和探索地下根系。",
+    tasks: ["收集一份洁净雪水", "检查幼苗保温", "整理一段冬藏档案"],
+    isSnow: true,
+  },
+  rainbow: {
+    weather: "彩虹",
+    world: "万物共振",
+    spirit: "虹光精灵",
+    energy: 86,
+    create: 92,
+    social: 90,
+    focus: 74,
+    temperature: 22,
+    humidity: 72,
+    windSpeed: 2,
+    resource: "虹光种子",
+    sampleKey: "rainbowSeed",
+    advice: "雨后的光与水短暂共振。世界树、漂流瓶和稀有种子都会回应，适合分享而不是囤积。",
+    tasks: ["去世界树下观察", "把一颗种子送给别人", "记录彩虹持续的时间"],
+    isRainbow: true,
+    isSunny: true,
   },
 };
 
+const weatherPatternCatalog = [
+  ["mist", "sunny", "wind", "sunset", "starry", "dreamFog"],
+  ["rain", "rain", "thunder", "rainbow", "starry", "dreamFog"],
+  ["mist", "sunny", "heat", "sunset", "rain", "dreamFog"],
+  ["mist", "sunny", "wind", "rain", "starry", "dreamFog"],
+];
+
 const locations = [
-  { id: "world-tree", x: 97, y: 52, w: 8, h: 11, kind: "worldTree", title: "世界树花园", text: "这里不是许愿菜单，而是所有花园共享的生命中枢。靠近按 E：种愿望、吹种子、供水，再收获世界记忆果。" },
-  { id: "home", x: 92, y: 62, w: 4, h: 4, kind: "house", title: "你的小屋", text: "回家后，Dead Night 会把今天的钓鱼、交换、拜访和信件整理成 Life Memory。" },
-  { id: "post", x: 106, y: 58, w: 4, h: 4, kind: "post", title: "蒲公英邮局", text: "写信、收信、投递祝福。远方的人不是好友列表，而是会在世界里留下回声。" },
-  { id: "tavern", x: 109, y: 64, w: 6, h: 5, kind: "tavern", title: "种种酒馆", text: "酒馆是世界生命的中转站。探索经历在这里被消化成故事、个人形态和新的世界规则提案。" },
+  { id: "world-tree", x: 97, y: 52, w: 8, h: 11, kind: "worldTree", title: "世界树", text: "古树以年轮保存时间，以根系连接水脉，以蒲公英传播未来。靠近按 E：种愿望、吹种子、供水，再收获世界记忆果。" },
+  { id: "home", x: 77, y: 59, w: 6, h: 6, kind: "house", title: "听风小院", text: "回到院中，蒲公英会把今天的钓鱼、交换、拜访和信件整理成生命记忆。" },
+  { id: "post", x: 106, y: 58, w: 4, h: 4, kind: "post", title: "风信驿", text: "写信、收信、投递祝福。远方的人不是好友列表，而是会在世界里留下回声。" },
+  { id: "tavern", x: 107, y: 57, w: 7, h: 7, kind: "tavern", title: "种种酒馆", text: "酒馆是世界生命的中转站。探索经历在这里被消化成故事、个人形态和新的世界规则提案。" },
   { id: "tree", x: 84, y: 52, w: 3, h: 5, kind: "knowledge", title: "记忆果树", text: "这不是资源点，而是一座地方知识档案馆。按 E 观察、理解并结出知识果实。" },
   { id: "lake", x: 119, y: 71, w: 8, h: 6, kind: "lake", title: "词语鱼塘", text: "按 E 观察词语鱼。鱼不是普通资源，而是携带词、概念、故事和文化的语言生命体。" },
-  { id: "plaza", x: 101, y: 76, w: 5, h: 4, kind: "plaza", title: "蒲公英广场", text: "每日世界事件会在这里落地。节气、天气、地方文化与所有人的行动共同改变广场正在发生的事。" },
-  { id: "memory", x: 90, y: 76, w: 3, h: 3, kind: "stone", title: "记忆石碑", text: "这里保存一天里发生的事情。身体会离开，关系和创造仍会继续生长。" },
+  { id: "plaza", x: 101, y: 76, w: 5, h: 4, kind: "plaza", title: "节气庭", text: "每日世界事件会在这里落地。二十四节气、天气、地方文化与所有人的行动共同改变庭院正在发生的事。" },
+  { id: "memory", x: 90, y: 76, w: 3, h: 3, kind: "stone", title: "万物有灵碑", text: "碑旁的古海床石保存着古老海洋与生命的痕迹；碑身继续记录今天被允许留下的人间故事。" },
   { id: "mirror-garden", x: 68, y: 87, w: 5, h: 4, kind: "healing", title: "镜像花园", text: "两颗被授权的记忆种子可以在这里并排生长。理解不是判决，原谅也不是通关条件。" },
   { id: "dandelion-chapel", x: 105, y: 48, w: 5, h: 4, kind: "chapel", title: "蒲公英礼堂", text: "一座从根系里长出的仪式空间。它记录双方选择共同守护的旅程，不替代现实法律关系。" },
-  { id: "garden", x: 78, y: 66, w: 6, h: 5, kind: "garden", title: "私人花园", text: "花园属于你。谁能看见记忆、关系和 Life Seed，由你授权。" },
+  { id: "goddess-garden", x: 89, y: 46, w: 6, h: 5, kind: "goddessGarden", title: "生命泉", text: "花、水、地、光是自然的四面镜子。这里不出售奇迹：愿望只有经过行动与关系支持，才会成为一颗真正发芽的种子。" },
+  { id: "weather-station", x: 114, y: 50, w: 4, h: 6, kind: "weatherStation", title: "听天观象台", text: "气象站不是天气菜单。木塔、风向仪、水晶天气球与星象盘共同记录天空，玩家在这里学习观察，再决定今天如何生活。" },
+  { id: "garden", x: 78, y: 66, w: 6, h: 5, kind: "garden", title: "百草园", text: "百草园属于你。草木依照节气、水土和照料生长；谁能看见记忆、关系和生命种子，由你授权。" },
   { id: "market", x: 113, y: 83, w: 6, h: 4, kind: "market", title: "种子交换站", text: "这里没有商城货架。两个生命只做一件事：把一件会继续生长的东西交给彼此。" },
   { id: "friend", x: 72, y: 80, w: 5, h: 5, kind: "friend", title: "朋友花园", text: "朋友可以来浇水、留言、赠送物品、合作建造。关系是一棵会长叶子的树。" },
   { id: "living-table", x: 87, y: 61, w: 3, h: 2, kind: "furniture", title: "共同木桌", text: "它记得谁做了它、材料从哪里来，也记得谁曾在桌边坐下、喝茶、吃饭和合影。" },
-  { id: "seed-vault", x: 72, y: 72, w: 4, h: 3, kind: "seedVault", title: "种子库与档案馆", text: "这里保存未来可能性，也保存每颗种子的来处、照料者、旅行与变化。" },
-  { id: "seed-nursery", x: 84, y: 72, w: 5, h: 4, kind: "seedNursery", title: "育苗温室", text: "温度、水、光和土壤共同决定幼苗如何适应；连续点击不会催熟生命。" },
-  { id: "seed-evolution", x: 86, y: 79, w: 4, h: 4, kind: "seedEvolution", title: "生命实验田", text: "这里记录可追溯的培育尝试。失败会进入档案，不会被删除成一次无意义的点击。" },
-  { id: "rural", x: 78, y: 78, w: 7, h: 6, kind: "rural", title: "种子农场 · 生态田", text: "种子农场是世界生命的育婴室。农田、蜜蜂、伴生植物、料理与堆肥在这里完成循环。" },
-  { id: "forest", x: 64, y: 52, w: 7, h: 7, kind: "forest", title: "森林区域", text: "这里可以采集种子、蘑菇、药草和木材。森林不是仓库，是会被照顾或消耗的生态。" },
-  { id: "craft", x: 86, y: 84, w: 4, h: 4, kind: "craft", title: "星愿工作室", text: "把材料做成物品。创造不是合成垃圾，而是把生活痕迹变成可分享的作品。" },
-  { id: "portal", x: 126, y: 55, w: 3, h: 4, kind: "portal", title: "彩虹传送门", text: "当生态、关系和创造都达到条件，新的区域会打开。" },
+  { id: "seed-vault", x: 72, y: 72, w: 4, h: 3, kind: "seedVault", title: "草木书院", text: "书院以种谱、方志和物候档案保存未来可能，也保存每颗种子的来处、照料者、旅行与变化。" },
+  { id: "seed-nursery", x: 84, y: 72, w: 5, h: 4, kind: "seedNursery", title: "育苗暖阁", text: "温度、水、光和土壤共同决定幼苗如何适应；连续点击不会催熟生命。" },
+  { id: "seed-evolution", x: 86, y: 79, w: 4, h: 4, kind: "seedEvolution", title: "百草试田", text: "这里记录可追溯的培育尝试。失败会进入档案，不会被删除成一次无意义的点击。" },
+  { id: "rural", x: 78, y: 78, w: 7, h: 6, kind: "rural", title: "种子农场", text: "种子农场是世界生命的育婴室。农田、蜜蜂、伴生植物、料理与堆肥在这里完成循环。" },
+  { id: "forest", x: 64, y: 52, w: 7, h: 7, kind: "forest", title: "古树森林", text: "这里可以采集种子、蘑菇、药草和木材。森林不是仓库，是会被照顾或消耗的生态。" },
+  { id: "craft", x: 86, y: 84, w: 4, h: 4, kind: "craft", title: "天工坊", text: "把材料、手艺和生活经验做成物品。创造不是合成垃圾，而是让一段手作传承继续被使用。" },
+  { id: "build-site", x: 92, y: 84, w: 6, h: 5, kind: "buildSite", title: "生命建造地", text: "这里从一件家具开始，逐渐长成房间、房屋、庭院与共同聚落。每一层都保留材料、参与者和生活痕迹。" },
+  { id: "portal", x: 126, y: 55, w: 3, h: 4, kind: "portal", title: "风路塔门", text: "当生态、关系和创造形成新的共振，塔门后的山水风路会打开。" },
 ];
 
 const residents = [
@@ -2747,6 +3975,11 @@ const residents = [
 ];
 
 const loadedResidents = [];
+const loadedSceneAssets = {
+  gardenCottage: null,
+  greenhouseTavern: null,
+  worldMap: null,
+};
 
 function resize() {
   canvas.width = window.innerWidth;
@@ -2795,6 +4028,19 @@ function save() {
   localStorage.setItem("dedalionGenesisState", JSON.stringify(genesisState));
   localStorage.setItem("dedalionGenesisComplete", genesisState.complete ? "1" : "0");
   localStorage.setItem("dedalionWorldTreeState", JSON.stringify(worldTreeState));
+  localStorage.setItem("dedalionGoddessGardenState", JSON.stringify({
+    ...goddessGardenState,
+    completedWishes: goddessGardenState.completedWishes.slice(-24),
+    helpSeeds: goddessGardenState.helpSeeds.slice(-24),
+    archive: goddessGardenState.archive.slice(-60),
+  }));
+  localStorage.setItem("dedalionTraceSystemState", JSON.stringify({
+    ...traceSystemState,
+    trail: traceSystemState.trail.slice(-140),
+    events: traceSystemState.events.slice(-240),
+    processes: traceSystemState.processes.slice(-80),
+    capsules: traceSystemState.capsules.slice(-24),
+  }));
   localStorage.setItem("dedalionFederationState", JSON.stringify(federationState));
   localStorage.setItem("dedalionAllianceState", JSON.stringify({
     ...allianceState,
@@ -2807,6 +4053,17 @@ function save() {
     photos: livingSceneState.photos.slice(-10),
     furniture: livingSceneState.furniture.slice(-16),
     worldHistory: livingSceneState.worldHistory.slice(-24),
+  }));
+  localStorage.setItem("dedalionCraftingState", JSON.stringify({
+    ...craftingState,
+    materialLedger: craftingState.materialLedger.slice(-80),
+    structures: craftingState.structures.slice(-32),
+    experiments: craftingState.experiments.slice(-40),
+    history: craftingState.history.slice(-80),
+    publicProject: {
+      ...craftingState.publicProject,
+      contributors: craftingState.publicProject.contributors.slice(-40),
+    },
   }));
   localStorage.setItem("dedalionSlowLifeState", JSON.stringify({
     ...slowLifeState,
@@ -2829,6 +4086,13 @@ function save() {
     dailySeeds: Object.fromEntries(Object.entries(lifeRhythmState.dailySeeds).slice(-60)),
     history: lifeRhythmState.history.slice(-120),
   }));
+  localStorage.setItem("dedalionWeatherObservatoryState", JSON.stringify({
+    ...weatherObservatoryState,
+    observations: weatherObservatoryState.observations.slice(-80),
+    archives: weatherObservatoryState.archives.slice(-80),
+    collectedKeys: weatherObservatoryState.collectedKeys.slice(-120),
+    forecasts: weatherObservatoryState.forecasts.slice(-60),
+  }));
   localStorage.setItem("dedalionFoodLifeState", JSON.stringify({
     ...foodLifeState,
     harvests: foodLifeState.harvests.slice(-20),
@@ -2847,6 +4111,28 @@ function save() {
     traces: lifeGrowthState.traces.slice(-180),
     experienceCards: lifeGrowthState.experienceCards.slice(-48),
     history: lifeGrowthState.history.slice(-80),
+  }));
+  localStorage.setItem("dedalionGrowthGuidanceState", JSON.stringify({
+    ...growthGuidanceState,
+    dailySeeds: Object.fromEntries(Object.entries(growthGuidanceState.dailySeeds).slice(-90)),
+    dormantSeeds: growthGuidanceState.dormantSeeds.slice(-40),
+    sharedExperienceIds: growthGuidanceState.sharedExperienceIds.slice(-80),
+    kindnessSeeds: growthGuidanceState.kindnessSeeds.slice(-80),
+    powerMarks: growthGuidanceState.powerMarks.slice(-100),
+    friendshipBoxes: growthGuidanceState.friendshipBoxes.slice(-30),
+    winterSeeds: growthGuidanceState.winterSeeds.slice(-40),
+    courageTraces: growthGuidanceState.courageTraces.slice(-100),
+    skillPractice: growthGuidanceState.skillPractice.slice(-180),
+    encounters: growthGuidanceState.encounters.slice(-40),
+    friendshipChronicle: {
+      ...growthGuidanceState.friendshipChronicle,
+      celebrations: growthGuidanceState.friendshipChronicle.celebrations.slice(-20),
+    },
+    bondGarden: {
+      ...growthGuidanceState.bondGarden,
+      history: growthGuidanceState.bondGarden.history.slice(-80),
+    },
+    history: growthGuidanceState.history.slice(-120),
   }));
   localStorage.setItem("dedalionGeneratedWorldState", JSON.stringify({
     ...generatedWorldState,
@@ -2871,13 +4157,22 @@ function riverCenter(x) {
   return 70 + Math.sin(x * 0.07) * 7 + Math.sin(x * 0.19) * 3;
 }
 
+function isVillagePath(x, y) {
+  const eastWest = 64 + Math.sin(x * 0.09) * 5;
+  const northSouth = 99 + Math.sin(y * 0.13) * 2;
+  const plazaBranch = y >= 48 && y <= 92 && Math.abs(x - northSouth) < 1.55;
+  const farmBranch = x >= 72 && x <= 99 && Math.abs(y - (79 + Math.sin(x * 0.16) * 2)) < 1.25;
+  const lakeBranch = x >= 99 && x <= 128 && Math.abs(y - (76 + Math.sin(x * 0.12) * 2)) < 1.2;
+  return Math.abs(y - eastWest) < 1.45 || plazaBranch || farmBranch || lakeBranch;
+}
+
 function tileType(x, y) {
   const river = riverCenter(x);
   const waterDistance = Math.abs(y - river);
   if (waterDistance < 1.45) return "deepWater";
   if (waterDistance < 3.2) return "water";
   if (Math.abs(y - river) < 4.2) return "bank";
-  if (Math.abs(y - 64 - Math.sin(x * 0.09) * 6) < 1.1) return "path";
+  if (isVillagePath(x, y)) return "path";
   if (noise(x - 11, y + 17) > 0.92) return "stone";
   if (noise(x + 13, y + 5) > 0.88) return "darkGrass";
   if (noise(x, y) > 0.84) return "flower";
@@ -2914,9 +4209,11 @@ function drawTile(x, y, type) {
 }
 
 function drawWaterDetails(px, py, x, y, type) {
-  ctx.fillStyle = type === "deepWater" ? "rgba(22, 83, 117, 0.45)" : "rgba(158, 243, 239, 0.48)";
-  if ((x + y + Math.floor(state.tick / 12)) % 5 === 0) ctx.fillRect(px + 5, py + 10, 15, 3);
-  if ((x * 3 + y + Math.floor(state.tick / 18)) % 7 === 0) ctx.fillRect(px + 13, py + 22, 12, 3);
+  ctx.fillStyle = type === "deepWater" ? "rgba(22, 67, 83, 0.42)" : "rgba(195, 236, 219, 0.5)";
+  if ((x + y + Math.floor(state.tick / 12)) % 5 === 0) ctx.fillRect(px + 3, py + 9, 17, 2);
+  if ((x * 3 + y + Math.floor(state.tick / 18)) % 7 === 0) ctx.fillRect(px + 13, py + 22, 13, 2);
+  ctx.fillStyle = "rgba(255, 248, 221, 0.22)";
+  if (noise(x + 17, y - 11) > 0.54) ctx.fillRect(px + 20, py + 5, 6, 2);
 
   const neighbors = [
     [0, -1, 0, 0, TILE, 4],
@@ -2935,39 +4232,43 @@ function drawWaterDetails(px, py, x, y, type) {
 
 function drawBankDetails(px, py, x, y) {
   ctx.fillStyle = colors.grassDeep;
-  if (tileType(x, y - 1) !== "water" && tileType(x, y - 1) !== "deepWater") ctx.fillRect(px, py, TILE, 5);
-  if (tileType(x, y + 1) !== "water" && tileType(x, y + 1) !== "deepWater") ctx.fillRect(px, py + TILE - 5, TILE, 5);
+  if (tileType(x, y - 1) !== "water" && tileType(x, y - 1) !== "deepWater") ctx.fillRect(px, py, TILE, 4);
+  if (tileType(x, y + 1) !== "water" && tileType(x, y + 1) !== "deepWater") ctx.fillRect(px, py + TILE - 4, TILE, 4);
   ctx.fillStyle = colors.waterC;
-  if (noise(x, y) > 0.45) ctx.fillRect(px + 8, py + 14, 4, 12);
-  if (noise(x + 5, y - 2) > 0.66) ctx.fillRect(px + 22, py + 9, 3, 15);
+  if (noise(x, y) > 0.45) ctx.fillRect(px + 8, py + 14, 3, 11);
+  if (noise(x + 5, y - 2) > 0.66) ctx.fillRect(px + 22, py + 9, 2, 14);
   ctx.fillStyle = colors.pathDark;
-  if (noise(x - 2, y + 8) > 0.55) ctx.fillRect(px + 4, py + 24, 8, 4);
+  if (noise(x - 2, y + 8) > 0.55) ctx.fillRect(px + 4, py + 24, 9, 3);
 }
 
 function drawPathDetails(px, py, x, y) {
   ctx.fillStyle = colors.pathA;
-  ctx.fillRect(px + 4, py + 22, 8, 4);
-  ctx.fillRect(px + 19, py + 8, 7, 4);
+  ctx.fillRect(px + 2, py + 20, 12, 3);
+  ctx.fillRect(px + 17, py + 7, 11, 3);
   ctx.fillStyle = colors.pathDark;
-  if (noise(x, y) > 0.35) ctx.fillRect(px + 8, py + 15, 4, 3);
-  if (noise(x + 4, y) > 0.5) ctx.fillRect(px + 24, py + 24, 4, 3);
+  if (noise(x, y) > 0.35) ctx.fillRect(px + 7, py + 14, 5, 2);
+  if (noise(x + 4, y) > 0.5) ctx.fillRect(px + 23, py + 25, 5, 2);
+  ctx.fillStyle = "rgba(255, 248, 221, 0.55)";
+  if ((x + y) % 3 === 0) ctx.fillRect(px + 6, py + 4, 12, 2);
   ctx.fillStyle = colors.grassLight;
-  if (tileType(x, y - 1) !== "path") ctx.fillRect(px, py, TILE, 4);
-  if (tileType(x, y + 1) !== "path") ctx.fillRect(px, py + TILE - 4, TILE, 4);
+  if (tileType(x, y - 1) !== "path") ctx.fillRect(px, py, TILE, 3);
+  if (tileType(x, y + 1) !== "path") ctx.fillRect(px, py + TILE - 3, TILE, 3);
 }
 
 function drawGrassTile(px, py, x, y, type) {
   const base = type === "darkGrass" ? colors.grassDeep : (x + y) % 2 ? colors.grassA : colors.grassB;
   ctx.fillStyle = base;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.fillStyle = type === "darkGrass" ? colors.grassC : colors.grassLight;
-  if (noise(x, y) > 0.28) ctx.fillRect(px + 3, py + 3, 9, 5);
-  if (noise(x + 7, y - 2) > 0.32) ctx.fillRect(px + 20, py + 18, 8, 4);
+  ctx.fillStyle = type === "darkGrass" ? "#7fa45d" : colors.grassLight;
+  if (noise(x, y) > 0.28) ctx.fillRect(px + 3, py + 4, 8, 3);
+  if (noise(x + 7, y - 2) > 0.32) ctx.fillRect(px + 20, py + 19, 7, 3);
+  ctx.fillStyle = "rgba(39, 70, 48, 0.28)";
+  if ((x * 3 + y) % 5 === 0) ctx.fillRect(px + 13, py + 26, 11, 2);
   ctx.fillStyle = colors.grassC;
   if (type === "grass" || type === "darkGrass") {
-    ctx.fillRect(px + 6, py + 7, 3, 8);
-    ctx.fillRect(px + 18, py + 16, 3, 9);
-    ctx.fillRect(px + 25, py + 6, 3, 6);
+    ctx.fillRect(px + 6, py + 7, 2, 8);
+    ctx.fillRect(px + 18, py + 16, 2, 9);
+    ctx.fillRect(px + 25, py + 6, 2, 6);
   }
   if (type === "flower") drawTinyFlower(px + 10, py + 8, noise(x, y) > 0.92 ? colors.pink : colors.yellow);
   if (type === "stone") drawTinyStone(px + 8, py + 13);
@@ -3001,10 +4302,117 @@ function drawMushroom(px, py) {
   ctx.fillRect(px + 4, py + 5, 3, 3);
 }
 
+function drawChineseEaves(px, py, width, roofColor = colors.roof) {
+  const safeWidth = Math.max(36, width);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(px - 5, py + 9, safeWidth + 10, 7);
+  ctx.fillRect(px, py + 4, safeWidth, 9);
+  ctx.fillRect(px + 9, py, safeWidth - 18, 7);
+  ctx.fillStyle = roofColor;
+  ctx.fillRect(px - 2, py + 8, safeWidth + 4, 5);
+  ctx.fillRect(px + 4, py + 4, safeWidth - 8, 6);
+  ctx.fillRect(px + 12, py + 1, safeWidth - 24, 5);
+  ctx.fillStyle = colors.roofDark;
+  for (let x = 9; x < safeWidth - 8; x += 12) ctx.fillRect(px + x, py + 4, 3, 8);
+  ctx.fillRect(px + safeWidth / 2 - 11, py - 3, 22, 4);
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(px - 6, py + 7, 5, 5);
+  ctx.fillRect(px + safeWidth + 1, py + 7, 5, 5);
+  ctx.fillRect(px + safeWidth / 2 - 2, py - 5, 4, 4);
+}
+
+function drawGardenCottage(location) {
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const image = loadedSceneAssets.gardenCottage;
+
+  ctx.fillStyle = "rgba(35, 57, 44, 0.25)";
+  ctx.fillRect(screen.x + 8, screen.y + height - 8, width - 16, 12);
+
+  if (image) {
+    const renderHeight = height + 10;
+    const renderWidth = Math.round(renderHeight * (image.naturalWidth / image.naturalHeight));
+    ctx.drawImage(image, screen.x + Math.round((width - renderWidth) / 2), screen.y - 10, renderWidth, renderHeight);
+    return;
+  }
+
+  const centerX = screen.x + width / 2;
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x + 8, screen.y + 56, width - 16, height - 60);
+  ctx.fillStyle = "#f3d9a2";
+  ctx.fillRect(screen.x + 12, screen.y + 60, width - 24, height - 68);
+
+  ctx.fillStyle = "#d49b67";
+  ctx.beginPath();
+  ctx.moveTo(screen.x - 5, screen.y + 64);
+  ctx.lineTo(centerX, screen.y - 8);
+  ctx.lineTo(screen.x + width + 5, screen.y + 64);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#f8e8bd";
+  ctx.beginPath();
+  ctx.moveTo(screen.x + 2, screen.y + 61);
+  ctx.lineTo(centerX, screen.y);
+  ctx.lineTo(screen.x + width - 2, screen.y + 61);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#74a66e";
+  ctx.beginPath();
+  ctx.moveTo(screen.x + 12, screen.y + 58);
+  ctx.lineTo(centerX, screen.y + 7);
+  ctx.lineTo(screen.x + width - 12, screen.y + 58);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#f8e8bd";
+  ctx.beginPath();
+  ctx.moveTo(screen.x + 25, screen.y + 60);
+  ctx.lineTo(centerX, screen.y + 28);
+  ctx.lineTo(screen.x + width - 25, screen.y + 60);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#dfb67d";
+  ctx.fillRect(centerX - 32, screen.y + 55, 64, 5);
+
+  ctx.fillStyle = "#4f6d4e";
+  ctx.fillRect(centerX - 14, screen.y + height - 48, 28, 44);
+  ctx.fillStyle = "#7fbd83";
+  ctx.fillRect(centerX - 10, screen.y + height - 44, 20, 38);
+  ctx.fillStyle = "#f2dfaa";
+  ctx.fillRect(centerX + 4, screen.y + height - 25, 4, 4);
+
+  [screen.x + 22, screen.x + width - 40].forEach((windowX) => {
+    ctx.fillStyle = "#4f6d4e";
+    ctx.fillRect(windowX, screen.y + height - 49, 18, 27);
+    ctx.fillStyle = "#a7d5a5";
+    ctx.fillRect(windowX + 4, screen.y + height - 45, 10, 19);
+    ctx.fillStyle = "#f9e7ac";
+    ctx.fillRect(windowX + 8, screen.y + height - 45, 2, 19);
+    ctx.fillRect(windowX + 4, screen.y + height - 36, 10, 2);
+  });
+
+  ctx.fillStyle = "#4f6d4e";
+  ctx.fillRect(centerX - 9, screen.y + 35, 18, 17);
+  ctx.fillStyle = "#a7d5a5";
+  ctx.fillRect(centerX - 5, screen.y + 39, 10, 9);
+
+  for (let index = 0; index < 7; index += 1) {
+    const flowerX = index < 4 ? screen.x + 5 + index * 8 : screen.x + width - 28 + (index - 4) * 8;
+    const flowerY = screen.y + height - 12 - (index % 2) * 4;
+    ctx.fillStyle = "#477447";
+    ctx.fillRect(flowerX + 3, flowerY, 2, 8);
+    ctx.fillStyle = index % 2 ? colors.pink : colors.yellow;
+    ctx.fillRect(flowerX, flowerY - 4, 8, 6);
+  }
+}
+
 function drawHouse(location) {
   const screen = worldToScreen(location.x, location.y);
   const width = location.w * TILE;
   const height = location.h * TILE;
+  ctx.fillStyle = "rgba(35, 57, 44, 0.24)";
+  ctx.fillRect(screen.x + 6, screen.y + height - 4, width - 12, 10);
   ctx.fillStyle = colors.outline;
   ctx.fillRect(screen.x - 4, screen.y + 26, width + 8, height - 18);
   ctx.fillStyle = colors.wall;
@@ -3013,10 +4421,25 @@ function drawHouse(location) {
   ctx.fillRect(screen.x + 8, screen.y + 8, width - 16, 26);
   ctx.fillStyle = location.kind === "post" ? "#f2b61f" : colors.roofDark;
   ctx.fillRect(screen.x + 18, screen.y, width - 36, 14);
+  drawChineseEaves(screen.x + 7, screen.y + 3, width - 14, location.kind === "post" ? "#b88935" : colors.roof);
+  ctx.fillStyle = "rgba(255, 248, 221, 0.34)";
+  for (let x = 14; x < width - 18; x += 20) ctx.fillRect(screen.x + x, screen.y + 12, 10, 3);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 9, screen.y + 34, 5, height - 34);
+  ctx.fillRect(screen.x + width - 14, screen.y + 34, 5, height - 34);
+  ctx.fillRect(screen.x + 9, screen.y + 70, width - 18, 5);
   ctx.fillStyle = colors.dark;
   ctx.fillRect(screen.x + width / 2 - 9, screen.y + height - 34, 18, 30);
   ctx.fillStyle = colors.waterA;
   ctx.fillRect(screen.x + 18, screen.y + 50, 18, 16);
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(screen.x + 21, screen.y + 53, 12, 4);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 13, screen.y + 68, 28, 5);
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(screen.x + 17, screen.y + 63, 6, 6);
+  ctx.fillStyle = colors.pink;
+  ctx.fillRect(screen.x + 29, screen.y + 62, 6, 6);
 }
 
 function drawLivingFurniture(location) {
@@ -3049,6 +4472,15 @@ function drawTavern(location) {
   const screen = worldToScreen(location.x, location.y);
   const width = location.w * TILE;
   const height = location.h * TILE;
+  const image = loadedSceneAssets.greenhouseTavern;
+  if (image) {
+    const renderHeight = height + 6;
+    const renderWidth = Math.round(renderHeight * (image.naturalWidth / image.naturalHeight));
+    ctx.fillStyle = "rgba(31, 66, 50, 0.18)";
+    ctx.fillRect(screen.x + 18, screen.y + height - 10, width - 36, 12);
+    ctx.drawImage(image, screen.x + Math.round((width - renderWidth) / 2), screen.y - 16, renderWidth, renderHeight);
+    return;
+  }
   const houseWidth = Math.round(width * 0.72);
   const pulse = Math.floor(state.tick / 18) % 2;
   const stories = Math.min(5, tavernState.ledger.length);
@@ -3069,6 +4501,7 @@ function drawTavern(location) {
   ctx.fillRect(screen.x + 14, screen.y + 5, houseWidth - 28, 30);
   ctx.fillStyle = "#b6612d";
   ctx.fillRect(screen.x + 26, screen.y, houseWidth - 52, 16);
+  drawChineseEaves(screen.x + 7, screen.y + 3, houseWidth - 14, colors.roof);
 
   ctx.fillStyle = colors.waterC;
   ctx.fillRect(screen.x + 16, screen.y + 50, 24, 18);
@@ -3088,12 +4521,12 @@ function drawTavern(location) {
   ctx.fillRect(screen.x + 108, screen.y + 102, 4, 13);
 
   ctx.fillStyle = colors.outline;
-  ctx.fillRect(screen.x + houseWidth - 18, screen.y + 42, 34, 32);
+  ctx.fillRect(screen.x + houseWidth - 22, screen.y + 42, 42, 32);
   ctx.fillStyle = colors.yellow;
-  ctx.fillRect(screen.x + houseWidth - 14, screen.y + 46, 26, 24);
+  ctx.fillRect(screen.x + houseWidth - 18, screen.y + 46, 34, 24);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 16px monospace";
-  ctx.fillText("种", screen.x + houseWidth - 9, screen.y + 65);
+  ctx.font = "bold 12px serif";
+  ctx.fillText("种种", screen.x + houseWidth - 14, screen.y + 63);
 
   for (let index = 0; index < stories; index += 1) {
     ctx.fillStyle = index % 2 ? colors.pink : colors.white;
@@ -3188,8 +4621,9 @@ function drawRuralTraining(location) {
   ctx.fillStyle = "rgba(255, 252, 231, 0.9)";
   ctx.fillRect(screen.x + 8, screen.y + 8, 112, 22);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 9px monospace";
-  ctx.fillText(`${season.id.toUpperCase()} · ${ruralCharacterState.plotStage.toUpperCase()}`, screen.x + 14, screen.y + 22);
+  ctx.font = "bold 9px serif";
+  const stageName = { empty: "休田", sown: "播种", growing: "生长", harvest: "收获", resting: "冬藏" }[ruralCharacterState.plotStage] || "顺时而耕";
+  ctx.fillText(`${season.name.split("·")[0].trim()} · ${stageName}`, screen.x + 14, screen.y + 22);
 }
 
 function drawSeedVault(location) {
@@ -3205,6 +4639,7 @@ function drawSeedVault(location) {
   ctx.fillRect(screen.x, screen.y + 12, width, 18);
   ctx.fillStyle = "#3c6f41";
   for (let x = 8; x < width - 8; x += 16) ctx.fillRect(screen.x + x, screen.y + 6 + (x % 3) * 2, 13, 10);
+  drawChineseEaves(screen.x + 2, screen.y + 7, width - 4, colors.roof);
   for (let row = 0; row < 2; row += 1) {
     for (let column = 0; column < 4; column += 1) {
       const drawerX = screen.x + 15 + column * 24;
@@ -3221,8 +4656,8 @@ function drawSeedVault(location) {
   ctx.fillRect(screen.x + width - 27, screen.y + 49, 4, 13);
   ctx.fillRect(screen.x + width - 32, screen.y + 47, 10, 5);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(`VAULT · ${profile.short}`, screen.x + 12, screen.y + height - 8);
+  ctx.font = "bold 8px serif";
+  ctx.fillText(`草木书院 · ${profile.name}`, screen.x + 12, screen.y + height - 8);
 }
 
 function drawSeedNursery(location) {
@@ -3237,6 +4672,7 @@ function drawSeedNursery(location) {
   ctx.fillStyle = "#e8f6d9";
   ctx.fillRect(screen.x + 20, screen.y + 12, width - 40, 18);
   ctx.fillRect(screen.x + 32, screen.y + 4, width - 64, 10);
+  drawChineseEaves(screen.x + 13, screen.y + 4, width - 26, colors.roof);
   ctx.fillStyle = "#5d8767";
   for (let x = 20; x < width - 18; x += 26) ctx.fillRect(screen.x + x, screen.y + 22, 4, height - 34);
   ctx.fillRect(screen.x + 8, screen.y + 54, width - 16, 4);
@@ -3254,8 +4690,9 @@ function drawSeedNursery(location) {
     ctx.fillRect(x + 2, y - 3, 7, 7);
   }
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(`NURSERY · ${nursery.stage.toUpperCase()}`, screen.x + 14, screen.y + height - 7);
+  ctx.font = "bold 8px serif";
+  const nurseryStageName = { empty: "候种", selected: "选种", growing: "育苗", ready: "待移栽" }[nursery.stage] || "生长";
+  ctx.fillText(`育苗暖阁 · ${nurseryStageName}`, screen.x + 14, screen.y + height - 7);
 }
 
 function drawSeedEvolutionGarden(location) {
@@ -3281,8 +4718,8 @@ function drawSeedEvolutionGarden(location) {
   ctx.fillStyle = colors.waterC;
   ctx.fillRect(screen.x + width / 2 - 6, screen.y + 9, 12, 14);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(`EVOLUTION · ${seedFarmState.variants.length}`, screen.x + 9, screen.y + height - 7);
+  ctx.font = "bold 8px serif";
+  ctx.fillText(`百草试田 · ${seedFarmState.variants.length}`, screen.x + 9, screen.y + height - 7);
 }
 
 function drawTree(location) {
@@ -3309,8 +4746,8 @@ function drawTree(location) {
     ctx.fillRect(screen.x + 48, screen.y + 22, 4, 4);
   }
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 10px monospace";
-  ctx.fillText(stage >= 3 ? tree.fruit.slice(0, 4) : "ARCH", screen.x + 22, screen.y + 18);
+  ctx.font = "bold 10px serif";
+  ctx.fillText(stage >= 3 ? tree.fruit.slice(0, 4) : "树档", screen.x + 22, screen.y + 18);
 }
 
 function worldTreeProfile() {
@@ -3404,6 +4841,17 @@ function drawWorldTreeGarden(location) {
     ctx.fillRect(x + 3, y + 3, 5, 5);
   }
 
+  for (let index = 0; index < 7; index += 1) {
+    const x = center - 82 + index * 27;
+    const y = screen.y + 91 + (index % 3) * 9;
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(x + 4, screen.y + 76, 2, y - screen.y - 74);
+    ctx.fillStyle = index % 2 ? "#b75c3c" : "#c99a38";
+    ctx.fillRect(x, y, 10, 16);
+    ctx.fillStyle = colors.yellow;
+    ctx.fillRect(x + 3, y + 4, 4, 4);
+  }
+
   for (let index = 0; index < 24; index += 1) {
     const column = index % 8;
     const row = Math.floor(index / 8);
@@ -3420,18 +4868,134 @@ function drawWorldTreeGarden(location) {
   ctx.fillStyle = "rgba(255, 252, 231, 0.88)";
   ctx.fillRect(screen.x + 54, screen.y + 4, width - 108, 29);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 10px monospace";
-  ctx.fillText(`WORLD TREE · ${profile.stage.short}`, screen.x + 62, screen.y + 16);
+  ctx.font = "bold 10px serif";
+  ctx.fillText(`万年古树 · ${profile.stage.name}`, screen.x + 62, screen.y + 16);
   ctx.fillStyle = colors.waterDeep || colors.waterC;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(`RULE ${rule.short} · ${dandelionStageProfile().short}`, screen.x + 62, screen.y + 27);
+  ctx.font = "bold 8px serif";
+  ctx.fillText(`生命律 ${rule.name} · ${dandelionStageProfile().name}`, screen.x + 62, screen.y + 27);
+}
+
+function drawWeatherStation(location) {
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const weather = currentWeatherProfile();
+  const keeper = weatherKeeperProfile();
+  const sphereColor = weather.isThunder
+    ? colors.purple
+    : weather.isRain
+      ? colors.waterA
+      : weather.isSnow
+        ? colors.white
+        : weather.isRainbow
+          ? colors.pink
+          : weather.isNight
+            ? colors.waterDeep
+            : colors.yellow;
+
+  ctx.fillStyle = "rgba(35, 57, 44, 0.26)";
+  ctx.fillRect(screen.x + 5, screen.y + height - 7, width - 10, 12);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x + 19, screen.y + 78, width - 38, height - 78);
+  ctx.fillStyle = "#b58a52";
+  ctx.fillRect(screen.x + 24, screen.y + 83, width - 48, height - 88);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 30, screen.y + 88, 6, height - 98);
+  ctx.fillRect(screen.x + width - 36, screen.y + 88, 6, height - 98);
+  ctx.fillRect(screen.x + 25, screen.y + 118, width - 50, 6);
+  ctx.fillStyle = colors.waterC;
+  ctx.fillRect(screen.x + 43, screen.y + 101, 18, 16);
+  ctx.fillRect(screen.x + width - 61, screen.y + 101, 18, 16);
+
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x + 8, screen.y + 65, width - 16, 20);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 13, screen.y + 69, width - 26, 12);
+  drawChineseEaves(screen.x + 4, screen.y + 55, width - 8, colors.roof);
+
+  const towerLeft = screen.x + width / 2 - 24;
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(towerLeft - 4, screen.y + 20, 56, 43);
+  ctx.fillStyle = "#c8a46b";
+  ctx.fillRect(towerLeft, screen.y + 24, 48, 35);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(towerLeft + 5, screen.y + 27, 5, 31);
+  ctx.fillRect(towerLeft + 38, screen.y + 27, 5, 31);
+  drawChineseEaves(towerLeft - 8, screen.y + 13, 64, colors.roof);
+
+  const sphereX = screen.x + width / 2;
+  const sphereY = screen.y + 39;
+  ctx.fillStyle = colors.outline;
+  ctx.beginPath();
+  ctx.arc(sphereX, sphereY, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = sphereColor;
+  ctx.beginPath();
+  ctx.arc(sphereX, sphereY, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255, 252, 231, 0.78)";
+  ctx.fillRect(sphereX - 4, sphereY - 6, 5, 5);
+
+  ctx.save();
+  ctx.translate(sphereX, screen.y + 4);
+  ctx.rotate((state.tick / 90) * Math.max(0.25, weather.windSpeed / 4));
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(-3, -27, 6, 54);
+  ctx.fillRect(-27, -3, 54, 6);
+  ctx.fillStyle = "#d6c28a";
+  ctx.fillRect(-5, -30, 10, 17);
+  ctx.fillRect(13, -5, 17, 10);
+  ctx.fillRect(-5, 13, 10, 17);
+  ctx.fillRect(-30, -5, 17, 10);
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(-5, -5, 10, 10);
+  ctx.restore();
+
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 12, screen.y + 128, 30, 5);
+  for (let index = 0; index < 3; index += 1) {
+    const jarX = screen.x + 14 + index * 10;
+    ctx.fillStyle = colors.outline;
+    ctx.fillRect(jarX, screen.y + 135, 8, 19);
+    ctx.fillStyle = index === 0 ? colors.waterA : index === 1 ? colors.white : colors.waterC;
+    ctx.fillRect(jarX + 2, screen.y + 141, 4, 11);
+  }
+
+  const diskX = screen.x + width - 27;
+  const diskY = screen.y + 145;
+  ctx.strokeStyle = colors.outline;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(diskX, diskY, 15, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = colors.yellow;
+  for (let index = 0; index < 5; index += 1) {
+    const angle = (Math.PI * 2 * index) / 5 + state.tick / 600;
+    ctx.fillRect(Math.round(diskX + Math.cos(angle) * 9) - 2, Math.round(diskY + Math.sin(angle) * 9) - 2, 4, 4);
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    const chimeX = screen.x + 47 + index * 10;
+    const sway = Math.round(Math.sin(state.tick / 22 + index) * 2);
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(chimeX, screen.y + 67, 2, 13 + sway);
+    ctx.fillStyle = index % 2 ? colors.yellow : colors.waterC;
+    ctx.fillRect(chimeX - 3 + sway, screen.y + 79 + sway, 8, 8);
+  }
+
+  ctx.fillStyle = "rgba(255, 252, 231, 0.94)";
+  ctx.fillRect(screen.x + 14, screen.y + height - 27, width - 28, 20);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 9px serif";
+  ctx.fillText(`听天观象台 · ${keeper.name}`, screen.x + 20, screen.y + height - 14);
 }
 
 function drawLocation(location) {
   const screen = worldToScreen(location.x, location.y);
   if (screen.x < -240 || screen.y < -240 || screen.x > canvas.width + 240 || screen.y > canvas.height + 240) return;
 
-  if (location.kind === "house" || location.kind === "post") drawHouse(location);
+  if (location.kind === "house") drawGardenCottage(location);
+  if (location.kind === "post") drawHouse(location);
   if (location.kind === "tavern") drawTavern(location);
   if (location.kind === "rural") drawRuralTraining(location);
   if (location.kind === "seedVault") drawSeedVault(location);
@@ -3444,15 +5008,21 @@ function drawLocation(location) {
   if (location.kind === "stone") drawStone(location);
   if (location.kind === "healing") drawHealingGarden(location);
   if (location.kind === "chapel") drawDandelionChapel(location);
+  if (location.kind === "goddessGarden") drawGoddessGarden(location);
+  if (location.kind === "weatherStation") drawWeatherStation(location);
   if (location.kind === "garden") drawGarden(location);
   if (location.kind === "market") drawMarket(location);
   if (location.kind === "friend") drawFriendGarden(location);
   if (location.kind === "furniture") drawLivingFurniture(location);
   if (location.kind === "forest") drawForest(location);
   if (location.kind === "craft") drawCraftStudio(location);
+  if (location.kind === "buildSite") drawLifeBuildSite(location);
   if (location.kind === "portal") drawPortal(location);
   if (location.kind === "generatedRegion") drawGeneratedRegion(location);
+  drawWeatherShelterMarker(location);
+  drawSceneEntranceAnchor(location);
   drawGenesisRouteMarker(location);
+  drawAccumulatedPlaceTrace(location);
 
   if (state.near?.id === location.id) {
     const markerY = location.kind === "worldTree" ? screen.y + location.h * TILE - 78 : screen.y - 12;
@@ -3525,8 +5095,8 @@ function drawGeneratedRegion(location) {
   ctx.fillStyle = "rgba(255, 252, 231, 0.92)";
   ctx.fillRect(screen.x, screen.y - 19, labelWidth, 16);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(`${profile.mark} · ${profile.stageProfile.short}`, screen.x + 5, screen.y - 8);
+  ctx.font = "bold 8px serif";
+  ctx.fillText(`${profile.name} · ${profile.stageProfile.name}`, screen.x + 5, screen.y - 8);
 }
 
 function drawGenesisRouteMarker(location) {
@@ -3563,35 +5133,126 @@ function drawWordFish(x, y, fish) {
   const px = Math.round(x + swim);
   const py = Math.round(y + bob);
   const stage = wordFishProgress[fish.id] || 0;
+  const grams = wordFishWeight(fish);
+  const bodyWidth = Math.round(Math.max(34, Math.min(68, grams / 3)));
+  const rootIndex = Math.max(0, fish.word.toLowerCase().indexOf(fish.root.toLowerCase()));
+  const rootX = Math.round(px + 5 + (rootIndex / fish.word.length) * (bodyWidth - 10));
+  const rootWidth = Math.max(5, Math.round((fish.root.length / fish.word.length) * (bodyWidth - 10)));
 
-  ctx.fillStyle = "rgba(255, 252, 231, 0.78)";
-  ctx.fillRect(px, py, 32, 14);
-  ctx.fillRect(px + 26, py + 4, 12, 6);
+  ctx.fillStyle = "rgba(255, 252, 231, 0.82)";
+  ctx.fillRect(px, py, bodyWidth, 16);
+  ctx.fillRect(px + bodyWidth - 2, py + 4, 12, 8);
+  ctx.fillStyle = "rgba(230, 187, 63, 0.86)";
+  ctx.fillRect(rootX, py + 3, Math.min(rootWidth, bodyWidth - (rootX - px) - 3), 10);
   ctx.fillStyle = colors.waterC;
   ctx.fillRect(px + 6, py + 4, 5, 5);
   ctx.fillStyle = colors.dark;
   ctx.font = "bold 11px monospace";
-  ctx.fillText(stage >= 2 ? fish.word.slice(0, 5) : "???", px - 2, py - 8);
+  const label = stage >= 2 ? fish.word : stage === 1 ? fish.root : "?";
+  ctx.fillText(`${label} · ${grams}g`, px - 2, py - 8);
 }
 
 function drawPlaza(location) {
   const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
   ctx.fillStyle = colors.outline;
-  ctx.fillRect(screen.x - 4, screen.y - 4, location.w * TILE + 8, location.h * TILE + 8);
-  ctx.fillStyle = colors.pathB;
-  ctx.fillRect(screen.x, screen.y, location.w * TILE, location.h * TILE);
+  ctx.fillRect(screen.x - 4, screen.y - 4, width + 8, height + 8);
+  ctx.fillStyle = "#c8bd92";
+  ctx.fillRect(screen.x, screen.y, width, height);
+
+  ctx.strokeStyle = "#a89c75";
+  ctx.lineWidth = 2;
+  for (let x = 12; x < width; x += 24) {
+    ctx.beginPath();
+    ctx.moveTo(screen.x + x, screen.y);
+    ctx.lineTo(screen.x + x - 12, screen.y + height);
+    ctx.stroke();
+  }
+  for (let y = 18; y < height; y += 18) {
+    ctx.beginPath();
+    ctx.moveTo(screen.x, screen.y + y);
+    ctx.lineTo(screen.x + width, screen.y + y);
+    ctx.stroke();
+  }
+
+  const centerX = screen.x + width / 2;
+  const centerY = screen.y + height / 2 + 4;
+  ctx.fillStyle = colors.outline;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 23, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#9d7742";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = colors.yellow;
-  ctx.fillRect(screen.x + 48, screen.y + 34, 24, 24);
+  ctx.fillRect(centerX - 2, centerY - 13, 4, 19);
+  ctx.fillStyle = "#f3d681";
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - 10);
+  ctx.lineTo(centerX + 13, centerY + 8);
+  ctx.lineTo(centerX, centerY + 5);
+  ctx.closePath();
+  ctx.fill();
+
+  const seasonMarks = [
+    ["春", 13, 16],
+    ["夏", width - 26, 16],
+    ["秋", width - 26, height - 9],
+    ["冬", 13, height - 9],
+  ];
+  ctx.font = "bold 9px serif";
+  seasonMarks.forEach(([mark, x, y]) => {
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(screen.x + x - 4, screen.y + y - 11, 18, 16);
+    ctx.fillStyle = colors.cream;
+    ctx.fillText(mark, screen.x + x + 1, screen.y + y);
+  });
+
+  ctx.fillStyle = "rgba(255, 252, 231, 0.92)";
+  ctx.fillRect(screen.x + width / 2 - 28, screen.y + 5, 56, 16);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 9px serif";
+  ctx.fillText("节气庭", screen.x + width / 2 - 19, screen.y + 16);
 }
 
 function drawStone(location) {
   const screen = worldToScreen(location.x, location.y);
+  const record = natureKnowledgeRecord("ancient-seabed").record;
+  ctx.fillStyle = "rgba(35, 57, 44, 0.24)";
+  ctx.fillRect(screen.x + 8, screen.y + 72, 80, 10);
   ctx.fillStyle = colors.outline;
-  ctx.fillRect(screen.x + 24, screen.y + 24, 52, 54);
-  ctx.fillStyle = "#a9c5b7";
-  ctx.fillRect(screen.x + 30, screen.y + 18, 40, 58);
-  ctx.fillStyle = colors.waterA;
-  ctx.fillRect(screen.x + 42, screen.y + 38, 16, 5);
+  ctx.fillRect(screen.x + 42, screen.y + 12, 40, 67);
+  ctx.fillStyle = "#a6ab91";
+  ctx.fillRect(screen.x + 47, screen.y + 8, 30, 66);
+  ctx.fillStyle = "#d0c79e";
+  ctx.fillRect(screen.x + 51, screen.y + 12, 22, 56);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 10px serif";
+  ["万", "物", "有", "灵"].forEach((character, index) => {
+    ctx.fillText(character, screen.x + 57, screen.y + 24 + index * 12);
+  });
+
+  const fossilX = screen.x + 17;
+  const fossilY = screen.y + 53;
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(fossilX - 9, fossilY + 12, 31, 8);
+  ctx.fillStyle = "#8f876e";
+  ctx.beginPath();
+  ctx.arc(fossilX + 5, fossilY, 16, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = record.stage >= 2 ? colors.yellow : "#d4c89f";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(fossilX + 5, fossilY, 11, 0.25, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(fossilX + 5, fossilY, 6, 0.4, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(fossilX + 3, fossilY - 2, 4, 4);
 }
 
 function drawHealingGarden(location) {
@@ -3623,8 +5284,8 @@ function drawHealingGarden(location) {
   ctx.fillStyle = "rgba(255, 252, 231, 0.9)";
   ctx.fillRect(screen.x + 34, screen.y + 6, width - 68, 18);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 9px monospace";
-  ctx.fillText(healing.paused ? "MIRROR · REST" : "MIRROR · CONSENT", screen.x + 42, screen.y + 18);
+  ctx.font = "bold 9px serif";
+  ctx.fillText(healing.paused ? "镜庭 · 暂歇" : "镜庭 · 自愿", screen.x + 42, screen.y + 18);
 }
 
 function drawDandelionChapel(location) {
@@ -3640,6 +5301,7 @@ function drawDandelionChapel(location) {
   ctx.fillRect(screen.x + 26, screen.y + 8, 10, height - 18);
   ctx.fillRect(screen.x + width - 36, screen.y + 8, 10, height - 18);
   ctx.fillRect(screen.x + 26, screen.y + 8, width - 52, 10);
+  drawChineseEaves(screen.x + 17, screen.y + 8, width - 34, colors.roof);
   ctx.fillStyle = colors.white;
   for (let index = 0; index < 7; index += 1) {
     const px = screen.x + 24 + index * 17;
@@ -3654,22 +5316,134 @@ function drawDandelionChapel(location) {
   ctx.fillStyle = ceremony.completed ? colors.yellow : colors.pink;
   ctx.fillRect(screen.x + width / 2 - 14, screen.y + 46, 28, 20);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(ceremony.completed ? "ROOTED" : "TWO YES", screen.x + width / 2 - 20, screen.y + 61);
+  ctx.font = "bold 9px serif";
+  ctx.fillText(ceremony.completed ? "同根" : "双生", screen.x + width / 2 - 9, screen.y + 61);
+}
+
+function drawGoddessGarden(location) {
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const spring = goddessGardenState.spring;
+  const active = goddessGardenState.activeWish;
+  const shrinePoints = [
+    { id: "flower", x: 34, y: 42 },
+    { id: "water", x: width - 50, y: 42 },
+    { id: "earth", x: 34, y: height - 48 },
+    { id: "light", x: width - 50, y: height - 48 },
+  ];
+
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x - 4, screen.y - 4, width + 8, height + 8);
+  ctx.fillStyle = "#789a62";
+  ctx.fillRect(screen.x, screen.y, width, height);
+  ctx.fillStyle = colors.pathB;
+  ctx.fillRect(screen.x + width / 2 - 11, screen.y + 12, 22, height - 20);
+  ctx.fillRect(screen.x + 16, screen.y + height / 2 - 10, width - 32, 20);
+  ctx.fillStyle = colors.pathDark;
+  for (let index = 0; index < 8; index += 1) {
+    ctx.fillRect(screen.x + width / 2 - 8 + (index % 2) * 9, screen.y + 22 + index * 16, 5, 5);
+  }
+
+  drawChineseEaves(screen.x + width / 2 - 42, screen.y + 2, 84, "#698b72");
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + width / 2 - 34, screen.y + 17, 5, 25);
+  ctx.fillRect(screen.x + width / 2 + 29, screen.y + 17, 5, 25);
+
+  shrinePoints.forEach((point) => {
+    const aspect = goddessAspects[point.id];
+    const selected = point.id === goddessGardenState.selectedAspectId;
+    ctx.fillStyle = colors.outline;
+    ctx.fillRect(screen.x + point.x - 5, screen.y + point.y - 5, 26, 26);
+    ctx.fillStyle = selected ? colors.white : aspect.color;
+    ctx.fillRect(screen.x + point.x, screen.y + point.y, 16, 16);
+    ctx.fillStyle = selected ? aspect.color : colors.dark;
+    ctx.font = "bold 11px serif";
+    ctx.fillText(aspect.symbol, screen.x + point.x + 3, screen.y + point.y + 12);
+  });
+
+  const springX = screen.x + width / 2;
+  const springY = screen.y + height / 2;
+  ctx.fillStyle = colors.outline;
+  ctx.beginPath();
+  ctx.arc(springX, springY, 27, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = spring.water > 0 ? colors.waterC : colors.waterA;
+  ctx.beginPath();
+  ctx.arc(springX, springY, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255, 248, 221, 0.82)";
+  ctx.fillRect(springX - 6, springY - 10, 7, 5);
+  for (let index = 0; index < Math.min(9, spring.community + goddessGardenState.blessing); index += 1) {
+    const angle = (Math.PI * 2 * index) / 9 + state.tick / 160;
+    ctx.fillStyle = index % 2 ? colors.yellow : colors.white;
+    ctx.fillRect(
+      Math.round(springX + Math.cos(angle) * 34) - 2,
+      Math.round(springY + Math.sin(angle) * 29) - 2,
+      5,
+      5,
+    );
+  }
+
+  if (active) {
+    const bloom = active.status === "complete";
+    ctx.fillStyle = colors.grassDeep;
+    ctx.fillRect(springX - 2, springY + 28, 4, 28);
+    ctx.fillStyle = bloom ? goddessAspects[active.aspectId].color : colors.white;
+    ctx.fillRect(springX - (bloom ? 9 : 5), springY + 22, bloom ? 18 : 10, bloom ? 12 : 8);
+  }
+
+  ctx.fillStyle = "rgba(255, 252, 231, 0.93)";
+  ctx.fillRect(screen.x + 24, screen.y + height - 24, width - 48, 18);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 9px serif";
+  ctx.fillText("四象生命仪庭 · 愿望须经行动生根", screen.x + 32, screen.y + height - 12);
 }
 
 function drawGarden(location) {
   const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
   const growth = lifeGrowthProfile();
   const stage = growth.garden.stage;
+  const weather = currentWeatherProfile();
+  const bloomSize = weather.isSnow ? 4 : weather.isNight ? 6 : weather.isSunny || weather.isRainbow ? 12 : 9;
+  const bloomColor = weather.isNight ? colors.waterC : weather.isRainbow ? colors.pink : weather.isSnow ? colors.white : colors.yellow;
+  const bloomOffset = Math.floor((TILE - bloomSize) / 2);
   ctx.fillStyle = "#4faa3f";
   ctx.fillRect(screen.x, screen.y, location.w * TILE, location.h * TILE);
-  ctx.fillStyle = colors.yellow;
+  ctx.fillStyle = bloomColor;
   for (let y = 0; y < location.h; y += 1) {
     for (let x = 0; x < location.w; x += 1) {
-      if ((x + y) % 2 === 0) ctx.fillRect(screen.x + x * TILE + 10, screen.y + y * TILE + 10, 10, 10);
+      if ((x + y) % 2 === 0) {
+        ctx.fillRect(
+          screen.x + x * TILE + bloomOffset,
+          screen.y + y * TILE + bloomOffset,
+          bloomSize,
+          bloomSize,
+        );
+      }
     }
   }
+  if (weather.isRain) {
+    ctx.fillStyle = "rgba(166, 222, 218, 0.72)";
+    for (let index = 0; index < 8; index += 1) {
+      ctx.fillRect(screen.x + 13 + index * 21, screen.y + 24 + (index % 3) * 31, 5, 5);
+    }
+  }
+  const herbSigns = [
+    ["桂", 18, 24],
+    ["茶", 64, 52],
+    ["莲", 29, 110],
+  ];
+  herbSigns.forEach(([label, x, y]) => {
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(screen.x + x + 8, screen.y + y + 12, 3, 16);
+    ctx.fillStyle = "#d2b478";
+    ctx.fillRect(screen.x + x, screen.y + y, 19, 15);
+    ctx.fillStyle = colors.dark;
+    ctx.font = "bold 9px serif";
+    ctx.fillText(label, screen.x + x + 5, screen.y + y + 11);
+  });
   if (stage >= 1) {
     ctx.fillStyle = colors.pathB;
     ctx.fillRect(screen.x + 76, screen.y + 6, 18, location.h * TILE - 12);
@@ -3707,10 +5481,10 @@ function drawGarden(location) {
     ctx.fillRect(screen.x + 94, screen.y + 108, 10, 10);
   }
   ctx.fillStyle = "rgba(255, 252, 231, 0.88)";
-  ctx.fillRect(screen.x + 8, screen.y + 8, 82, 16);
+  ctx.fillRect(screen.x + 8, screen.y + 8, 68, 16);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 8px monospace";
-  ctx.fillText(growth.garden.short, screen.x + 13, screen.y + 19);
+  ctx.font = "bold 9px serif";
+  ctx.fillText("百草园", screen.x + 20, screen.y + 19);
 }
 
 function drawMarket(location) {
@@ -3794,34 +5568,141 @@ function drawForest(location) {
 
 function drawCraftStudio(location) {
   const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  ctx.fillStyle = "rgba(35, 57, 44, 0.24)";
+  ctx.fillRect(screen.x + 6, screen.y + height - 3, width - 12, 10);
   ctx.fillStyle = colors.outline;
-  ctx.fillRect(screen.x - 4, screen.y + 18, location.w * TILE + 8, location.h * TILE - 10);
-  ctx.fillStyle = "#efe4a1";
-  ctx.fillRect(screen.x, screen.y + 22, location.w * TILE, location.h * TILE - 18);
-  ctx.fillStyle = colors.purple;
-  ctx.fillRect(screen.x + 10, screen.y, location.w * TILE - 20, 28);
+  ctx.fillRect(screen.x - 4, screen.y + 18, width + 8, height - 10);
+  ctx.fillStyle = colors.wall;
+  ctx.fillRect(screen.x, screen.y + 22, width, height - 18);
+  ctx.fillStyle = colors.roofDark;
+  ctx.fillRect(screen.x + 4, screen.y + 7, width - 8, 24);
+  ctx.fillStyle = colors.roof;
+  ctx.fillRect(screen.x + 14, screen.y, width - 28, 19);
+  drawChineseEaves(screen.x + 4, screen.y + 3, width - 8, colors.roof);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 11, screen.y + 32, 5, height - 36);
+  ctx.fillRect(screen.x + width - 16, screen.y + 32, 5, height - 36);
+  ctx.fillRect(screen.x + 11, screen.y + 61, width - 22, 5);
   ctx.fillStyle = colors.yellow;
-  ctx.fillRect(screen.x + 50, screen.y + 46, 22, 22);
+  ctx.fillRect(screen.x + width / 2 - 14, screen.y + 39, 28, 23);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 9px serif";
+  ctx.fillText("天工", screen.x + width / 2 - 10, screen.y + 54);
   ctx.fillStyle = colors.waterA;
   ctx.fillRect(screen.x + 18, screen.y + 58, 18, 10);
+  ctx.fillRect(screen.x + width - 36, screen.y + 58, 18, 10);
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(screen.x + 21, screen.y + 61, 12, 3);
+  ctx.fillRect(screen.x + width - 33, screen.y + 61, 12, 3);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 20, screen.y + height - 28, width - 40, 6);
+  ctx.fillRect(screen.x + 24, screen.y + height - 22, 5, 18);
+  ctx.fillRect(screen.x + width - 29, screen.y + height - 22, 5, 18);
+}
+
+function drawLifeBuildSite(location) {
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const profile = lifeBuildingProfile();
+  const tier = profile.stage.tier;
+
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x - 4, screen.y + height - 27, width + 8, 23);
+  ctx.fillStyle = tier >= 4 ? "#5c9f4e" : "#98704a";
+  ctx.fillRect(screen.x, screen.y + height - 23, width, 15);
+
+  for (let index = 0; index < 7; index += 1) {
+    const x = screen.x + 12 + index * 25;
+    ctx.fillStyle = tier >= 4 && index % 2 ? colors.yellow : "#b89260";
+    ctx.fillRect(x, screen.y + height - 34 - (index % 2) * 4, 8, 8);
+    if (tier >= 4) {
+      ctx.fillStyle = colors.grassDeep;
+      ctx.fillRect(x + 3, screen.y + height - 26, 2, 7);
+    }
+  }
+
+  if (tier === 0) {
+    ctx.fillStyle = "#d1b77a";
+    ctx.fillRect(screen.x + 28, screen.y + height - 52, width - 56, 5);
+    for (let index = 0; index < 4; index += 1) {
+      ctx.fillStyle = colors.white;
+      ctx.fillRect(screen.x + 31 + index * 39, screen.y + height - 57, 4, 10);
+    }
+  } else if (tier === 1) {
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(screen.x + width / 2 - 25, screen.y + height - 59, 50, 7);
+    ctx.fillRect(screen.x + width / 2 - 20, screen.y + height - 52, 5, 22);
+    ctx.fillRect(screen.x + width / 2 + 15, screen.y + height - 52, 5, 22);
+  } else {
+    const buildingWidth = Math.min(width - 24, 68 + tier * 15);
+    const buildingHeight = Math.min(height - 35, 43 + tier * 11);
+    const left = screen.x + Math.floor((width - buildingWidth) / 2);
+    const top = screen.y + height - buildingHeight - 24;
+    ctx.fillStyle = colors.outline;
+    ctx.fillRect(left - 4, top - 4, buildingWidth + 8, buildingHeight + 8);
+    ctx.fillStyle = tier >= 5 ? "#d4e6a2" : "#efe4a1";
+    ctx.fillRect(left, top, buildingWidth, buildingHeight);
+    ctx.fillStyle = tier >= 6 ? colors.purple : tier >= 4 ? colors.grassDeep : colors.trunk;
+    ctx.fillRect(left - 8, top - 12, buildingWidth + 16, 16);
+    ctx.fillStyle = colors.waterA;
+    const windows = Math.min(5, tier);
+    for (let index = 0; index < windows; index += 1) {
+      ctx.fillRect(left + 12 + index * Math.max(15, Math.floor((buildingWidth - 24) / windows)), top + 18, 9, 12);
+    }
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(left + Math.floor(buildingWidth / 2) - 6, top + buildingHeight - 22, 12, 22);
+    if (tier >= 5) {
+      ctx.fillStyle = colors.yellow;
+      ctx.fillRect(left + 10, top - 26, 6, 15);
+      ctx.fillRect(left + 2, top - 22, 22, 5);
+    }
+    if (tier >= 7) {
+      ctx.fillStyle = colors.white;
+      for (let index = 0; index < 5; index += 1) {
+        ctx.fillRect(left + 18 + index * 22, top - 32 - (index % 2) * 6, 5, 5);
+      }
+    }
+  }
+
+  ctx.fillStyle = "rgba(255, 252, 231, 0.92)";
+  ctx.fillRect(screen.x + 8, screen.y + 5, Math.min(width - 16, 154), 25);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 8px serif";
+  ctx.fillText(`生命营造 · ${profile.stage.name}`, screen.x + 14, screen.y + 16);
+  ctx.fillStyle = colors.waterDeep || colors.waterC;
+  ctx.fillText(`${profile.structures.length} 段建造档 · ${profile.profession.name}`, screen.x + 14, screen.y + 26);
 }
 
 function drawPortal(location) {
   const screen = worldToScreen(location.x, location.y);
   const unlocked = state.area > 1;
+  const width = location.w * TILE;
   ctx.fillStyle = colors.outline;
-  ctx.fillRect(screen.x + 16, screen.y + 14, 64, 96);
-  ctx.fillStyle = unlocked ? colors.waterA : "#698172";
-  ctx.fillRect(screen.x + 24, screen.y + 22, 48, 80);
+  ctx.fillRect(screen.x + 17, screen.y + 20, 62, 94);
+  ctx.fillStyle = "#aaad95";
+  ctx.fillRect(screen.x + 23, screen.y + 26, 50, 84);
+  ctx.fillStyle = unlocked ? colors.waterA : "#60796d";
+  ctx.fillRect(screen.x + 31, screen.y + 39, 34, 71);
+  drawChineseEaves(screen.x + 8, screen.y + 12, width - 16, colors.roof);
   if (unlocked) {
-    ["#ffd92f", "#f3a2c8", "#8d7bd6", "#4ecbd2"].forEach((color, index) => {
-      ctx.fillStyle = color;
-      ctx.fillRect(screen.x + 28 + index * 10, screen.y + 26 + index * 6, 8, 66 - index * 8);
-    });
+    ctx.fillStyle = colors.white;
+    ctx.fillRect(screen.x + 39, screen.y + 44, 5, 60);
+    ctx.fillStyle = colors.yellow;
+    ctx.fillRect(screen.x + 53, screen.y + 50, 5, 52);
+    ctx.fillStyle = colors.pink;
+    ctx.fillRect(screen.x + 32, screen.y + 68, 32, 5);
   } else {
     ctx.fillStyle = colors.dark;
     ctx.fillRect(screen.x + 42, screen.y + 54, 12, 16);
   }
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 30, screen.y + 27, 36, 13);
+  ctx.fillStyle = colors.yellow;
+  ctx.font = "bold 9px serif";
+  ctx.fillText("风路", screen.x + 39, screen.y + 37);
 }
 
 function drawInteractMarker(x, y) {
@@ -3834,20 +5715,206 @@ function drawInteractMarker(x, y) {
   ctx.fillText("E", x - 3, y - 3);
 }
 
+const sceneEntranceAnchorIds = new Set([
+  "home",
+  "post",
+  "tavern",
+  "weather-station",
+  "garden",
+  "rural",
+  "forest",
+  "craft",
+  "portal",
+]);
+
+function activeSceneEntranceIds() {
+  if (!isPixelWorldSurface()) return new Set();
+  return new Set(
+    locations
+      .filter((location) => sceneEntranceAnchorIds.has(location.id))
+      .map((location) => ({
+        id: location.id,
+        distance: Math.hypot(state.x - (location.x + location.w / 2), state.y - (location.y + location.h / 2)),
+      }))
+      .filter((item) => item.distance < 19)
+      .sort((left, right) => left.distance - right.distance)
+      .slice(0, 4)
+      .map((item) => item.id),
+  );
+}
+
+function drawSceneEntranceAnchor(location) {
+  if (!activeSceneEntranceIds().has(location.id) || state.near?.id === location.id) return;
+  const screen = worldToScreen(location.x, location.y);
+  const centerX = Math.round(screen.x + location.w * TILE / 2);
+  const topY = Math.round(screen.y - 15);
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  ctx.fillStyle = "rgba(255, 248, 221, 0.9)";
+  ctx.fillRect(centerX - 12, topY - 11, 24, 23);
+  ctx.fillStyle = "#6e654b";
+  ctx.fillRect(centerX - 10, topY - 9, 20, 4);
+  ctx.fillRect(centerX - 9, topY - 5, 4, 15);
+  ctx.fillRect(centerX + 5, topY - 5, 4, 15);
+  ctx.fillRect(centerX - 9, topY + 7, 18, 4);
+  ctx.fillStyle = location.id === "weather-station" ? colors.waterC : location.id === "portal" ? colors.purple : colors.yellow;
+  ctx.fillRect(centerX - 3, topY - 2, 6, 9);
+  ctx.restore();
+}
+
+function residentWeatherBehavior(resident, index) {
+  const weather = currentWeatherProfile();
+  if (resident.id === "cloudy") {
+    return {
+      route: [[116, 55], [117, 54], [115, 56], [116, 53]],
+      hidden: false,
+      shelterId: "weather-station",
+      reason: "云云正在观象台记录天空",
+    };
+  }
+
+  if (weather.isThunder || weather.isRain || weather.isSnow) {
+    const shelterId = resident.farmRole ? "seed-nursery" : resident.id === "star" ? "home" : "tavern";
+    const shelterRoutes = {
+      "seed-nursery": [[86, 75], [87, 74], [85, 75]],
+      home: [[94, 65], [93, 65], [94, 64]],
+      tavern: [[111, 67], [110, 67], [112, 66]],
+    };
+    return {
+      route: shelterRoutes[shelterId],
+      hidden: true,
+      shelterId,
+      reason: weather.isThunder
+        ? "雷雨里，精灵先躲进有灯的屋檐"
+        : weather.isSnow
+          ? "落雪时，精灵回到暖屋保存体力"
+          : "下雨时，精灵在屋里听水声",
+    };
+  }
+
+  if (weather.isHeat) {
+    return {
+      route: [[95 + (index % 3), 63], [97 + (index % 2), 64], [94 + (index % 4), 62]],
+      hidden: false,
+      shelterId: "world-tree",
+      reason: "热浪里，精灵移动到树荫和水边",
+    };
+  }
+
+  if (weather.period.id === "dusk") {
+    return {
+      route: [[102 + (index % 3), 78], [104 + (index % 2), 79], [101 + (index % 4), 77]],
+      hidden: false,
+      shelterId: null,
+      reason: "晚霞时，精灵来到节气庭相遇",
+    };
+  }
+
+  if (weather.isNight) {
+    return {
+      route: resident.id === "star"
+        ? [[103, 57], [105, 56], [102, 59]]
+        : [[94 + (index % 3), 64], [96 + (index % 2), 65], [93 + (index % 4), 63]],
+      hidden: false,
+      shelterId: resident.id === "star" ? "world-tree" : "home",
+      reason: "夜里，精灵靠近灯火与月光植物",
+    };
+  }
+
+  return {
+    route: resident.route,
+    hidden: false,
+    shelterId: null,
+    reason: "天气温和，精灵在世界里继续生活",
+  };
+}
+
+function residentIsSheltered(resident, index = residents.indexOf(resident)) {
+  return residentWeatherBehavior(resident, Math.max(0, index)).hidden;
+}
+
+function worldSpiritShelterProfile() {
+  const sheltered = residents
+    .map((resident, index) => ({ resident, ...residentWeatherBehavior(resident, index) }))
+    .filter((item) => item.hidden);
+  return {
+    sheltered,
+    count: sheltered.length,
+    shelterNames: [...new Set(sheltered.map((item) => locations.find((location) => location.id === item.shelterId)?.title).filter(Boolean))],
+  };
+}
+
+function drawWeatherShelterMarker(location) {
+  const sheltered = residents
+    .map((resident, index) => ({ resident, ...residentWeatherBehavior(resident, index) }))
+    .filter((item) => item.hidden && item.shelterId === location.id);
+  if (!sheltered.length) return;
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const markerX = Math.round(screen.x + width - 28);
+  const markerY = Math.round(screen.y + height - 28);
+  ctx.fillStyle = "rgba(255, 248, 221, 0.88)";
+  ctx.fillRect(markerX - 12, markerY - 9, 29, 18);
+  ctx.fillStyle = "#786247";
+  ctx.fillRect(markerX - 9, markerY - 6, 23, 3);
+  for (let index = 0; index < Math.min(4, sheltered.length); index += 1) {
+    ctx.fillStyle = index % 2 ? colors.yellow : colors.waterC;
+    ctx.fillRect(markerX - 6 + index * 6, markerY, 4, 5);
+  }
+}
+
+function activeNpcHotspotIds() {
+  if (!isPixelWorldSurface()) return new Set();
+  return new Set(
+    residents
+      .map((resident, index) => ({
+        id: resident.id,
+        hidden: residentIsSheltered(resident, index),
+        distance: Math.hypot(state.x - resident.x, state.y - resident.y),
+      }))
+      .filter((item) => !item.hidden && item.distance < 9)
+      .sort((left, right) => left.distance - right.distance)
+      .slice(0, 2)
+      .map((item) => item.id),
+  );
+}
+
+function drawNpcHotspot(screen, resident) {
+  if (!activeNpcHotspotIds().has(resident.id) || state.near?.id === resident.id) return;
+  const pulse = Math.floor(state.tick / 24) % 2;
+  ctx.save();
+  ctx.globalAlpha = pulse ? 0.74 : 0.92;
+  ctx.strokeStyle = "#8073a0";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(screen.x + 6, screen.y - 35, 9, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(screen.x + 3, screen.y - 39, 6, 6);
+  ctx.fillStyle = colors.purple;
+  ctx.fillRect(screen.x + 5, screen.y - 37, 2, 2);
+  ctx.restore();
+}
+
 function drawResidents() {
   const balance = lifeBalanceProfile();
   const ease = balance.phase === "strained" ? 0.01 : 0.015;
   const bobScale = balance.dominant.id === "body" && balance.dominant.level >= 3 ? 0.45 : 1;
-  residents.forEach((resident) => {
-    const target = resident.route[Math.floor(state.tick / 150) % resident.route.length];
+  residents.forEach((resident, index) => {
+    const behavior = residentWeatherBehavior(resident, index);
+    const activeRoute = behavior.route;
+    const target = activeRoute[Math.floor(state.tick / 150) % activeRoute.length];
     resident.x += (target[0] - resident.x) * ease;
     resident.y += (target[1] - resident.y) * ease;
+    if (behavior.hidden) return;
     const screen = worldToScreen(resident.x, resident.y);
     const image = loadedResidents.find((item) => item.id === resident.id)?.image;
     if (!image) return;
     const bob = Math.sin(state.tick / 18 + resident.x) * 3 * bobScale;
     drawSpiritParticles(screen.x, screen.y - 50 + bob, resident.id);
     ctx.drawImage(image, screen.x - 30, screen.y - 66 + bob, 72, 72);
+    drawNpcHotspot(screen, resident);
     if (state.near?.id === resident.id) drawInteractMarker(screen.x, screen.y - 52);
   });
 }
@@ -3868,13 +5935,13 @@ function drawDandelionProtocol() {
   const labelWidth = Math.min(154, canvas.width - 24);
   const labelX = Math.max(12, Math.min(x + 18, canvas.width - labelWidth - 12));
   const label = canvas.width < 520
-    ? `${stage.short} · ${today.term.name}`
+    ? `${stage.name} · ${today.term.name}`
     : `${growth.companion.name} · ${today.term.name}`;
 
   ctx.fillStyle = "rgba(255, 252, 231, 0.88)";
   ctx.fillRect(labelX, y - 32, labelWidth, 16);
   ctx.fillStyle = colors.dark;
-  ctx.font = "bold 9px monospace";
+  ctx.font = "bold 9px serif";
   ctx.fillText(label, labelX + 5, y - 21);
 
   if (dandelionProtocol.stage === "rooting") {
@@ -3968,38 +6035,504 @@ function drawGrowthLights() {
   }
 }
 
+function traceKindForLocation(location) {
+  const kind = location?.kind;
+  if (["friend", "post", "tavern", "chapel", "healing"].includes(kind)) return "empathy";
+  if (["lake", "knowledge", "stone", "seedVault", "weatherStation"].includes(kind)) return "learning";
+  if (["craft", "buildSite", "furniture"].includes(kind)) return "creation";
+  if (["forest", "garden", "rural", "seedNursery", "seedEvolution"].includes(kind)) return "stewardship";
+  if (kind === "goddessGarden" || kind === "worldTree") return "ritual";
+  return "exploration";
+}
+
+function tracePlaceContext(details = {}) {
+  const near = details.location || (state.near?.kind ? state.near : null);
+  return {
+    id: details.locationId || near?.id || "open-world",
+    name: details.place || near?.title || currentLifePlace(),
+    x: Number.isFinite(details.x) ? details.x : state.x,
+    y: Number.isFinite(details.y) ? details.y : state.y,
+  };
+}
+
+function recordTrace(details = {}) {
+  const place = tracePlaceContext(details);
+  const kind = traceKindCatalog[details.kind] ? details.kind : "memory";
+  const trace = {
+    id: `trace-${Date.now()}-${traceSystemState.events.length}`,
+    kind,
+    title: details.title || "一段没有命名的过程",
+    subjectType: details.subjectType || "life",
+    subjectId: details.subjectId || null,
+    processId: details.processId || null,
+    stage: details.stage || null,
+    status: details.status || "left-a-mark",
+    detail: details.detail || "",
+    placeId: place.id,
+    place: place.name,
+    x: place.x,
+    y: place.y,
+    term: currentSolarTerm().name,
+    weather: currentWeatherProfile().weather,
+    time: currentTimeLabel(),
+    createdAt: new Date().toISOString(),
+  };
+  traceSystemState.events.push(trace);
+  traceSystemState.events = traceSystemState.events.slice(-240);
+  const mark = traceSystemState.placeMarks[place.id] || {
+    id: place.id,
+    name: place.name,
+    x: place.x,
+    y: place.y,
+    visits: 0,
+    events: 0,
+    kinds: {},
+    lastTick: -9999,
+  };
+  mark.events += 1;
+  mark.kinds[kind] = (mark.kinds[kind] || 0) + 1;
+  mark.x = place.x;
+  mark.y = place.y;
+  mark.lastTraceId = trace.id;
+  traceSystemState.placeMarks[place.id] = mark;
+  return trace;
+}
+
+function startTraceProcess(type, title, subjectType, subjectId, expectedStages = []) {
+  const existing = traceSystemState.processes.find((process) => process.type === type && process.subjectId === subjectId);
+  if (existing) return existing;
+  const process = {
+    id: `process-${type}-${subjectId || Date.now()}`,
+    type,
+    title,
+    subjectType,
+    subjectId,
+    expectedStages,
+    stages: [],
+    status: "growing",
+    startedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  traceSystemState.processes.push(process);
+  traceSystemState.processes = traceSystemState.processes.slice(-80);
+  return process;
+}
+
+function advanceTraceProcess(processOrId, stage, detail, status = "growing", traceKind = "memory") {
+  const process = typeof processOrId === "string"
+    ? traceSystemState.processes.find((item) => item.id === processOrId)
+    : processOrId;
+  if (!process) return null;
+  const entry = {
+    stage,
+    detail,
+    place: currentLifePlace(),
+    term: currentSolarTerm().name,
+    weather: currentWeatherProfile().weather,
+    time: new Date().toISOString(),
+  };
+  process.stages.push(entry);
+  process.stages = process.stages.slice(-24);
+  process.status = status;
+  process.updatedAt = entry.time;
+  recordTrace({
+    kind: traceKind,
+    title: `${process.title} · ${stage}`,
+    subjectType: process.subjectType,
+    subjectId: process.subjectId,
+    processId: process.id,
+    stage,
+    status,
+    detail,
+  });
+  return process;
+}
+
+function latestGrowingTraceProcess(type) {
+  return [...traceSystemState.processes]
+    .reverse()
+    .find((process) => process.type === type && process.status === "growing") || null;
+}
+
+function recordMovementTrace() {
+  const previous = traceSystemState.lastTrailPoint;
+  if (previous && Math.hypot(state.x - previous.x, state.y - previous.y) < 1.15) return;
+  const location = state.near?.kind ? state.near : null;
+  const kind = traceKindForLocation(location);
+  const point = {
+    x: Number(state.x.toFixed(2)),
+    y: Number(state.y.toFixed(2)),
+    kind,
+    place: location?.title || "未命名小路",
+    createdAt: new Date().toISOString(),
+  };
+  traceSystemState.trail.push(point);
+  traceSystemState.trail = traceSystemState.trail.slice(-140);
+  traceSystemState.lastTrailPoint = point;
+}
+
+function recordPlaceVisit(target) {
+  if (!target) return;
+  const placeId = target.id || `resident-${target.name || "unknown"}`;
+  const mark = traceSystemState.placeMarks[placeId];
+  if (mark && state.tick - mark.lastTick < 240) return;
+  const kind = traceKindForLocation(target);
+  recordTrace({
+    kind,
+    title: `来到${target.title || target.name}`,
+    subjectType: target.kind ? "place" : "resident",
+    subjectId: placeId,
+    location: target.kind ? target : null,
+    locationId: placeId,
+    place: target.title || target.name,
+  });
+  traceSystemState.placeMarks[placeId].visits += 1;
+  traceSystemState.placeMarks[placeId].lastTick = state.tick;
+}
+
+function drawLifeTrail() {
+  const points = traceSystemState.trail;
+  if (points.length < 2) return;
+  ctx.lineCap = "square";
+  ctx.lineJoin = "round";
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    if (Math.hypot(current.x - previous.x, current.y - previous.y) > 7) continue;
+    const from = worldToScreen(previous.x, previous.y);
+    const to = worldToScreen(current.x, current.y);
+    if ((from.x < -60 && to.x < -60) || (from.y < -60 && to.y < -60)
+      || (from.x > canvas.width + 60 && to.x > canvas.width + 60)
+      || (from.y > canvas.height + 60 && to.y > canvas.height + 60)) continue;
+    ctx.strokeStyle = traceKindCatalog[current.kind]?.color || traceKindCatalog.movement.color;
+    ctx.globalAlpha = 0.42;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(from.x), Math.round(from.y));
+    ctx.lineTo(Math.round(to.x), Math.round(to.y));
+    ctx.stroke();
+    if (index % 4 === 0) {
+      ctx.fillStyle = traceKindCatalog[current.kind]?.color || traceKindCatalog.movement.color;
+      ctx.fillRect(Math.round(to.x) - 3, Math.round(to.y) - 5, 6, 4);
+      ctx.fillRect(Math.round(to.x), Math.round(to.y) - 2, 2, 7);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawTraceBlooms() {
+  traceSystemState.events.slice(-70).forEach((trace, index) => {
+    const screen = worldToScreen(trace.x, trace.y);
+    if (screen.x < -30 || screen.y < -30 || screen.x > canvas.width + 30 || screen.y > canvas.height + 30) return;
+    const profile = traceKindCatalog[trace.kind] || traceKindCatalog.memory;
+    const offsetX = ((index * 7) % 19) - 9;
+    const offsetY = ((index * 11) % 13) - 6;
+    const x = Math.round(screen.x + offsetX);
+    const y = Math.round(screen.y + offsetY);
+    ctx.globalAlpha = trace.status === "failed" ? 0.72 : 0.88;
+    ctx.fillStyle = profile.color;
+    if (trace.kind === "failure" || trace.status === "failed") {
+      ctx.fillRect(x - 5, y - 1, 11, 3);
+      ctx.fillRect(x - 1, y - 5, 3, 11);
+    } else if (trace.status === "complete" || trace.stage === "开花") {
+      ctx.fillRect(x - 7, y - 3, 15, 7);
+      ctx.fillRect(x - 3, y - 7, 7, 15);
+      ctx.fillStyle = colors.white;
+      ctx.fillRect(x - 2, y - 2, 5, 5);
+    } else {
+      ctx.fillRect(x - 2, y - 6, 4, 9);
+      ctx.fillRect(x - 6, y - 5, 5, 4);
+      ctx.fillRect(x + 2, y - 2, 5, 4);
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawAccumulatedPlaceTrace(location) {
+  const mark = traceSystemState.placeMarks[location.id];
+  if (!mark || mark.events + mark.visits < 3) return;
+  const screen = worldToScreen(location.x, location.y);
+  const width = location.w * TILE;
+  const height = location.h * TILE;
+  const strength = Math.min(8, mark.events + mark.visits);
+  const dominantKind = Object.entries(mark.kinds).sort((left, right) => right[1] - left[1])[0]?.[0] || "memory";
+  const color = traceKindCatalog[dominantKind]?.color || colors.yellow;
+  if (location.kind === "lake") {
+    ctx.fillStyle = colors.trunk;
+    for (let index = 0; index < Math.min(5, strength); index += 1) {
+      ctx.fillRect(screen.x + 8 + index * 11, screen.y + height - 18, 9, 4);
+    }
+  } else if (location.kind === "post") {
+    ctx.fillStyle = color;
+    for (let index = 0; index < Math.min(4, strength); index += 1) {
+      ctx.fillRect(screen.x + width - 12 + index * 3, screen.y + 24 + index * 8, 7, 5);
+    }
+  } else {
+    for (let index = 0; index < strength; index += 1) {
+      const x = screen.x + 8 + ((index * 23) % Math.max(12, width - 16));
+      const y = screen.y + height - 8 - (index % 3) * 5;
+      ctx.fillStyle = colors.grassDeep;
+      ctx.fillRect(x + 2, y, 2, 7);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y - 3, 7, 5);
+    }
+  }
+}
+
+function currentGeography() {
+  return worldGeography.find((area) => (
+    state.x >= area.x1 && state.x < area.x2 && state.y >= area.y1 && state.y < area.y2
+  )) || worldGeography[3];
+}
+
+function applyPlayerIdentity() {
+  const safeName = String(playerIdentityState.name || "风芽").trim().slice(0, 8) || "风芽";
+  const safeSignature = String(playerIdentityState.signature || "让风带我去看看").trim().slice(0, 24) || "让风带我去看看";
+  const safeSkin = ["sage", "sky", "blossom", "night"].includes(playerIdentityState.skin) ? playerIdentityState.skin : "sage";
+  playerIdentityState.name = safeName;
+  playerIdentityState.signature = safeSignature;
+  playerIdentityState.skin = safeSkin;
+  playerNameplateName.textContent = safeName;
+  playerNameplateSignature.textContent = safeSignature;
+  playerSprite.alt = safeName;
+  document.body.dataset.playerSkin = safeSkin;
+}
+
+function openProfileEditor() {
+  playerNameInput.value = playerIdentityState.name;
+  playerSignatureInput.value = playerIdentityState.signature;
+  profileEditor.querySelectorAll("[data-skin]").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.skin === playerIdentityState.skin);
+  });
+  profileEditor.classList.remove("is-hidden");
+  keys.clear();
+}
+
+function closeProfileEditor(saveChanges = false) {
+  if (saveChanges) {
+    playerIdentityState.name = playerNameInput.value;
+    playerIdentityState.signature = playerSignatureInput.value;
+    playerIdentityState.skin = profileEditor.querySelector("[data-skin].is-selected")?.dataset.skin || playerIdentityState.skin;
+    applyPlayerIdentity();
+    localStorage.setItem("dedalionPlayerIdentity", JSON.stringify(playerIdentityState));
+    setPanel("名牌更新", `${playerIdentityState.name} · ${playerIdentityState.signature}`);
+  }
+  profileEditor.classList.add("is-hidden");
+}
+
+function openBuildingInterior(buildingId = "home") {
+  if (buildingId !== "home") {
+    interactTavern();
+    return;
+  }
+  const geography = currentGeography();
+  buildingInteriorTitle.textContent = "听风小院";
+  buildingInteriorSubtitle.textContent = `${geography.country} · ${geography.region} · ${geography.district}`;
+  buildingInteriorImage.src = "./assets/sprites/cottage-interior-v2.png";
+  buildingInterior.classList.remove("is-hidden");
+  document.body.classList.add("is-interior-open");
+  keys.clear();
+}
+
+function closeBuildingInterior() {
+  buildingInterior.classList.add("is-hidden");
+  document.body.classList.remove("is-interior-open");
+}
+
+function runInteriorAction(action) {
+  if (action === "leave") {
+    closeBuildingInterior();
+    return;
+  }
+  if (action === "rest") {
+    setSceneEmote("sit", false);
+    addLifeValue("energy", 1);
+    buildingInteriorSubtitle.textContent = "床铺收住了今天多余的风。";
+  }
+  if (action === "tea") {
+    setSceneEmote("tea", false);
+    addLifeValue("memory", 1);
+    buildingInteriorSubtitle.textContent = "茶壶温着，圆窗外的水声慢了下来。";
+  }
+  if (action === "seeds") {
+    inventory.seeds += 1;
+    buildingInteriorSubtitle.textContent = "一颗小花种子进入了床边的种子瓶。";
+    addMemory("听风小院：整理一颗小花种子");
+  }
+  save();
+}
+
+function pointerWorldPosition(event) {
+  const rect = canvas.getBoundingClientRect();
+  const scale = Math.max(rect.width / canvas.width, rect.height / canvas.height);
+  const renderedWidth = canvas.width * scale;
+  const renderedHeight = canvas.height * scale;
+  const offsetX = (rect.width - renderedWidth) / 2;
+  const offsetY = (rect.height - renderedHeight) / 2;
+  const canvasX = (event.clientX - rect.left - offsetX) / scale;
+  const canvasY = (event.clientY - rect.top - offsetY) / scale;
+  const unzoomedX = (canvasX - canvas.width / 2) / VIEW_ZOOM + canvas.width / 2;
+  const unzoomedY = (canvasY - canvas.height / 2) / VIEW_ZOOM + canvas.height / 2;
+  return {
+    x: state.x + (unzoomedX - canvas.width / 2) / TILE,
+    y: state.y + (unzoomedY - canvas.height / 2) / TILE,
+  };
+}
+
+function buildingAtPointer(event) {
+  const point = pointerWorldPosition(event);
+  return locations.find((location) => (
+    illustratedBuildingIds.has(location.id)
+    && point.x >= location.x - 0.6
+    && point.x <= location.x + location.w + 0.6
+    && point.y >= location.y - 1.2
+    && point.y <= location.y + location.h + 0.6
+  )) || null;
+}
+
+function drawIllustratedMap() {
+  const image = loadedSceneAssets.worldMap;
+  if (!image) return;
+  const screen = worldToScreen(illustratedMapBounds.x, illustratedMapBounds.y);
+  ctx.drawImage(
+    image,
+    screen.x,
+    screen.y,
+    illustratedMapBounds.w * TILE,
+    illustratedMapBounds.h * TILE,
+  );
+}
+
+function drawIllustratedWaterMotion() {
+  const waterfall = worldToScreen(69.5, 43.2);
+  for (let index = 0; index < 6; index += 1) {
+    const y = waterfall.y + ((state.tick * 2.4 + index * 17) % 84);
+    ctx.fillStyle = index % 2 ? "rgba(238, 255, 249, 0.72)" : "rgba(142, 229, 239, 0.64)";
+    ctx.fillRect(waterfall.x + 4 + index * 4, Math.round(y), 3, 18);
+  }
+  const streamGlints = [
+    [91, 55],
+    [92, 63],
+    [96, 74],
+    [113, 45],
+    [121, 64],
+    [99, 101],
+  ];
+  streamGlints.forEach(([x, y], index) => {
+    const screen = worldToScreen(x, y);
+    const slide = (state.tick * 0.75 + index * 13) % 22;
+    ctx.fillStyle = "rgba(255, 255, 238, 0.58)";
+    ctx.fillRect(Math.round(screen.x + slide), screen.y, 12, 3);
+    ctx.fillStyle = "rgba(118, 211, 230, 0.46)";
+    ctx.fillRect(Math.round(screen.x + 6 + slide), screen.y + 6, 17, 2);
+  });
+}
+
+function drawIllustratedPetalsAndSeeds() {
+  for (let index = 0; index < 18; index += 1) {
+    const baseX = 66 + ((index * 17) % 60);
+    const baseY = 39 + ((index * 23) % 62);
+    const drift = (state.tick / 190 + index * 0.071) % 1;
+    const screen = worldToScreen(baseX + drift * 2.4, baseY + drift * 1.3);
+    const flutter = Math.sin(state.tick / 18 + index) * 6;
+    ctx.fillStyle = index % 3 === 0 ? "rgba(247, 167, 191, 0.76)" : "rgba(255, 251, 226, 0.78)";
+    ctx.fillRect(Math.round(screen.x + flutter), Math.round(screen.y), index % 4 === 0 ? 5 : 3, 3);
+    if (index % 4 === 0) {
+      ctx.fillStyle = "rgba(223, 179, 65, 0.68)";
+      ctx.fillRect(Math.round(screen.x + flutter + 3), Math.round(screen.y + 3), 2, 4);
+    }
+  }
+}
+
+function drawIllustratedMapPoints() {
+  illustratedMapPoints.forEach((point) => {
+    if (point.id === "home" || point.id === "tavern") return;
+    const screen = worldToScreen(point.x, point.y);
+    if (screen.x < -80 || screen.y < -50 || screen.x > canvas.width + 80 || screen.y > canvas.height + 50) return;
+    const pulse = Math.floor(state.tick / 24) % 2;
+    ctx.fillStyle = "rgba(43, 78, 62, 0.9)";
+    ctx.fillRect(screen.x - 4, screen.y - 18, 9, 18);
+    ctx.fillStyle = pulse ? colors.yellow : colors.white;
+    ctx.fillRect(screen.x - 8, screen.y - 25, 17, 10);
+    ctx.fillStyle = "rgba(255, 248, 222, 0.9)";
+    ctx.fillRect(screen.x + 13, screen.y - 28, point.label.length * 10 + 10, 20);
+    ctx.fillStyle = colors.dark;
+    ctx.font = "bold 10px serif";
+    ctx.fillText(point.label, screen.x + 18, screen.y - 14);
+  });
+}
+
 function drawWorld() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (loadedSceneAssets.worldMap) {
+    ctx.fillStyle = "#5aa8d2";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
-  const startX = Math.floor(state.x - canvas.width / TILE / 2) - 2;
-  const endX = Math.floor(state.x + canvas.width / TILE / 2) + 2;
-  const startY = Math.floor(state.y - canvas.height / TILE / 2) - 2;
-  const endY = Math.floor(state.y + canvas.height / TILE / 2) + 2;
+  const startX = Math.floor(state.x - canvas.width / VIEW_ZOOM / TILE / 2) - 2;
+  const endX = Math.floor(state.x + canvas.width / VIEW_ZOOM / TILE / 2) + 2;
+  const startY = Math.floor(state.y - canvas.height / VIEW_ZOOM / TILE / 2) - 2;
+  const endY = Math.floor(state.y + canvas.height / VIEW_ZOOM / TILE / 2) + 2;
 
-  for (let y = startY; y <= endY; y += 1) {
-    for (let x = startX; x <= endX; x += 1) {
-      drawTile(x, y, tileType(x, y));
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.scale(VIEW_ZOOM, VIEW_ZOOM);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+  if (loadedSceneAssets.worldMap) {
+    ctx.fillStyle = "#5aa8d2";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawIllustratedMap();
+  } else {
+    for (let y = startY; y <= endY; y += 1) {
+      for (let x = startX; x <= endX; x += 1) {
+        drawTile(x, y, tileType(x, y));
+      }
     }
   }
 
-  drawWorldTerrainObjects(startX, endX, startY, endY);
-  locations.forEach(drawLocation);
-  activeGeneratedLocations().forEach(drawLocation);
-  drawResidents();
-  drawPlayerShadow();
-  drawDandelionProtocol();
-  drawGrowthLights();
-  drawWishParticles();
+  if (loadedSceneAssets.worldMap) {
+    const cottage = locations.find((location) => location.id === "home");
+    const tavern = locations.find((location) => location.id === "tavern");
+    if (cottage) drawGardenCottage(cottage);
+    if (tavern) drawTavern(tavern);
+    drawPlayerShadow();
+  } else {
+    drawWorldTerrainObjects(startX, endX, startY, endY);
+    drawJoyfulMapLife();
+    drawLifeTrail();
+    locations.forEach(drawLocation);
+    activeGeneratedLocations().forEach(drawLocation);
+    drawTraceBlooms();
+    drawResidents();
+    drawPlayerShadow();
+    drawDandelionProtocol();
+    drawGrowthLights();
+    drawWishParticles();
+  }
+  ctx.restore();
+
   drawWeatherLayer();
   drawLifeBalanceLayer();
+  drawAtmosphericFrame();
 }
 
 function drawWorldTerrainObjects(startX, endX, startY, endY) {
   const rule = livingRuleProfile();
+  const activeWeather = currentWeatherProfile();
+  const activeWeatherDay = livingDateKey();
   drawBridge(97, Math.round(riverCenter(97)) - 2, 5);
   drawBridge(116, Math.round(riverCenter(116)) - 2, 4);
   drawSteppingStones(83, Math.round(riverCenter(83)));
+  drawVillageLifeDecor();
+  [
+    [88, 57, 1.1],
+    [91, 54, 1.35],
+    [106, 54, 1],
+    [112, 59, 0.86],
+    [81, 72, 0.72],
+  ].forEach(([x, y, scale]) => drawGiantDandelion(x, y, scale));
 
   for (let y = startY; y <= endY; y += 1) {
     for (let x = startX; x <= endX; x += 1) {
@@ -4014,7 +6547,341 @@ function drawWorldTerrainObjects(startX, endX, startY, endY) {
       if (worldRuleState.failures.length > 0 && type === "path" && noise(x - 91, y + 29) > 0.994) drawEvolutionMark(x, y, "scar");
       if (rule.phase === "strained" && type === "meadow" && noise(x - 71, y - 17) > 0.992) drawEvolutionMark(x, y, "scar");
       if (rule.phase === "recovering" && type === "meadow" && noise(x + 41, y + 91) > 0.986) drawEvolutionMark(x, y, "sprout");
+      const weatherResource = weatherResourceAt(x, y, type, activeWeather, activeWeatherDay);
+      if (weatherResource) drawWeatherResource(x, y, weatherResource);
     }
+  }
+}
+
+function drawJoyfulMapLife() {
+  const butterflies = [
+    [82.8, 60.4, colors.pink],
+    [88.6, 68.2, colors.yellow],
+    [93.4, 57.8, colors.waterC],
+    [101.2, 63.7, colors.purple],
+    [108.4, 71.2, colors.pink],
+    [116.3, 59.6, colors.yellow],
+    [76.4, 73.6, colors.waterC],
+  ];
+  butterflies.forEach(([x, y, color], index) => drawMeadowButterfly(x, y, color, index));
+
+  const seedAnchors = [
+    [79, 55],
+    [86, 64],
+    [95, 61],
+    [104, 72],
+    [112, 56],
+    [120, 68],
+    [73, 70],
+    [99, 53],
+  ];
+  seedAnchors.forEach(([x, y], index) => drawDriftingMapSeed(x, y, index));
+  drawVillageBunting(88, 61.2, 17);
+}
+
+function drawMeadowButterfly(tileX, tileY, color, index) {
+  const driftX = Math.sin(state.tick / 34 + index * 1.7) * 9;
+  const driftY = Math.cos(state.tick / 41 + index * 2.1) * 6;
+  const screen = worldToScreen(tileX, tileY);
+  const x = Math.round(screen.x + driftX);
+  const y = Math.round(screen.y + driftY - 14);
+  if (x < -24 || y < -24 || x > canvas.width + 24 || y > canvas.height + 24) return;
+  const openWing = (Math.floor(state.tick / 7) + index) % 2 === 0;
+  const wingWidth = openWing ? 7 : 4;
+  ctx.fillStyle = "rgba(30, 58, 43, 0.2)";
+  ctx.fillRect(x - 5, y + 8, 12, 3);
+  ctx.fillStyle = color;
+  ctx.fillRect(x - wingWidth, y, wingWidth, 6);
+  ctx.fillRect(x + 2, y, wingWidth, 6);
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(x - wingWidth + 2, y + 1, 3, 2);
+  ctx.fillRect(x + wingWidth - 1, y + 1, 3, 2);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(x, y + 1, 3, 7);
+}
+
+function drawDriftingMapSeed(tileX, tileY, index) {
+  const phase = (state.tick / 210 + index * 0.137) % 1;
+  const screen = worldToScreen(tileX + phase * 2.2, tileY - phase * 1.4);
+  const x = Math.round(screen.x + Math.sin(state.tick / 22 + index) * 5);
+  const y = Math.round(screen.y - 8);
+  if (x < -18 || y < -18 || x > canvas.width + 18 || y > canvas.height + 18) return;
+  const alpha = 0.42 + (1 - phase) * 0.48;
+  ctx.fillStyle = `rgba(255, 252, 231, ${alpha})`;
+  ctx.fillRect(x - 4, y - 2, 9, 5);
+  ctx.fillRect(x - 1, y - 5, 3, 10);
+  ctx.fillStyle = `rgba(225, 182, 70, ${alpha})`;
+  ctx.fillRect(x + 1, y + 4, 2, 5);
+}
+
+function drawVillageBunting(tileX, tileY, length) {
+  const start = worldToScreen(tileX, tileY);
+  const end = worldToScreen(tileX + length, tileY + 0.8);
+  if ((end.x < -40 || start.x > canvas.width + 40) || (end.y < -30 || start.y > canvas.height + 30)) return;
+  ctx.strokeStyle = colors.outline;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(start.x, start.y);
+  ctx.quadraticCurveTo((start.x + end.x) / 2, start.y + 12, end.x, end.y);
+  ctx.stroke();
+  const flagColors = [colors.yellow, colors.pink, colors.waterC, colors.white];
+  for (let index = 1; index < 13; index += 1) {
+    const progress = index / 13;
+    const x = start.x + (end.x - start.x) * progress;
+    const y = start.y + (end.y - start.y) * progress + Math.sin(progress * Math.PI) * 9;
+    ctx.fillStyle = flagColors[index % flagColors.length];
+    ctx.beginPath();
+    ctx.moveTo(Math.round(x - 4), Math.round(y + 1));
+    ctx.lineTo(Math.round(x + 5), Math.round(y + 2));
+    ctx.lineTo(Math.round(x), Math.round(y + 11));
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.lineWidth = 1;
+}
+
+function drawVillageLifeDecor() {
+  drawFenceLine(77, 77, 9, "horizontal");
+  drawFenceLine(77, 84, 8, "horizontal");
+  drawFenceLine(76, 78, 6, "vertical");
+  drawFenceLine(90, 82, 7, "horizontal");
+  drawWaterWheel(72, 67, 1);
+  drawMoonGate(85, 65);
+  drawBambooGrove(69, 61, 5);
+  drawBambooGrove(123, 64, 4);
+  drawStoneLantern(96, 74);
+  drawStoneLantern(108, 72);
+  drawAncientPlantBed(95, 79);
+
+  [
+    [94, 67, colors.yellow],
+    [95, 67, colors.white],
+    [105, 69, colors.pink],
+    [106, 69, colors.yellow],
+    [113, 68, colors.white],
+    [114, 68, colors.pink],
+  ].forEach(([x, y, color]) => drawFlowerPatch(x, y, color));
+}
+
+function drawFenceLine(tileX, tileY, length, direction) {
+  const screen = worldToScreen(tileX, tileY);
+  const horizontal = direction === "horizontal";
+  const span = length * TILE;
+  ctx.fillStyle = "rgba(38, 60, 49, 0.18)";
+  ctx.fillRect(screen.x + 3, screen.y + 22, horizontal ? span : 8, horizontal ? 7 : span);
+  ctx.fillStyle = colors.outline;
+  for (let index = 0; index <= length; index += 1) {
+    const x = screen.x + (horizontal ? index * TILE : 0);
+    const y = screen.y + (horizontal ? 0 : index * TILE);
+    ctx.fillRect(x + 3, y + 3, 7, 24);
+  }
+  ctx.fillStyle = "#a97848";
+  if (horizontal) {
+    ctx.fillRect(screen.x + 5, screen.y + 9, span, 5);
+    ctx.fillRect(screen.x + 5, screen.y + 20, span, 5);
+  } else {
+    ctx.fillRect(screen.x + 5, screen.y + 9, 5, span);
+    ctx.fillRect(screen.x + 16, screen.y + 9, 5, span);
+  }
+}
+
+function drawFlowerPatch(tileX, tileY, color) {
+  const screen = worldToScreen(tileX, tileY);
+  for (let index = 0; index < 5; index += 1) {
+    const x = screen.x + 4 + (index % 3) * 9;
+    const y = screen.y + 8 + Math.floor(index / 3) * 11;
+    ctx.fillStyle = colors.grassDeep;
+    ctx.fillRect(x + 3, y + 5, 2, 9);
+    ctx.fillStyle = index % 2 ? colors.white : color;
+    ctx.fillRect(x, y, 7, 7);
+    ctx.fillStyle = colors.yellow;
+    ctx.fillRect(x + 2, y + 2, 3, 3);
+  }
+}
+
+function drawWaterWheel(tileX, tileY, scale = 1) {
+  const screen = worldToScreen(tileX, tileY);
+  const radius = Math.round(24 * scale);
+  const centerX = screen.x + radius + 6;
+  const centerY = screen.y + radius - 3;
+  ctx.fillStyle = colors.waterDeep;
+  ctx.fillRect(screen.x - 4, screen.y + radius + 10, radius * 2 + 24, 15);
+  ctx.fillStyle = colors.waterA;
+  ctx.fillRect(screen.x, screen.y + radius + 12, radius * 2 + 18, 7);
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(state.tick / 240);
+  ctx.strokeStyle = colors.outline;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "#9a6a3f";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius - 5, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let index = 0; index < 8; index += 1) {
+    ctx.save();
+    ctx.rotate((Math.PI * 2 * index) / 8);
+    ctx.fillStyle = colors.trunk;
+    ctx.fillRect(-2, -radius + 3, 4, radius - 3);
+    ctx.fillStyle = "#b98550";
+    ctx.fillRect(-7, -radius - 4, 14, 7);
+    ctx.restore();
+  }
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(-6, -6, 12, 12);
+  ctx.restore();
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(centerX - 4, centerY, 8, radius + 20);
+}
+
+function drawMoonGate(tileX, tileY) {
+  const screen = worldToScreen(tileX, tileY);
+  const width = 76;
+  const height = 78;
+  ctx.fillStyle = "rgba(35, 57, 44, 0.22)";
+  ctx.fillRect(screen.x - 3, screen.y + height - 3, width + 8, 9);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x, screen.y + 14, width, height - 14);
+  ctx.fillStyle = "#bdba9f";
+  ctx.fillRect(screen.x + 5, screen.y + 19, width - 10, height - 24);
+  drawChineseEaves(screen.x - 2, screen.y + 7, width + 4, colors.roof);
+  ctx.fillStyle = colors.pathB;
+  ctx.beginPath();
+  ctx.arc(screen.x + width / 2, screen.y + 53, 23, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(screen.x + 15, screen.y + 53, 46, 23);
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 22, screen.y + 23, 32, 15);
+  ctx.fillStyle = colors.yellow;
+  ctx.font = "bold 10px serif";
+  ctx.fillText("百草园", screen.x + 23, screen.y + 34);
+}
+
+function drawBambooGrove(tileX, tileY, count) {
+  const screen = worldToScreen(tileX, tileY);
+  for (let index = 0; index < count; index += 1) {
+    const x = screen.x + index * 11;
+    const height = 58 + (index % 3) * 15;
+    ctx.fillStyle = colors.outline;
+    ctx.fillRect(x + 3, screen.y - height, 6, height + 25);
+    ctx.fillStyle = index % 2 ? "#699352" : "#7ca35a";
+    ctx.fillRect(x + 5, screen.y - height, 3, height + 23);
+    ctx.fillStyle = colors.yellow;
+    for (let y = screen.y - height + 13; y < screen.y + 10; y += 17) ctx.fillRect(x + 4, y, 5, 2);
+    ctx.fillStyle = colors.grassDeep;
+    ctx.fillRect(x - 4, screen.y - height + 16, 10, 4);
+    ctx.fillRect(x + 7, screen.y - height + 30, 12, 4);
+    ctx.fillRect(x - 6, screen.y - height + 44, 12, 4);
+  }
+}
+
+function drawStoneLantern(tileX, tileY) {
+  const screen = worldToScreen(tileX, tileY);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x + 7, screen.y + 24, 19, 6);
+  ctx.fillRect(screen.x + 12, screen.y + 4, 9, 24);
+  ctx.fillRect(screen.x + 5, screen.y, 23, 7);
+  ctx.fillRect(screen.x + 9, screen.y - 9, 15, 12);
+  ctx.fillStyle = "#a8aa91";
+  ctx.fillRect(screen.x + 10, screen.y + 22, 13, 4);
+  ctx.fillRect(screen.x + 14, screen.y + 5, 5, 18);
+  ctx.fillRect(screen.x + 8, screen.y + 1, 17, 3);
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(screen.x + 13, screen.y - 6, 7, 7);
+}
+
+function drawAncientPlantBed(tileX, tileY) {
+  const screen = worldToScreen(tileX, tileY);
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x - 5, screen.y + 20, 74, 8);
+  ctx.fillStyle = "#82704f";
+  ctx.fillRect(screen.x, screen.y + 16, 64, 8);
+  for (let index = 0; index < 4; index += 1) {
+    const x = screen.x + 8 + index * 15;
+    const height = 20 + (index % 2) * 8;
+    ctx.fillStyle = colors.grassDeep;
+    ctx.fillRect(x + 4, screen.y + 16 - height, 3, height);
+    ctx.fillRect(x - 2, screen.y - height + 5, 11, 3);
+    ctx.fillRect(x + 5, screen.y - height + 10, 12, 3);
+    ctx.fillRect(x - 4, screen.y - height + 14, 10, 3);
+    ctx.fillStyle = "#7fa36a";
+    ctx.fillRect(x, screen.y - height + 2, 8, 5);
+  }
+  ctx.fillStyle = colors.trunk;
+  ctx.fillRect(screen.x + 51, screen.y - 12, 3, 28);
+  ctx.fillStyle = "#d2b478";
+  ctx.fillRect(screen.x + 44, screen.y - 20, 18, 13);
+  ctx.fillStyle = colors.dark;
+  ctx.font = "bold 8px serif";
+  ctx.fillText("古蕨", screen.x + 46, screen.y - 11);
+}
+
+function drawGiantDandelion(tileX, tileY, scale = 1) {
+  const screen = worldToScreen(tileX, tileY);
+  const stemHeight = Math.round(58 * scale);
+  const puff = Math.round(22 * scale);
+  if (screen.x < -80 || screen.x > canvas.width + 80 || screen.y < -100 || screen.y > canvas.height + 100) return;
+
+  ctx.fillStyle = "rgba(38, 60, 49, 0.2)";
+  ctx.fillRect(screen.x - Math.round(9 * scale), screen.y + 11, Math.round(24 * scale), Math.max(3, Math.round(4 * scale)));
+  ctx.fillStyle = colors.grassDeep;
+  ctx.fillRect(screen.x, screen.y - stemHeight, Math.max(2, Math.round(3 * scale)), stemHeight + 10);
+  ctx.fillRect(screen.x - Math.round(8 * scale), screen.y - Math.round(stemHeight * 0.35), Math.round(10 * scale), Math.max(2, Math.round(3 * scale)));
+  ctx.fillRect(screen.x + Math.round(2 * scale), screen.y - Math.round(stemHeight * 0.55), Math.round(11 * scale), Math.max(2, Math.round(3 * scale)));
+
+  const sway = Math.sin(state.tick / 40 + tileX) * 2;
+  const centerX = Math.round(screen.x + sway);
+  const centerY = screen.y - stemHeight;
+  ctx.fillStyle = "rgba(255, 248, 221, 0.72)";
+  ctx.fillRect(centerX - puff, centerY - Math.round(puff * 0.44), puff * 2, Math.round(puff * 0.88));
+  ctx.fillRect(centerX - Math.round(puff * 0.45), centerY - puff, Math.round(puff * 0.9), puff * 2);
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(centerX - Math.round(puff * 0.7), centerY - Math.round(puff * 0.7), Math.round(puff * 1.4), Math.round(puff * 1.4));
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(centerX - Math.max(2, Math.round(3 * scale)), centerY - Math.max(2, Math.round(3 * scale)), Math.max(5, Math.round(7 * scale)), Math.max(5, Math.round(7 * scale)));
+
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (Math.PI * 2 * index) / 8;
+    const radius = puff * 0.82;
+    ctx.fillStyle = index % 2 ? colors.white : "#f3e9c7";
+    ctx.fillRect(
+      Math.round(centerX + Math.cos(angle) * radius),
+      Math.round(centerY + Math.sin(angle) * radius),
+      Math.max(2, Math.round(3 * scale)),
+      Math.max(2, Math.round(3 * scale)),
+    );
+  }
+}
+
+function drawAtmosphericFrame() {
+  const edge = Math.max(42, Math.min(108, canvas.width * 0.1));
+  const foliage = [
+    [0, 0, edge * 1.15, edge * 0.72],
+    [canvas.width - edge * 1.18, 0, edge * 1.18, edge * 0.82],
+    [0, canvas.height - edge * 0.62, edge * 0.9, edge * 0.62],
+    [canvas.width - edge * 0.86, canvas.height - edge * 0.56, edge * 0.86, edge * 0.56],
+  ];
+  foliage.forEach(([x, y, width, height], index) => {
+    ctx.fillStyle = index < 2 ? "rgba(24, 57, 42, 0.34)" : "rgba(31, 69, 45, 0.26)";
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+    ctx.fillStyle = "rgba(68, 104, 60, 0.42)";
+    const inwardX = x === 0 ? x + width - 18 : x + 8;
+    const inwardY = y === 0 ? y + height - 15 : y + 6;
+    ctx.fillRect(Math.round(inwardX), Math.round(inwardY), 24, 18);
+  });
+
+  if (!currentWeatherProfile().isNight) {
+    ctx.fillStyle = "rgba(255, 243, 193, 0.07)";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width * 0.12, 0);
+    ctx.lineTo(canvas.width * 0.31, 0);
+    ctx.lineTo(canvas.width * 0.56, canvas.height);
+    ctx.lineTo(canvas.width * 0.43, canvas.height);
+    ctx.closePath();
+    ctx.fill();
   }
 }
 
@@ -4112,6 +6979,60 @@ function drawEvolutionMark(tileX, tileY, kind) {
   ctx.fillRect(screen.x + 18, screen.y + 9, 8, 4);
 }
 
+function weatherResourceAt(tileX, tileY, terrain = tileType(tileX, tileY), weather = currentWeatherProfile(), dayKey = livingDateKey()) {
+  const collectionId = `weather-drop-${dayKey}-${weather.period.id}-${tileX}-${tileY}`;
+  if (interacted.has(collectionId)) return null;
+  const dayNumber = Number(dayKey.slice(-2)) || 1;
+  const signal = noise(tileX + currentWorldRhythmIndex() * 37, tileY - dayNumber * 11);
+  if (weather.id === "mist" && ["grass", "meadow", "flower", "darkGrass"].includes(terrain) && signal > 0.984) return { key: "morningDew", name: "晨露", kind: "dew", collectionId };
+  if (weather.isRain && ["darkGrass", "bank", "grass"].includes(terrain) && signal > 0.985) return { key: "mushrooms", name: "雨菇灵", kind: "mushroom", collectionId };
+  if (weather.isThunder && ["path", "stone", "bank"].includes(terrain) && signal > 0.996) return { key: "thunderCrystal", name: "雷晶", kind: "crystal", collectionId };
+  if (weather.isSnow && ["meadow", "darkGrass", "bank"].includes(terrain) && signal > 0.989) return { key: "snowWater", name: "新雪", kind: "snow", collectionId };
+  if (weather.isRainbow && ["flower", "meadow"].includes(terrain) && signal > 0.993) return { key: "rainbowSeed", name: "虹光种子", kind: "rainbow", collectionId };
+  if (weather.id === "starry" && ["meadow", "bank", "flower"].includes(terrain) && signal > 0.991) return { key: "starWater", name: "星水滴", kind: "star", collectionId };
+  if (weather.isWind && ["path", "meadow", "flower"].includes(terrain) && signal > 0.992) return { key: "windThread", name: "风丝", kind: "wind", collectionId };
+  if (weather.isSunny && ["flower", "meadow"].includes(terrain) && signal > 0.994) return { key: "sunlightShard", name: "日光片", kind: "sun", collectionId };
+  return null;
+}
+
+function drawWeatherResource(tileX, tileY, resource) {
+  const screen = worldToScreen(tileX, tileY);
+  const bob = Math.round(Math.sin(state.tick / 18 + tileX + tileY) * 2);
+  if (resource.kind === "mushroom") {
+    ctx.fillStyle = colors.white;
+    ctx.fillRect(screen.x + 8, screen.y + 12 + bob, 15, 8);
+    ctx.fillStyle = colors.waterA;
+    ctx.fillRect(screen.x + 11, screen.y + 19 + bob, 9, 8);
+    return;
+  }
+  if (resource.kind === "wind") {
+    ctx.fillStyle = "rgba(255, 252, 231, 0.82)";
+    ctx.fillRect(screen.x + 4, screen.y + 11 + bob, 23, 3);
+    ctx.fillRect(screen.x + 12, screen.y + 17 + bob, 15, 3);
+    return;
+  }
+  if (resource.kind === "rainbow") {
+    [colors.pink, colors.yellow, colors.waterA].forEach((color, index) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(screen.x + 10 + index * 4, screen.y + 8 + index * 4 + bob, 8, 8);
+    });
+    return;
+  }
+  const color = {
+    dew: colors.waterC,
+    crystal: colors.purple,
+    snow: colors.white,
+    star: colors.yellow,
+    sun: "#f5c94a",
+  }[resource.kind] || colors.white;
+  ctx.fillStyle = colors.outline;
+  ctx.fillRect(screen.x + 10, screen.y + 8 + bob, 15, 15);
+  ctx.fillStyle = color;
+  ctx.fillRect(screen.x + 13, screen.y + 11 + bob, 9, 9);
+  ctx.fillStyle = colors.white;
+  ctx.fillRect(screen.x + 15, screen.y + 12 + bob, 3, 3);
+}
+
 function drawWishParticles() {
   for (let index = wishParticles.length - 1; index >= 0; index -= 1) {
     const seed = wishParticles[index];
@@ -4130,32 +7051,111 @@ function drawWishParticles() {
 
 function drawWeatherLayer() {
   const weather = currentWeatherProfile();
-  if (weather.weather === "小雨") {
-    ctx.fillStyle = "rgba(158, 243, 239, 0.52)";
-    for (let index = 0; index < 70; index += 1) {
-      const x = (index * 47 + state.tick * 2) % canvas.width;
-      const y = (index * 83 + state.tick * 4) % canvas.height;
-      ctx.fillRect(x, y, 2, 10);
+  const periodOverlay = {
+    dawn: "rgba(222, 239, 217, 0.08)",
+    morning: "rgba(255, 239, 167, 0.05)",
+    noon: "rgba(255, 214, 126, 0.08)",
+    dusk: "rgba(202, 121, 79, 0.13)",
+    night: "rgba(22, 51, 67, 0.25)",
+    dream: "rgba(39, 52, 73, 0.3)",
+  }[weather.period.id];
+  if (periodOverlay) {
+    ctx.fillStyle = periodOverlay;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  if (weather.isRain) {
+    ctx.fillStyle = weather.isThunder ? "rgba(188, 222, 232, 0.68)" : "rgba(158, 221, 218, 0.54)";
+    const rainCount = weather.isThunder ? 105 : 72;
+    for (let index = 0; index < rainCount; index += 1) {
+      const x = (index * 47 + state.tick * (weather.isThunder ? 4 : 2)) % canvas.width;
+      const y = (index * 83 + state.tick * (weather.isThunder ? 6 : 4)) % canvas.height;
+      ctx.fillRect(x, y, weather.isThunder ? 3 : 2, weather.isThunder ? 15 : 10);
     }
   }
 
-  if (weather.spirit === "风精灵") {
+  if (weather.isWind) {
     ctx.fillStyle = "rgba(255, 252, 231, 0.55)";
     for (let index = 0; index < 18; index += 1) {
-      const x = (index * 89 + state.tick * 3) % canvas.width;
+      const x = (index * 89 + state.tick * Math.max(2, weather.windSpeed / 2)) % canvas.width;
       const y = (index * 37 + Math.sin(state.tick / 18 + index) * 20 + canvas.height) % canvas.height;
       ctx.fillRect(x, y, 18, 3);
     }
   }
 
-  if (weather.spirit === "星光精灵") {
-    ctx.fillStyle = "rgba(255, 217, 47, 0.6)";
-    for (let index = 0; index < 24; index += 1) {
-      const x = (index * 73) % canvas.width;
-      const y = (index * 41 + Math.sin(state.tick / 20 + index) * 6 + canvas.height) % canvas.height;
-      ctx.fillRect(x, y, 4, 4);
+  drawFireflies(weather);
+
+  if (weather.isFog) {
+    for (let index = 0; index < 7; index += 1) {
+      const width = 110 + (index % 3) * 54;
+      const x = ((index * 173 + state.tick * 0.4) % (canvas.width + width)) - width;
+      const y = 70 + ((index * 97) % Math.max(90, canvas.height - 150));
+      ctx.fillStyle = `rgba(231, 239, 221, ${0.08 + (index % 2) * 0.04})`;
+      ctx.fillRect(Math.round(x), y, width, 18);
+      ctx.fillRect(Math.round(x + 32), y - 9, width - 58, 12);
     }
   }
+
+  if (weather.isSnow) {
+    ctx.fillStyle = "rgba(255, 252, 231, 0.82)";
+    for (let index = 0; index < 64; index += 1) {
+      const x = (index * 67 + state.tick * 0.45 + Math.sin(index + state.tick / 25) * 12) % canvas.width;
+      const y = (index * 43 + state.tick * 0.75) % canvas.height;
+      const size = index % 4 === 0 ? 5 : 3;
+      ctx.fillRect(Math.round(x), Math.round(y), size, size);
+    }
+  }
+
+  if (weather.isRainbow) {
+    const centerX = canvas.width * 0.68;
+    const centerY = canvas.height * 0.62;
+    ["rgba(217, 92, 78, 0.5)", "rgba(239, 186, 71, 0.5)", "rgba(87, 171, 111, 0.5)", "rgba(73, 151, 176, 0.5)"].forEach((color, index) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 128 - index * 7, Math.PI, Math.PI * 2);
+      ctx.stroke();
+    });
+  }
+
+  if (weather.isThunder && state.tick % 180 < 7) {
+    ctx.fillStyle = "rgba(255, 252, 231, 0.28)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = colors.white;
+    const boltX = canvas.width * 0.72;
+    ctx.fillRect(boltX, 0, 5, 70);
+    ctx.fillRect(boltX - 14, 64, 18, 6);
+    ctx.fillRect(boltX - 14, 64, 5, 48);
+  }
+
+  if (weather.isHeat) {
+    ctx.fillStyle = "rgba(255, 239, 193, 0.24)";
+    for (let index = 0; index < 12; index += 1) {
+      const x = (index * 103 + state.tick) % canvas.width;
+      const y = canvas.height * 0.68 + Math.sin(state.tick / 17 + index) * 18;
+      ctx.fillRect(x, y, 2, 46);
+    }
+  }
+}
+
+function drawFireflies(weather) {
+  if (weather.isThunder || weather.isSnow || weather.isRain) return;
+  const count = weather.isNight ? 28 : weather.isSunset ? 12 : weather.isFog ? 8 : 0;
+  if (!count) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (let index = 0; index < count; index += 1) {
+    const pulse = (Math.sin(state.tick / 13 + index * 1.7) + 1) / 2;
+    const x = (index * 97 + Math.sin(state.tick / 48 + index) * 24 + canvas.width) % canvas.width;
+    const yBase = canvas.height * 0.42 + ((index * 53) % Math.max(80, canvas.height * 0.5));
+    const y = yBase + Math.cos(state.tick / 39 + index * 1.3) * 16;
+    ctx.shadowColor = "rgba(205, 255, 112, 0.95)";
+    ctx.shadowBlur = 5 + pulse * 9;
+    ctx.fillStyle = `rgba(226, 255, 132, ${0.38 + pulse * 0.58})`;
+    const size = pulse > 0.62 ? 3 : 2;
+    ctx.fillRect(Math.round(x), Math.round(y), size, size);
+  }
+  ctx.restore();
 }
 
 function drawLifeBalanceLayer() {
@@ -4234,6 +7234,7 @@ function updateMovement() {
     const diagonal = dx && dy ? 0.72 : 1;
     state.x += dx * diagonal;
     state.y += dy * diagonal;
+    recordMovementTrace();
     state.direction = dx < 0 ? "left" : dx > 0 ? "right" : state.direction;
     playerSprite.classList.add("walking");
     playerSprite.classList.toggle("left", state.direction === "left");
@@ -4244,7 +7245,12 @@ function updateMovement() {
 
 function findNearby() {
   const nearbyResident = residents
-    .map((resident) => ({ resident, distance: Math.hypot(state.x - resident.x, state.y - resident.y) }))
+    .map((resident, index) => ({
+      resident,
+      hidden: residentIsSheltered(resident, index),
+      distance: Math.hypot(state.x - resident.x, state.y - resident.y),
+    }))
+    .filter((item) => !item.hidden)
     .sort((left, right) => left.distance - right.distance)[0];
   if (nearbyResident && nearbyResident.distance < 1.45) return nearbyResident.resident;
 
@@ -4261,6 +7267,456 @@ function findNearby() {
   return nearbyResident?.distance < 2.0 ? nearbyResident.resident : null;
 }
 
+function weatherKeeperProfile() {
+  const score = weatherObservatoryState.observations.length + weatherObservatoryState.correctForecasts * 3;
+  const stages = [
+    { level: 0, threshold: 0, name: "听风学徒", gift: "可以读取天气球与当前风向" },
+    { level: 1, threshold: 3, name: "观云者", gift: "可以根据云形推演下一时段" },
+    { level: 2, threshold: 8, name: "雨水记录员", gift: "可以保存不同天气样本" },
+    { level: 3, threshold: 15, name: "气象师", gift: "天气观察会形成知识经历卡" },
+    { level: 4, threshold: 26, name: "世界气候守望者", gift: "可以阅读生态与气候的长期联系" },
+  ];
+  let current = stages[0];
+  stages.forEach((stage) => { if (score >= stage.threshold) current = stage; });
+  return { ...current, score, accuracy: weatherObservatoryState.attempts ? Math.round((weatherObservatoryState.correctForecasts / weatherObservatoryState.attempts) * 100) : 0 };
+}
+
+function weatherArchiveKey(weather = currentWeatherProfile()) {
+  return `${livingDateKey()}-${weather.period.id}-${weather.id}`;
+}
+
+function observeWeatherInstruments() {
+  const weather = currentWeatherProfile();
+  const key = weatherArchiveKey(weather);
+  const alreadyObserved = weatherObservatoryState.observations.some((item) => item.key === key);
+  if (!alreadyObserved) {
+    const observation = {
+      key,
+      date: livingDateKey(),
+      period: weather.period.name,
+      hours: weather.period.hours,
+      weatherId: weather.id,
+      weather: weather.weather,
+      temperature: weather.temperature,
+      humidity: weather.humidity,
+      windDirection: weather.windDirection,
+      windSpeed: weather.windSpeed,
+      world: weather.world,
+      time: new Date().toISOString(),
+    };
+    weatherObservatoryState.observations.push(observation);
+    weatherObservatoryState.archives.push(observation);
+    inventory.archive += 1;
+    recordLifeGrowthAction("knowledge", `观测${weather.period.name}的${weather.weather}`, 1, { growthAbility: "learning", place: "听天观象台" });
+    addMemory(`气象观察：${weather.period.name}${weather.weather}`);
+  }
+  const keeper = weatherKeeperProfile();
+  setPanel(
+    `${weather.period.name} · ${weather.weather}`,
+    `天气球记录：${weather.temperature}℃，湿度 ${weather.humidity}%，${weather.windDirection}风 ${weather.windSpeed}级。${weather.world}；当前适合${weather.period.activity}。${alreadyObserved ? "这一时段已经进入天气档案。" : `新的观测让你成为「${keeper.name}」。`}`,
+  );
+  setPanelActions(weatherStationActions());
+  save();
+}
+
+function collectWeatherSample() {
+  const weather = currentWeatherProfile();
+  const key = weatherArchiveKey(weather);
+  if (weatherObservatoryState.collectedKeys.includes(key)) {
+    setPanel("样本已经收集", `${weather.period.name}的${weather.resource}已经取过一份。气象站只保存足够观察的量，不把天气变成无限矿点。`);
+    setPanelActions(weatherStationActions());
+    return;
+  }
+  weatherObservatoryState.collectedKeys.push(key);
+  inventory[weather.sampleKey] = (inventory[weather.sampleKey] || 0) + 1;
+  if (weather.isRain || weather.isSnow || weather.isFog) inventory.water += 1;
+  if (weather.isRainbow) {
+    inventory.seeds += 1;
+    inventory.contributionValue += 1;
+  }
+  recordCraftMaterial(weather.sampleKey, 1, `${weather.period.name}的${weather.resource}`, [`${weather.temperature}℃`, `湿度${weather.humidity}%`, `${weather.windDirection}风`], "听天观象台");
+  recordLifeGrowthAction("observation", `收集${weather.resource}`, 1, { place: "听天观象台" });
+  setPanel("天气样本", `你只取走一份「${weather.resource}」。它记住了${weather.period.name}、${weather.temperature}℃、湿度 ${weather.humidity}% 和${weather.windDirection}风；天空本身仍继续流动。`);
+  setPanelActions(weatherStationActions());
+  save();
+}
+
+function beginWeatherForecast() {
+  const forecast = weatherForecastProfile();
+  const fallbackIds = ["sunny", "rain", "wind", "mist", "starry", "snow"];
+  const optionIds = [...new Set([forecast.id, ...fallbackIds.filter((id) => id !== forecast.id)])].slice(0, 3);
+  const rotate = Math.abs(livingDateKey().length + currentWorldRhythmIndex()) % optionIds.length;
+  const ordered = [...optionIds.slice(rotate), ...optionIds.slice(0, rotate)];
+  setPanel("观云辨风", `下一时段是${forecast.period.name} ${forecast.period.hours}。根据现在的湿度、风向和云层，你判断天空会变成什么？`);
+  setPanelActions(ordered.map((id) => [
+    weatherConditionCatalog[id].weather,
+    () => resolveWeatherForecast(id, forecast),
+  ]));
+}
+
+function resolveWeatherForecast(selectedId, forecast) {
+  const correct = selectedId === forecast.id;
+  weatherObservatoryState.attempts += 1;
+  if (correct) {
+    weatherObservatoryState.correctForecasts += 1;
+    inventory.knowledgeSeed += 1;
+    recordLifeGrowthAction("learning", `读懂${forecast.period.name}前的云与风`, 1, { growthAbility: "learning", place: "听天观象台" });
+  }
+  weatherObservatoryState.forecasts.push({
+    date: livingDateKey(),
+    from: currentWorldRhythm().id,
+    to: forecast.period.id,
+    expected: forecast.id,
+    selected: selectedId,
+    correct,
+    time: new Date().toISOString(),
+  });
+  const clue = correct
+    ? `你从湿度和风向读出了「${forecast.weather}」。知识种子进入背包。`
+    : `天空最终会走向「${forecast.weather}」。错误没有被扣分，它会留在档案里，帮助你下次分辨相似云形。`;
+  setPanel(correct ? "预测吻合" : "天空给出新线索", `${clue} 当前预测准确率 ${weatherKeeperProfile().accuracy}%。`);
+  setPanelActions(weatherStationActions());
+  save();
+}
+
+function showWeatherArchive() {
+  const keeper = weatherKeeperProfile();
+  const recent = weatherObservatoryState.archives.slice(-4).reverse();
+  const archiveText = recent.length
+    ? recent.map((item) => item.resource
+      ? `${item.date} ${item.period}：在${item.place}发现${item.resource}`
+      : `${item.date} ${item.period}：${item.weather}，${item.temperature}℃，${item.windDirection}风`).join("；")
+    : "档案树上还没有天气叶片。先观察一次水晶天气球。";
+  setPanel(`天气档案 · ${keeper.name}`, `${archiveText}。观测 ${weatherObservatoryState.observations.length} 次，预测 ${weatherObservatoryState.correctForecasts}/${weatherObservatoryState.attempts || 0}。`);
+  setPanelActions(weatherStationActions());
+}
+
+function weatherStationActions() {
+  const weather = currentWeatherProfile();
+  return [
+    ["观察天气球", observeWeatherInstruments],
+    [`收集${weather.resource}`, collectWeatherSample],
+    ["观云辨风", beginWeatherForecast],
+    ["查看天气档案", showWeatherArchive],
+  ];
+}
+
+function interactWeatherStation() {
+  const weather = currentWeatherProfile();
+  const forecast = weatherForecastProfile();
+  setPanel(
+    "听天观象台",
+    `${weather.period.name} ${weather.period.hours}。水晶球显示${weather.weather}，${weather.temperature}℃，湿度 ${weather.humidity}%，${weather.windDirection}风 ${weather.windSpeed}级。下一时段是${forecast.period.name}；气象站建议：${weather.advice}`,
+  );
+  setPanelActions(weatherStationActions());
+}
+
+function seasonalRitualProfile() {
+  const term = currentSolarTerm();
+  const profiles = {
+    spring: {
+      name: "春生 · 新芽与春茶",
+      offering: "一盏新茶或一束初生花",
+      practice: "观察新芽，不催促还没有准备好的生命。",
+    },
+    summer: {
+      name: "夏长 · 艾草与荷风",
+      offering: "一束香草或一瓶雨水",
+      practice: "照顾水源与身体，文化记录不是医疗处方。",
+    },
+    autumn: {
+      name: "秋收 · 桂花与菊",
+      offering: "自己收集的桂花、菊花或一份当季食物",
+      practice: "感谢土地与同行者，把丰收的一部分交给别人。",
+    },
+    winter: {
+      name: "冬藏 · 松柏与暖茶",
+      offering: "一杯暖茶或一段被允许保存的记忆",
+      practice: "减少催促，让身体、土地和关系进入修复。",
+    },
+  };
+  return { term, ...profiles[term.season] };
+}
+
+function availableGoddessOffering(aspect) {
+  return aspect.offerings.find((offering) => (inventory[offering.key] || 0) > 0) || null;
+}
+
+function goddessHealthReflection(aspectId) {
+  if (aspectId !== "water") return "";
+  const body = bodyTreeProfile();
+  return `你的身体花园目前是「${body.stage}」。这里不诊断，也不提供神力加成；这次仪式只帮助你选择休息、补水、吃饭、散步或寻求现实支持。`;
+}
+
+function openGoddessAspect(aspectId) {
+  const aspect = goddessAspects[aspectId];
+  const seasonal = seasonalRitualProfile();
+  const offering = availableGoddessOffering(aspect);
+  goddessGardenState.selectedAspectId = aspectId;
+  setPanel(
+    `${aspect.name} · ${aspect.meaning}`,
+    `${aspect.name}是${aspect.meaning}的自然象征，不替人改变命运。${seasonal.term.name}的仪式建议是「${seasonal.offering}」；${seasonal.practice}${goddessHealthReflection(aspectId)}`,
+  );
+  const actions = [];
+  if (offering) actions.push([`献上${offering.name}`, () => prepareGoddessOffering(aspectId, false)]);
+  actions.push(["写下一句感谢", () => prepareGoddessOffering(aspectId, true)]);
+  actions.push(["回到生命泉", interactGoddessGarden]);
+  setPanelActions(actions);
+  save();
+}
+
+function prepareGoddessOffering(aspectId, gratitudeOnly) {
+  const aspect = goddessAspects[aspectId];
+  const seasonal = seasonalRitualProfile();
+  let offering = {
+    key: "gratitude",
+    name: `感谢${seasonal.term.name}仍让生命继续流动`,
+    source: "玩家亲自写下的感谢",
+  };
+  if (!gratitudeOnly) {
+    const available = availableGoddessOffering(aspect);
+    if (!available) {
+      setPanel("先准备，再祈愿", "背包里还没有适合的自制贡品。你可以去花园种花、到气象站收集雨露、去农场收获，或者只写下一句真实的感谢。");
+      setPanelActions([["写下一句感谢", () => prepareGoddessOffering(aspectId, true)], ["回到四象", interactGoddessGarden]]);
+      return;
+    }
+    inventory[available.key] -= 1;
+    offering = { ...available, source: "玩家亲手采集、培育或制作" };
+  }
+  goddessGardenState.offering = offering;
+  goddessGardenState.archive.push({
+    event: "offering",
+    aspectId,
+    offering: offering.name,
+    term: seasonal.term.name,
+    time: new Date().toISOString(),
+  });
+  setPanel(
+    "贡品已经准备好",
+    `你把「${offering.name}」放在生命泉边。它不是购买祝福的价格，只证明你愿意先付出照料。现在选择一个你真正愿意完成的行动。`,
+  );
+  setPanelActions(aspect.actions.map((actionId) => {
+    const action = goddessWishActions[actionId];
+    return [action.name, () => beginGoddessWish(aspectId, actionId)];
+  }));
+  save();
+}
+
+function beginGoddessWish(aspectId, actionId) {
+  const aspect = goddessAspects[aspectId];
+  const action = goddessWishActions[actionId];
+  const wishId = `ritual-wish-${Date.now()}`;
+  const process = startTraceProcess(
+    "wish",
+    `${aspect.name} · ${action.name}`,
+    "wish",
+    wishId,
+    ["准备贡品", "写下愿望", "采取行动", "获得支持", "生根"],
+  );
+  goddessGardenState.activeWish = {
+    id: wishId,
+    aspectId,
+    actionId,
+    offering: goddessGardenState.offering,
+    traceProcessId: process.id,
+    status: "waiting-action",
+    createdAt: new Date().toISOString(),
+    term: currentSolarTerm().name,
+  };
+  advanceTraceProcess(process, "写下愿望", `${goddessGardenState.activeWish.offering.name}被放在生命泉边，愿望等待真实行动。`, "growing", "ritual");
+  goddessGardenState.offering = null;
+  setPanel(
+    `${aspect.name} · 愿望种子尚未发芽`,
+    `你没有得到即时奖励。愿望现在需要「${action.name}」：${action.place}。完成后，行动会把它变成真正的生命种子。`,
+  );
+  setPanelActions([
+    ["记住行动方向", () => showGoddessWishDirection()],
+    ["去求助花圃寻找支持", openHelpGarden],
+    ["让愿望暂时休眠", pauseGoddessWish],
+  ]);
+  addMemory(`四象生命仪庭：向${aspect.name}写下一个需要行动的愿望`);
+  save();
+}
+
+function showGoddessWishDirection() {
+  const wish = goddessGardenState.activeWish;
+  if (!wish) {
+    interactGoddessGarden();
+    return;
+  }
+  const action = goddessWishActions[wish.actionId];
+  setPanel("行动比祈求更接近改变", `${action.place}。蒲公英会记住这个愿望，但不会催促、连续打卡或代替你完成。`);
+  setPanelActions([["回到生命泉", interactGoddessGarden], ["需要别人帮忙", openHelpGarden]]);
+}
+
+function pauseGoddessWish() {
+  const wish = goddessGardenState.activeWish;
+  if (!wish) return;
+  wish.status = "dormant";
+  goddessGardenState.archive.push({ event: "wish-dormant", ...wish, time: new Date().toISOString() });
+  goddessGardenState.activeWish = null;
+  setPanel("愿望进入冬藏", "没有完成也不会失败。它被放进仪庭档案，等你真正有时间、力量或支持时再重新开始。");
+  setPanelActions([["回到四象", interactGoddessGarden]]);
+  save();
+}
+
+function completeGoddessWish(actionId, source) {
+  const wish = goddessGardenState.activeWish;
+  if (!wish || wish.status !== "waiting-action" || wish.actionId !== actionId) return false;
+  const aspect = goddessAspects[wish.aspectId];
+  const action = goddessWishActions[actionId];
+  wish.status = "complete";
+  wish.completedAt = new Date().toISOString();
+  wish.source = source;
+  goddessGardenState.completedWishes.push({ ...wish });
+  goddessGardenState.completedWishes = goddessGardenState.completedWishes.slice(-24);
+  goddessGardenState.blessing += 1;
+  goddessGardenState.spring.water += 1;
+  inventory.wishSeed += 1;
+  createLifeSeed(aspect.seedType, {
+    name: `${aspect.name} · ${action.name}种子`,
+    source: `${wish.offering.name}与真实行动`,
+    payload: `${source}让愿望从语言变成经历。`,
+    place: "女神花园 · 四象生命仪庭",
+    growthDirection: action.name,
+  });
+  addLifeValue(aspect.value, 1);
+  recordLifeGrowthAction(action.growth, action.name, 1, { growthAbility: action.ability, place: "四象生命仪庭", sourceId: wish.id });
+  goddessGardenState.archive.push({
+    event: "wish-complete",
+    wishId: wish.id,
+    aspectId: wish.aspectId,
+    actionId,
+    source,
+    time: wish.completedAt,
+  });
+  advanceTraceProcess(wish.traceProcessId, "生根", `${source}让愿望从表达变成经历。`, "complete", "ritual");
+  setPanel(
+    "愿望已经生根",
+    `${source}完成了「${action.name}」。${aspect.name}没有替你制造奇迹；贡品、行动和支持共同让愿望长成一颗生命种子。福泽表示这份照料已经流回社区，不是个人幸运值。`,
+  );
+  setPanelActions([["把一份照料交给别人", openHelpGarden], ["回到生命泉", interactGoddessGarden]]);
+  addMemory(`四象生命仪庭：${action.name}让愿望生根`);
+  save();
+  return true;
+}
+
+function newGoddessWish() {
+  goddessGardenState.activeWish = null;
+  goddessGardenState.selectedAspectId = null;
+  goddessGardenState.offering = null;
+  interactGoddessGarden();
+  save();
+}
+
+function helpSeedProfile(kind) {
+  const profiles = {
+    learning: { title: "我需要一起学习的人", detail: "需要一份知识、一种方法或一次耐心解释。", key: "knowledgeSeed", actionId: "connect" },
+    partner: { title: "我需要一位同行伙伴", detail: "需要有人回应，一起完成一件小事。", key: "letters", actionId: "connect" },
+    repair: { title: "我的花园需要修复", detail: "需要一颗种子、一瓶水或一份堆肥。", key: "seeds", actionId: "restore" },
+  };
+  return profiles[kind];
+}
+
+function plantHelpSeed(kind) {
+  const profile = helpSeedProfile(kind);
+  goddessGardenState.helpSeeds.push({
+    id: `help-seed-${Date.now()}`,
+    owner: "风芽",
+    kind,
+    title: profile.title,
+    detail: profile.detail,
+    care: 0,
+    status: "waiting",
+  });
+  setPanel("求助种子已经放下", "它不会公开隐私，也不会换来同情分。社区只看见你愿意公开的需要；你可以随时让它休眠。");
+  setPanelActions([["看看别人的求助", openHelpGarden], ["回到生命泉", interactGoddessGarden]]);
+  save();
+}
+
+function respondToHelpSeed() {
+  const seed = goddessGardenState.helpSeeds.find((item) => item.owner !== "风芽" && item.status === "waiting");
+  if (!seed) {
+    setPanel("求助花圃", "眼前没有等待回应的公开种子。你可以安静离开，不需要为了获得贡献而制造帮助。");
+    setPanelActions([["回到生命泉", interactGoddessGarden]]);
+    return;
+  }
+  const profile = helpSeedProfile(seed.kind);
+  const alternatives = seed.kind === "repair" ? ["seeds", "water", "compost"] : seed.kind === "learning" ? ["knowledgeSeed", "archive"] : ["letters", "relationSeed"];
+  const resourceKey = alternatives.find((key) => (inventory[key] || 0) > 0);
+  if (!resourceKey) {
+    setPanel("先准备能给出的东西", `这颗种子需要真实支持：${seed.detail}。你的背包里暂时没有合适资源，可以先去探索、学习或写信，之后再回来。`);
+    setPanelActions([["回到求助花圃", openHelpGarden]]);
+    return;
+  }
+  inventory[resourceKey] -= 1;
+  seed.care += 1;
+  seed.status = "supported";
+  goddessGardenState.blessing += 1;
+  goddessGardenState.spring.community += 1;
+  state.friendship += 1;
+  addLifeValue("harmony", 1);
+  addLifeValue("contribution", 1);
+  if (seed.kind === "repair") recordEnvironmentChange("restoration", 1, "回应求助花圃的土地修复种子");
+  recordLifeGrowthAction(seed.kind === "repair" ? "restoration" : "relation", `回应：${seed.title}`, 1, { place: "求助花圃", sourceId: seed.id });
+  completeGoddessWish(profile.actionId, `你回应了「${seed.title}」`);
+  setPanel("一颗求助种子得到回应", `你交出了一份真实资源，${seed.title}不再独自等待。福泽进入生命泉，代表社区多了一次互助记录，而不是神明返还的奖励。`);
+  setPanelActions([["继续看求助花圃", openHelpGarden], ["回到生命泉", interactGoddessGarden]]);
+  addMemory(`求助花圃：回应${seed.title}`);
+  save();
+}
+
+function openHelpGarden() {
+  const waiting = goddessGardenState.helpSeeds.find((item) => item.owner !== "风芽" && item.status === "waiting");
+  const mine = goddessGardenState.helpSeeds.filter((item) => item.owner === "风芽" && item.status === "waiting").length;
+  setPanel(
+    "求助花圃 · Help Garden",
+    `${waiting ? `一颗公开种子写着：「${waiting.title}」。${waiting.detail}` : "今天没有陌生求助正在等待。"} 你自己有 ${mine} 颗求助种子在安静生长。求助不是乞讨，而是允许关系参与修复。`,
+  );
+  const actions = [];
+  if (waiting) actions.push(["回应眼前的种子", respondToHelpSeed]);
+  actions.push(["放下学习求助", () => plantHelpSeed("learning")]);
+  actions.push(["寻找同行伙伴", () => plantHelpSeed("partner")]);
+  actions.push(["请求花园修复", () => plantHelpSeed("repair")]);
+  actions.push(["回到生命泉", interactGoddessGarden]);
+  setPanelActions(actions);
+}
+
+function interactGoddessGarden() {
+  const active = goddessGardenState.activeWish;
+  const seasonal = seasonalRitualProfile();
+  if (active?.status === "waiting-action") {
+    const aspect = goddessAspects[active.aspectId];
+    const action = goddessWishActions[active.actionId];
+    setPanel(
+      `${aspect.name} · 愿望正在等待行动`,
+      `${active.offering.name}已经留在泉边。接下来不是再次祈求，而是「${action.name}」：${action.place}。`,
+    );
+    setPanelActions([["查看行动方向", showGoddessWishDirection], ["去求助花圃", openHelpGarden], ["让愿望休眠", pauseGoddessWish]]);
+    return;
+  }
+  if (active?.status === "complete") {
+    const aspect = goddessAspects[active.aspectId];
+    setPanel(
+      `生命泉 · ${aspect.name}愿望已开花`,
+      `仪庭保存了${goddessGardenState.completedWishes.length}次“愿望变行动”的经历，生命泉汇入 ${goddessGardenState.spring.water} 份个人照料与 ${goddessGardenState.spring.community} 份社区支持。`,
+    );
+    setPanelActions([["开始新的愿望", newGoddessWish], ["去求助花圃", openHelpGarden]]);
+    return;
+  }
+  setPanel(
+    "女神花园 · 四象生命仪庭",
+    `${seasonal.term.name}，${seasonal.name}。花、水、地、光不是万能神，而是天空、大地、身体与心灵的四面镜子。准备一份自己种植、采集、制作或写下的贡品，再选择一件愿意真正去做的事。`,
+  );
+  setPanelActions([
+    ["花 · 生长与美", () => openGoddessAspect("flower")],
+    ["水 · 恢复与流动", () => openGoddessAspect("water")],
+    ["地 · 养育与根基", () => openGoddessAspect("earth")],
+    ["光 · 希望与方向", () => openGoddessAspect("light")],
+    ["求助花圃", openHelpGarden],
+  ]);
+}
+
 function interact() {
   const target = state.near;
   if (!target) {
@@ -4268,6 +7724,7 @@ function interact() {
     return;
   }
 
+  recordPlaceVisit(target);
   if (markGenesisRoute(target)) return;
 
   if (target.kind === "worldTree") {
@@ -4331,7 +7788,12 @@ function interact() {
   }
 
   if (target.kind === "stone") {
-    tendFamilyMemoryHouse();
+    const ancientRecord = natureKnowledgeRecord("ancient-seabed").record;
+    if (ancientRecord.stage < natureKnowledgeStages.length - 1) {
+      advanceNatureKnowledge("ancient-seabed");
+    } else {
+      tendFamilyMemoryHouse();
+    }
     return;
   }
 
@@ -4342,6 +7804,16 @@ function interact() {
 
   if (target.kind === "chapel") {
     interactDandelionChapel();
+    return;
+  }
+
+  if (target.kind === "goddessGarden") {
+    interactGoddessGarden();
+    return;
+  }
+
+  if (target.kind === "weatherStation") {
+    interactWeatherStation();
     return;
   }
 
@@ -4361,7 +7833,12 @@ function interact() {
   }
 
   if (target.kind === "craft") {
-    craftItem();
+    interactCraftStudio();
+    return;
+  }
+
+  if (target.kind === "buildSite") {
+    interactLifeBuildSite();
     return;
   }
 
@@ -4401,7 +7878,7 @@ function interact() {
     return;
   }
 
-  const text = target.text || `${target.name}看见了 Dead Night，轻轻晃了晃。`;
+  const text = target.text || `${target.name}看见了 风芽，轻轻晃了晃。`;
   setPanel(target.title || target.name, text);
 
   if (!interacted.has(target.id)) {
@@ -4438,21 +7915,22 @@ function markGenesisRoute(target) {
 function fishAtLake() {
   const fish = currentWordFish();
   const stage = wordFishProgress[fish.id] || 0;
+  const grams = wordFishWeight(fish);
   interacted.add("lake");
 
   if (stage === 0) {
     wordFishProgress[fish.id] = 1;
-    setPanel("发现词语鱼", `一条透明小鱼从${fish.water}游过，鱼身上只有「???」。Dead Night 说：它不是用网捕的，要先理解它。线索：${fish.clue}`);
+    setPanel("词鱼", `??? · ${grams}g · ${fish.clue}`);
     addMemory(`词语鱼塘：第一次遇见 ${fish.rarity} 词鱼`);
     markLifeRhythmAction(["learning", "exploration"], `遇见词语鱼${fish.word}`);
-    setPanelActions([["去听真实水声", () => startSlowLifeInvitation("rain")]]);
+    setPanelActions([["听水", () => startSlowLifeInvitation("rain")]]);
     save();
     return;
   }
 
   if (stage === 1) {
     wordFishProgress[fish.id] = 2;
-    setPanel("鱼的记忆空间", `${fish.meaning} 再次遇见它时，说出它的名字：${fish.word}。`);
+    setPanel(fish.root, `${fish.parts.join(" + ")} → ${fish.word}`);
     addMemory(`鱼的记忆空间：理解 ${fish.word}`);
     markLifeRhythmAction(["learning"], `理解词语鱼${fish.word}`);
     save();
@@ -4476,13 +7954,13 @@ function fishAtLake() {
     if (fish.word.toLowerCase().includes("star") || currentTimeLabel() === "Night") inventory.starWater += 1;
     state.seed += fish.rarity === "Legendary" ? 5 : fish.rarity === "Rare" ? 3 : 1;
     advanceDemo(2);
-    setPanel("捕获知识生命", `你真正认识了「${fish.word}」。它进入你的 Knowledge Pond。${rule.id === "knowledge" ? "生物机械知识城把这次理解同步成一片新档案叶。" : "它会提醒你：学习是遇见一个世界。"}`);
-    addMemory(`Knowledge Pond：捕获 ${fish.word}`);
+    setPanel("入池", `${fish.word} · ${grams}g`);
+    addMemory(`词鱼池：捕获 ${fish.word}`);
     save();
     return;
   }
 
-  setPanel("Knowledge Pond", `「${fish.word}」已经在你的知识池里。以后可以把词鱼送给朋友，或者用它触发生活任务。`);
+  setPanel("词鱼池", `${fish.rootMeaning} · ${fish.word} · ${grams}g`);
   save();
 }
 
@@ -4742,7 +8220,7 @@ function beginCompanionBond(typeId) {
   createLifeSeed("relationship", {
     name: `${bond.name}种子`,
     source: "朋友花园的双向回应",
-    relationships: ["Dead Night", "远方照料者"],
+    relationships: ["风芽", "远方照料者"],
     growthDirection: "共识花园",
   });
   syncAllianceNetwork();
@@ -4934,7 +8412,7 @@ function visitFriendGarden() {
     createLifeSeed("relationship", {
       name: "共同花园种子",
       source: "两位生命交换蒲公英信物",
-      relationships: ["Dead Night", "远方照料者"],
+      relationships: ["风芽", "远方照料者"],
       growthDirection: "双生共同树",
     });
     addFamilyRecord("家庭建立仪式", "两颗种子选择共同生长", "不是血缘证明，也不是占有契约；两位照料者承诺共同维护一座花园。");
@@ -4951,6 +8429,14 @@ function visitFriendGarden() {
     advanceDemo(4);
     setPanel("家庭建立仪式", `你们交换了透明蒲公英信物。${federationState.familyName}从两片叶子开始生长；这里不问血缘，只记录谁愿意一起照顾生命。`);
     addMemory("朋友花园：共同树第一次萌芽");
+    recordTrace({
+      kind: "empathy",
+      title: "共同花园 · 第一次萌芽",
+      subjectType: "relationship",
+      subjectId: "family-garden",
+      stage: "建立",
+      detail: "两位照料者交换信物，并共同决定照顾同一片土地。",
+    });
     markLifeRhythmAction(["relation"], "建立共同花园");
     save();
     return;
@@ -4975,6 +8461,14 @@ function visitFriendGarden() {
   const token = familyTokenProfile();
   setPanel("共同花园", `你们一起给共同树浇水。蒲公英信物已经长到「${token.name}」；它记录持续的照顾，而不是相识天数。`);
   addMemory(`共同花园：信物长成${token.name}`);
+  recordTrace({
+    kind: "empathy",
+    title: `共同花园 · ${token.name}`,
+    subjectType: "relationship",
+    subjectId: "family-garden",
+    stage: "共同照料",
+    detail: "这段关系因一次真实的共同照顾继续生长。",
+  });
   markLifeRhythmAction(["relation"], "照顾共同花园");
   save();
 }
@@ -4987,7 +8481,7 @@ function writeLetter() {
   createLifeSeed("relationship", {
     name: "风信关系种子",
     source: "打开并回应漂流瓶",
-    relationships: ["远方来信者", "Dead Night 种子守护者"],
+    relationships: ["远方来信者", "风芽 种子守护者"],
     growthDirection: "回应藤蔓",
   });
   absorbDandelionNutrient("wind", 1, "蒲公英邮局");
@@ -5027,15 +8521,28 @@ function writeLetter() {
   }
   setPanel(panelTitle, panelText);
   addMemory(memoryText);
+  recordTrace({
+    kind: "empathy",
+    title: panelTitle,
+    subjectType: "relationship",
+    subjectId: "wind-letter",
+    stage: "回应",
+    detail: "一段远方信息被打开、理解，并得到真实回应。",
+  });
   completeFoodEnergyAction("回应一封真实来信", "relationship");
   markLifeRhythmAction(["relation", "emotion"], "回应一封风信");
-  setPanelActions([["联系真实的人", () => startSlowLifeInvitation("relation")]]);
+  setPanelActions([
+    ["联系真实的人", () => startSlowLifeInvitation("relation")],
+    ["进入时间胶囊室", sealTraceTimeCapsule],
+    ["查看生命藤蔓", showTraceMap],
+  ]);
+  completeGoddessWish("connect", "你在风信驿回应了一段真实关系");
   save();
 }
 
 function tendFamilyMemoryHouse() {
   if (!federationState.gardenCreated) {
-    setPanel("记忆石碑", "石碑可以保存关系留下的痕迹。先用蒲公英信物建立一座共同花园，这里才会长出属于你们的记忆屋。");
+    setPanel("万物有灵碑", "古海床的生命档案已经被认识。碑身还可以保存关系留下的痕迹；先用蒲公英信物建立共同花园，这里才会长出属于你们的记忆枝。");
     return;
   }
 
@@ -5137,17 +8644,17 @@ function interactHealingGarden() {
 
   if (["idle", "withdrawn"].includes(healing.stage)) {
     const seed = createLifeSeed("memory", {
-      name: "Dead Night 的私人记忆种子",
+      name: "风芽 的私人记忆种子",
       source: "个人记忆保险箱",
       payload: "原始内容保持私人",
-      relationships: ["Dead Night"],
+      relationships: ["风芽"],
       growthDirection: "双向记忆花",
     });
     seed.visibility = "private";
-    seed.owner = "Dead Night";
+    seed.owner = "风芽";
     healing.firstSeed = {
       id: seed.id,
-      owner: "Dead Night",
+      owner: "风芽",
       shared: false,
       approvedExcerpt: "我有一段过去，希望先被安静地保存。",
     };
@@ -5369,18 +8876,21 @@ function returnHome() {
   recordLifeBalanceAction("回家整理生命记忆");
   createLifeSeed("memory", {
     name: "今日记忆种子",
-    source: "Dead Night 整理今日生命记录",
+    source: "风芽 整理今日生命记录",
     payload: summary.join("、") || "安静的一天",
     growthDirection: "今日记忆花",
   });
   interacted.add("home");
-  setPanel("今日生命记录", summary.length ? `Dead Night 整理了今天：${summary.join("、")}。这个世界因为你的生活留下了痕迹。` : "Dead Night 还在等今天的故事。去湖边、集市或朋友花园走一走，再回家。");
+  setPanel("今日生命记录", summary.length ? `风芽 整理了今天：${summary.join("、")}。这个世界因为你的生活留下了痕迹。` : "风芽 还在等今天的故事。去湖边、集市或朋友花园走一走，再回家。");
   addMemory("回家：生成今日生命记录");
   markLifeRhythmAction(["body", "emotion"], "回家休息并整理今天");
   setPanelActions([
     ["看最近一段经历", showLatestExperienceCard],
     ["把屏幕留在这里", () => startSlowLifeInvitation(currentTimeLabel() === "Night" ? "evening" : null)],
+    ["查看生命藤蔓", showTraceMap],
+    ["封存这个阶段", sealTraceTimeCapsule],
   ]);
+  completeGoddessWish("rest", "你回到听风小院，让身体和今天一起收束");
   save();
 }
 
@@ -5398,9 +8908,20 @@ function plantLifeSeed() {
     addLifeValue("contribution", 1);
     recordTavernDiscovery("creation", "照料种子直到精灵出生", 1, { growthAbility: "empathy" });
     recordLifeBalanceAction("照顾新生精灵", { emotion: -1, relationship: -0.5 });
+    const plantProcess = latestGrowingTraceProcess("plant");
+    if (plantProcess) {
+      advanceTraceProcess(
+        plantProcess,
+        "开花与诞生",
+        "它记住天气、知识与陪伴，从嫩芽长成一只愿意回应世界的小精灵。",
+        "complete",
+        "stewardship",
+      );
+    }
     setPanel("新小精灵出生", "种子记住了你的天气、知识和回应，终于长出一只小精灵。它不是奖励，而是你今天参与世界的回声。");
     addMemory("个人生命花园：新小精灵出生");
     markLifeRhythmAction(["creation", "emotion"], "照顾新生精灵");
+    completeGoddessWish("plant", "你在百草园把一颗种子照顾到诞生新生命");
     save();
     return;
   }
@@ -5428,9 +8949,24 @@ function plantLifeSeed() {
   addLifeValue("growth", 2);
   recordTavernDiscovery("creation", "把现实种子种进个人花园", 1, { place: "私人花园" });
   recordLifeBalanceAction("把现实种进私人花园", { emotion: -0.5, time: 0.25 });
+  const plantProcess = startTraceProcess(
+    "plant",
+    "百草园的新生命",
+    "plant",
+    `garden-plant-${Date.now()}`,
+    ["播种", "吸收天气", "萌芽", "开花", "诞生精灵"],
+  );
+  advanceTraceProcess(
+    plantProcess,
+    "播种",
+    "一颗来自森林的现实种子进入私人花园，携带着采集路线、今日天气与浇灌者。",
+    "growing",
+    "stewardship",
+  );
   setPanel("种下现实种子", "你把森林带回来的种子种进私人花园。它吸收了今天的天气和知识，下一次回来会长出一只新的小精灵。");
   addMemory("个人生命花园：种下一颗现实种子");
   markLifeRhythmAction(["creation", "body"], "把一颗种子种进花园");
+  completeGoddessWish("plant", "你在百草园亲手种下一颗现实种子");
   save();
 }
 
@@ -5529,17 +9065,23 @@ function harvestForest() {
   const rule = livingRuleProfile();
   const today = livingCalendarProfile();
   inventory.seeds += rule.id === "nature" ? 2 : 1;
-  inventory.mushrooms += weather.weather === "小雨" || state.tick % 2 === 0 ? 1 : 0;
+  inventory.mushrooms += weather.isRain || state.tick % 2 === 0 ? 1 : 0;
   inventory.herbs += rule.phase === "strained" ? 0 : 1;
   inventory.wood += 1;
+  inventory.resin += rule.phase === "strained" ? 0 : 1;
+  const foundStone = state.tick % 3 === 0 ? 1 : 0;
+  inventory.stone += foundStone;
+  recordCraftMaterial("wood", 1, `${today.term.name}的古树森林边缘`, ["观察后有限采集"], "风芽");
+  if (rule.phase !== "strained") recordCraftMaterial("resin", 1, "古树自然分泌的树脂露", ["没有伤害树干"], "风芽");
+  if (foundStone) recordCraftMaterial("stone", 1, "林下旧河床", ["根系旁的地表石"], "风芽");
   const seasonalFinding = collectSolarTermFinding(today);
-  if (weather.weather === "小雨") inventory.water += 1;
-  if (weather.weather === "小雨") inventory.driftBottle += 1;
+  if (weather.isRain) inventory.water += 1;
+  if (weather.isRain) inventory.driftBottle += 1;
   if (currentTimeLabel() === "Night") inventory.starWater += 1;
   createLifeSeed("place", {
     name: "森林地方种子",
     source: "观察森林、天气与土地",
-    growthDirection: weather.weather === "小雨" ? "雨林地图节点" : "晨光森林节点",
+    growthDirection: weather.isRain ? "雨林地图节点" : "晨光森林节点",
   });
   absorbDandelionNutrient("soil", 1, "森林行动");
   addLifeValue("growth", 1);
@@ -5550,7 +9092,7 @@ function harvestForest() {
   state.seed += 1;
   interacted.add("forest");
   advanceDemo(1);
-  setPanel("带走一份当季材料", `${today.term.name}让森林出现「${seasonalFinding}」。你采到了蒲公英种子、药草和木材。${rule.id === "nature" ? "森林文明已经学会伴生采集，土地压力更小。" : weather.weather === "小雨" ? "雨水还把一只漂流瓶冲到了林边。" : "天气改变了今天的材料刷新。"}林下空地会记住这次取用；下次来可以补种，或把有限的水送向别处。`);
+  setPanel("带走一份当季材料", `${today.term.name}让森林出现「${seasonalFinding}」。你采到了蒲公英种子、药草、树脂和木材，偶尔还能在根边发现石材。${rule.id === "nature" ? "森林文明已经学会伴生采集，土地压力更小。" : weather.isRain ? "雨水还把一只漂流瓶冲到了林边。" : "天气改变了今天的材料刷新。"}林下空地会记住这次取用；下次来可以补种，或把有限的水送向别处。`);
   addMemory("森林区域：采集材料");
   setPanelActions([
     ["补种一颗", replantForest],
@@ -5604,6 +9146,7 @@ function replantForest() {
   completeFoodEnergyAction("补种森林", "place");
   setPanel("森林进入恢复期", "你没有把一次补种变成赎罪分数。新芽只是接住了前一次采集留下的空地，精灵会慢慢回来。 ");
   addMemory("古树森林：在取用后补种一颗本地种子");
+  completeGoddessWish("restore", "你在古树森林把一颗本地种子还给土地");
   save();
   renderHud();
 }
@@ -5668,53 +9211,453 @@ function joinWorldEvent() {
   save();
 }
 
-function craftItem() {
-  if (inventory.seeds < 1 || inventory.starWater < 1 || inventory.wood < 1) {
-    const failure = archiveWorldFailure("star-lamp-materials", "未完成的星愿灯", "材料不足让灯没有点亮，但组合方式被世界记住了。");
-    setPanel("失败植物档案", `配方需要：蒲公英种子 1、星光水 1、木材 1。${failure.title}没有被删除，它已经沉淀成遗迹；以后补齐材料时会成为改良配方。`);
-    addMemory(`失败遗迹：${failure.title}`);
+function lifeCraftingRecipe(recipeId = craftingState.selectedRecipeId) {
+  return lifeCraftingRecipes.find((recipe) => recipe.id === recipeId) || lifeCraftingRecipes[0];
+}
+
+function highestLifeBuildingTier() {
+  return craftingState.structures.reduce(
+    (highest, structure) => structure.status === "active" ? Math.max(highest, structure.tier || 0) : highest,
+    0,
+  );
+}
+
+function lifeProductionProfessionProfile() {
+  const scores = {
+    ...craftingState.professionActions,
+    gardener: craftingState.professionActions.gardener + seedFarmState.variants.length + Math.floor(state.eco / 3),
+    cook: craftingState.professionActions.cook + foodLifeState.dishes.length,
+  };
+  const catalog = {
+    carpenter: { name: "木匠", role: "让地方木材进入生活空间" },
+    gardener: { name: "园艺师", role: "让建筑与生态共同生长" },
+    artisan: { name: "工匠", role: "发现材料之间的新关系" },
+    cook: { name: "厨师", role: "把土地与文化带到餐桌" },
+    architect: { name: "建筑师", role: "组织空间与公共协作" },
+    researcher: { name: "研究者", role: "从未知组合中发现新材料" },
+  };
+  const [id, score] = Object.entries(scores).sort((a, b) => b[1] - a[1])[0] || ["artisan", 0];
+  return { id, score, ...catalog[id] };
+}
+
+function lifeBuildingProfile() {
+  const tier = highestLifeBuildingTier();
+  const stage = lifeBuildingStages[tier] || lifeBuildingStages[0];
+  const structures = craftingState.structures.filter((structure) => structure.status === "active");
+  const latest = structures[structures.length - 1] || null;
+  return {
+    stage,
+    structures,
+    latest,
+    profession: lifeProductionProfessionProfile(),
+    next: lifeBuildingStages[Math.min(lifeBuildingStages.length - 1, tier + 1)],
+  };
+}
+
+function lifeMaterialName(key) {
+  return craftingMaterialCatalog[key]?.name || livingInventoryIcons[key]?.[1] || key;
+}
+
+function recipeCostText(recipe) {
+  return Object.entries(recipe.cost)
+    .map(([key, amount]) => `${lifeMaterialName(key)} ${amount}`)
+    .join(" + ");
+}
+
+function publicRecipe(recipe) {
+  return recipe.kind === "build" && recipe.tier >= 5;
+}
+
+function publicPoolFor(recipe) {
+  if (!publicRecipe(recipe) || craftingState.publicProject.recipeId !== recipe.id) return {};
+  return craftingState.publicProject.pooled;
+}
+
+function availableRecipeMaterial(recipe, key) {
+  return (inventory[key] || 0) + (publicPoolFor(recipe)[key] || 0);
+}
+
+function recipeMaterialShortages(recipe) {
+  return Object.entries(recipe.cost)
+    .filter(([key, amount]) => availableRecipeMaterial(recipe, key) < amount)
+    .map(([key, amount]) => `${lifeMaterialName(key)} ${availableRecipeMaterial(recipe, key)}/${amount}`);
+}
+
+function lifeRecipeRequirement(recipe) {
+  if (recipe.kind !== "build") return { ok: true, reason: "" };
+  if (recipe.tier > highestLifeBuildingTier() + 1) {
+    return { ok: false, reason: `先让建造地成长到${lifeBuildingStages[recipe.tier - 1].name}` };
+  }
+  if (recipe.tier === 4 && state.eco < 2) {
+    return { ok: false, reason: "庭院需要至少两段生态修复痕迹" };
+  }
+  const allianceNeed = { 5: 2, 6: 4, 7: 6 }[recipe.tier];
+  if (allianceNeed && allianceDerivedStage() < allianceNeed) {
+    return { ok: false, reason: `共同体需要先成长到${allianceStageCatalog[allianceNeed].name}` };
+  }
+  return { ok: true, reason: "" };
+}
+
+function recordCraftMaterial(key, amount, source, inputs = [], relation = "风芽") {
+  const material = craftingMaterialCatalog[key] || { name: lifeMaterialName(key), property: "仍在被认识", origin: source };
+  const entry = {
+    id: `material-${Date.now()}-${craftingState.materialLedger.length}`,
+    key,
+    name: material.name,
+    amount,
+    source,
+    origin: material.origin,
+    property: material.property,
+    inputs,
+    relation,
+    weather: currentWeatherProfile().weather,
+    season: currentSolarTerm().name,
+    createdAt: new Date().toISOString(),
+  };
+  craftingState.materialLedger.push(entry);
+  craftingState.materialLedger = craftingState.materialLedger.slice(-80);
+  return entry;
+}
+
+function recipeMaterialLineage(recipe) {
+  return Object.keys(recipe.cost).map((key) => {
+    const trace = [...craftingState.materialLedger].reverse().find((entry) => entry.key === key);
+    return trace ? `${lifeMaterialName(key)}：${trace.source}` : `${lifeMaterialName(key)}：${craftingMaterialCatalog[key]?.origin || "生命背包"}`;
+  });
+}
+
+function consumeLifeRecipe(recipe) {
+  const pool = publicPoolFor(recipe);
+  Object.entries(recipe.cost).forEach(([key, amount]) => {
+    const pooled = Math.min(pool[key] || 0, amount);
+    if (pooled) pool[key] -= pooled;
+    inventory[key] = Math.max(0, (inventory[key] || 0) - (amount - pooled));
+  });
+}
+
+function discoverLifeRecipe() {
+  const recipe = lifeCraftingRecipes.find(
+    (candidate) => !craftingState.discoveredRecipeIds.includes(candidate.id) && candidate.discover(),
+  );
+  if (!recipe) {
+    const profile = lifeBuildingProfile();
+    setPanel("材料仍在沉默", `目前没有新的关系显现。${profile.next.tier > profile.stage.tier ? `下一层是「${profile.next.name}」，先使用现有作品、恢复生态或与伙伴形成共识。` : "这片土地已经长出完整的文明结构。"}`);
+    setPanelActions([["查看生产谱系", showLifeProductionLineage], ["切换现有图纸", cycleLifeRecipe]]);
+    return null;
+  }
+
+  craftingState.discoveredRecipeIds.push(recipe.id);
+  craftingState.selectedRecipeId = recipe.id;
+  craftingState.experiments.push({
+    id: `experiment-${Date.now()}-${recipe.id}`,
+    recipeId: recipe.id,
+    result: "discovered",
+    materials: Object.keys(recipe.cost),
+    day: tavernState.day,
+  });
+  craftingState.professionActions.researcher += 1;
+  inventory.blueprints += 1;
+  addLifeValue("growth", 1);
+  setPanel("新配方从材料里长出来", `你发现了「${recipe.name}」：${recipeCostText(recipe)}。${recipe.story} 这张图纸记录了观察过程，不是商店解锁。`);
+  setPanelActions([[`尝试${recipe.name}`, () => craftLifeRecipe(recipe.id)], ["查看生产谱系", showLifeProductionLineage]]);
+  addMemory(`配方发现：${recipe.name}`);
+  save();
+  return recipe;
+}
+
+function cycleLifeRecipe() {
+  const known = craftingState.discoveredRecipeIds
+    .map((id) => lifeCraftingRecipe(id))
+    .filter(Boolean);
+  const currentIndex = Math.max(0, known.findIndex((recipe) => recipe.id === craftingState.selectedRecipeId));
+  const recipe = known[(currentIndex + 1) % known.length] || lifeCraftingRecipes[0];
+  craftingState.selectedRecipeId = recipe.id;
+  if (publicRecipe(recipe) && craftingState.publicProject.recipeId !== recipe.id) {
+    craftingState.publicProject = { recipeId: recipe.id, pooled: {}, contributors: [] };
+  }
+  setPanel("图纸换到工作台上", `${recipe.name} · ${recipe.kind === "process" ? "基础加工" : recipe.kind === "item" ? "生活物" : lifeBuildingStages[recipe.tier].name}。需要：${recipeCostText(recipe)}。${recipe.story}`);
+  setCraftStudioActions(recipe);
+  save();
+}
+
+function setCraftStudioActions(recipe) {
+  const actions = [[recipe.kind === "process" ? `加工${recipe.name}` : `创造${recipe.name}`, () => craftLifeRecipe(recipe.id)]];
+  actions.push(["观察材料关系", discoverLifeRecipe]);
+  actions.push(["切换图纸", cycleLifeRecipe]);
+  actions.push(publicRecipe(recipe) ? ["贡献公共材料", () => contributePublicBuildMaterial(recipe.id)] : ["查看生产谱系", showLifeProductionLineage]);
+  setPanelActions(actions);
+}
+
+function interactCraftStudio() {
+  const recipe = lifeCraftingRecipe();
+  const shortages = recipeMaterialShortages(recipe);
+  const profile = lifeBuildingProfile();
+  const requirement = lifeRecipeRequirement(recipe);
+  setPanel(
+    "星愿工作室",
+    `当前图纸「${recipe.name}」：${recipeCostText(recipe)}。${shortages.length ? `还缺 ${shortages.join("、")}。` : requirement.ok ? "材料已经能够回应这张图纸。" : requirement.reason} 建造地目前是${profile.stage.name}，你的生产倾向正在长成${profile.profession.name}。`,
+  );
+  setCraftStudioActions(recipe);
+}
+
+function contributePublicBuildMaterial(recipeId) {
+  const recipe = lifeCraftingRecipe(recipeId);
+  if (!publicRecipe(recipe)) return;
+  if (craftingState.publicProject.recipeId !== recipe.id) {
+    craftingState.publicProject = { recipeId: recipe.id, pooled: {}, contributors: [] };
+  }
+  const candidate = Object.keys(recipe.cost).find(
+    (key) => (inventory[key] || 0) > 0 && (craftingState.publicProject.pooled[key] || 0) < recipe.cost[key],
+  );
+  if (!candidate) {
+    setPanel("公共材料桌", `你暂时没有「${recipe.name}」仍需要的材料。共同建造不会用贡献值伪造木头、石头或关系。`);
+    return;
+  }
+  inventory[candidate] -= 1;
+  craftingState.publicProject.pooled[candidate] = (craftingState.publicProject.pooled[candidate] || 0) + 1;
+  const contribution = {
+    id: `public-material-${Date.now()}-${craftingState.publicProject.contributors.length}`,
+    member: "风芽",
+    material: candidate,
+    amount: 1,
+    day: tavernState.day,
+  };
+  craftingState.publicProject.contributors.push(contribution);
+  craftingState.professionActions.architect += 1;
+  recordAllianceContribution("engineer", `为${recipe.name}贡献${lifeMaterialName(candidate)}`, 1, contribution.id);
+  setPanel("一份材料进入共同地基", `${lifeMaterialName(candidate)}保留了贡献者和来处。公共材料：${Object.entries(craftingState.publicProject.pooled).map(([key, amount]) => `${lifeMaterialName(key)} ${amount}`).join("、")}。`);
+  setPanelActions([[`继续查看${recipe.name}`, interactCraftStudio], ["去生命建造地", interactLifeBuildSite]]);
+  save();
+}
+
+function createLifeStructure(recipe, lineage) {
+  const participants = ["风芽"];
+  if (allianceDerivedStage() >= 1) participants.push(allianceState.group.name);
+  const structure = {
+    id: `life-structure-${Date.now()}-${craftingState.structures.length}`,
+    recipeId: recipe.id,
+    name: recipe.name,
+    tier: recipe.tier,
+    stage: lifeBuildingStages[recipe.tier].name,
+    builder: "风芽",
+    participants,
+    materials: Object.entries(recipe.cost).map(([key, amount]) => `${lifeMaterialName(key)} ${amount}`),
+    lineage,
+    createdAt: new Date().toISOString(),
+    season: currentSolarTerm().name,
+    weather: currentWeatherProfile().weather,
+    firstUse: null,
+    uses: 0,
+    memories: [],
+    status: "active",
+    ecologicalTrace: recipe.tier === 4 ? "为水与昆虫留出循环空间" : `生态负担 ${Math.max(1, recipe.tier)}`,
+  };
+  craftingState.structures.push(structure);
+  craftingState.structures = craftingState.structures.slice(-32);
+  const process = startTraceProcess("structure", structure.name, "structure", structure.id, ["材料", "建造", "第一次使用", "共同生活", "遗迹"]);
+  structure.traceProcessId = process.id;
+  advanceTraceProcess(process, "建造", `${structure.materials.join("、")}由${participants.join("、")}共同建成${structure.name}。`, "growing", "object");
+  craftingState.history.push({ event: "structure-created", structureId: structure.id, tier: recipe.tier, day: tavernState.day });
+  craftingState.history = craftingState.history.slice(-80);
+  return structure;
+}
+
+function craftLifeRecipe(recipeId) {
+  const recipe = lifeCraftingRecipe(recipeId);
+  const requirement = lifeRecipeRequirement(recipe);
+  const shortages = recipeMaterialShortages(recipe);
+  if (!requirement.ok || shortages.length) {
+    const failure = archiveWorldFailure(
+      `life-craft-${recipe.id}`,
+      `未完成的${recipe.name}`,
+      `${!requirement.ok ? requirement.reason : shortages.join("、")}让创造停在工作台上，但材料关系被保留。`,
+    );
+    craftingState.experiments.push({
+      id: `experiment-${Date.now()}-${recipe.id}`,
+      recipeId: recipe.id,
+      result: "waiting",
+      shortages,
+      requirement: requirement.reason,
+      day: tavernState.day,
+    });
+    setPanel("未完成不是废弃", `${failure.title}进入失败档案。${!requirement.ok ? requirement.reason : `还缺 ${shortages.join("、")}`}；下一次补齐条件时，它可以继续生长。`);
+    addMemory(`建造停痕：${failure.title}`);
     save();
+    return null;
+  }
+
+  const lineage = recipeMaterialLineage(recipe);
+  consumeLifeRecipe(recipe);
+  craftingState.professionActions[recipe.profession] += 1;
+  inventory.blueprints = Math.max(1, inventory.blueprints);
+  inventory.archive += 1;
+  let resultText = "";
+
+  if (recipe.kind === "process") {
+    Object.entries(recipe.output).forEach(([key, amount]) => {
+      inventory[key] = (inventory[key] || 0) + amount;
+      recordCraftMaterial(key, amount, "星愿工作室", lineage, "风芽");
+    });
+    craftingState.ecologyDebt += recipe.id === "root-board" ? 0.25 : 0;
+    if (recipe.id === "root-board") recordEnvironmentChange("extraction", 0.25, "木材加工留下的能量与余料");
+    resultText = `加工得到 ${Object.entries(recipe.output).map(([key, amount]) => `${lifeMaterialName(key)} ${amount}`).join("、")}。`;
+  } else if (recipe.kind === "item") {
+    Object.entries(recipe.output).forEach(([key, amount]) => {
+      inventory[key] = (inventory[key] || 0) + amount;
+    });
+    const item = registerLivingFurniture({
+      name: recipe.name,
+      type: "emotion-light",
+      maker: "风芽",
+      materials: Object.entries(recipe.cost).map(([key]) => lifeMaterialName(key)),
+      source: "星愿工作室",
+    });
+    const oldFailure = [...worldRuleState.failures].reverse().find((failure) => failure.key.startsWith(`life-craft-${recipe.id}-`) && failure.status === "ruin-seed");
+    if (oldFailure) {
+      oldFailure.status = "regrown";
+      oldFailure.future = `失败档案已长成${recipe.name}的改良配方`;
+    }
+    resultText = `「${item.name}」进入花园生活物档案，可以被使用、赠送并继续积累记忆。`;
+  } else {
+    const structure = createLifeStructure(recipe, lineage);
+    if (recipe.tier === 1) {
+      inventory.furniture += 1;
+      registerLivingFurniture({
+        id: `furniture-${structure.id}`,
+        name: structure.name,
+        type: "seat",
+        maker: structure.builder,
+        materials: structure.materials,
+        source: "生命建造地",
+        placedAt: "生命建造地",
+      });
+    }
+    if (recipe.tier === 4) {
+      state.eco += 1;
+      craftingState.ecologyDebt = Math.max(0, craftingState.ecologyDebt - 1);
+      recordEnvironmentChange("restoration", 1.5, "共生庭院把水与栖息地还给土地");
+    } else {
+      craftingState.ecologyDebt += Math.max(0.25, recipe.tier * 0.2);
+      recordEnvironmentChange("extraction", Math.max(0.25, recipe.tier * 0.15), `${recipe.name}使用了真实材料`);
+    }
+    if (publicRecipe(recipe)) {
+      worldTreeState.community += 1;
+      allianceState.community.publicCare += 1;
+      craftingState.publicProject = { recipeId: null, pooled: {}, contributors: [] };
+    }
+    resultText = `「${structure.name}」进入建造地档案：${structure.participants.join("、")}共同留下了${structure.stage}。`;
+  }
+
+  const oldFailure = [...worldRuleState.failures].reverse().find((failure) => failure.key.startsWith(`life-craft-${recipe.id}-`) && failure.status === "ruin-seed");
+  if (oldFailure) {
+    oldFailure.status = "regrown";
+    oldFailure.future = `${recipe.name}已经从旧尝试中继续生长`;
+  }
+  recordTavernDiscovery("creation", `完成${recipe.name}`, Math.max(1, recipe.tier), { recipeId: recipe.id, lineage });
+  recordAllianceContribution(
+    recipe.profession === "architect" ? "engineer" : recipe.profession === "gardener" ? "gardener" : "artist",
+    `创造${recipe.name}`,
+    Math.max(1, recipe.tier),
+    `life-craft-${recipe.id}-${Date.now()}`,
+  );
+  createLifeSeed(recipe.kind === "build" ? "place" : "creation", {
+    name: `${recipe.name}创造种子`,
+    source: "材料、知识与关系的共同创造",
+    payload: `${recipeCostText(recipe)} · ${lineage.join(" / ")}`,
+    relationships: allianceDerivedStage() >= 1 ? ["风芽", allianceState.group.name] : ["风芽"],
+    growthDirection: recipe.kind === "build" ? lifeBuildingStages[recipe.tier].name : "可继续使用的生活物",
+  });
+  state.seed += Math.max(1, recipe.tier);
+  addLifeValue("energy", 1);
+  addLifeValue("memory", 1);
+  addLifeValue(recipe.kind === "build" && recipe.tier >= 4 ? "contribution" : "growth", 1);
+  interacted.add("craft");
+  setPanel(recipe.kind === "process" ? "生产完成" : "创造完成", `${resultText}${oldFailure ? " 旧失败没有被删除，而是成为这次改良的一部分。" : ""} ${recipe.story}`);
+  setPanelActions([["查看建造档案", interactLifeBuildSite], ["继续观察材料", discoverLifeRecipe]]);
+  addMemory(`星愿工作室：${recipe.name}`);
+  completeFoodEnergyAction(`完成${recipe.name}`, "creation");
+  markLifeRhythmAction(["creation"], `创造${recipe.name}`);
+  completeGoddessWish("create", `你在天工坊完成了「${recipe.name}」`);
+  updateWorldUnlocks();
+  save();
+  return recipe;
+}
+
+function showLifeProductionLineage() {
+  const profile = lifeBuildingProfile();
+  const latestMaterial = craftingState.materialLedger[craftingState.materialLedger.length - 1];
+  const latestStructure = profile.latest;
+  setPanel(
+    "生命生产谱系",
+    `${profile.stage.name} · ${profile.profession.name} ${profile.profession.score} 次实践。${latestMaterial ? `最近材料：${latestMaterial.name}来自${latestMaterial.source}，性质是${latestMaterial.property}。` : "第一份材料还没有进入加工档案。"}${latestStructure ? `最近建造：${latestStructure.name}，参与者 ${latestStructure.participants.join("、")}，使用 ${latestStructure.uses} 次。` : "这块土地仍在等待第一件生活物。"}`,
+  );
+  setPanelActions([["回到当前图纸", interactCraftStudio], ["去生命建造地", interactLifeBuildSite]]);
+}
+
+function interactLifeBuildSite() {
+  const profile = lifeBuildingProfile();
+  if (!profile.latest) {
+    setPanel("一块土地", "这里只有边界桩、土壤和风。先在星愿工作室加工材料并做出第一件家具；世界不会替你自动放下一座房子。");
+    setPanelActions([["去看工作台", interactCraftStudio], ["观察土地", () => {
+      recordCraftMaterial("stone", 0, "生命建造地的地表观察", [], "风芽");
+      setPanel("土地档案", `这里的地基靠近河流与农田，适合从小尺度开始。当前生态负担 ${craftingState.ecologyDebt.toFixed(1)}。`);
+      save();
+    }]]);
     return;
   }
 
-  inventory.seeds -= 1;
-  inventory.starWater -= 1;
-  inventory.wood -= 1;
-  inventory.starLamp += 1;
-  inventory.blueprints = Math.max(1, inventory.blueprints);
-  const rule = livingRuleProfile();
-  inventory.creationSeed += rule.id === "creation" ? 2 : 1;
-  inventory.archive += 1;
-  registerLivingFurniture({
-    name: "星愿灯",
-    type: "emotion-light",
-    maker: "Dead Night",
-    materials: ["蒲公英种子", "星光水", "树根材"],
-    source: "星愿工作室",
-  });
-  const oldFailure = [...worldRuleState.failures].reverse().find((failure) => failure.key.startsWith("star-lamp-materials-") && failure.status === "ruin-seed");
-  if (oldFailure) {
-    oldFailure.status = "regrown";
-    oldFailure.future = "失败档案已长成星愿灯的稳定配方";
+  const latest = profile.latest;
+  setPanel(
+    `${profile.stage.name} · ${latest.name}`,
+    `建造者：${latest.builder}。参与者：${latest.participants.join("、")}。材料：${latest.materials.join("、")}。${latest.firstUse ? `第一次使用：${latest.firstUse}。` : "它还在等待第一次真正的生活。"}下一层是${profile.next.name}。`,
+  );
+  const actions = [
+    ["在这里生活一次", () => useLifeStructure(latest)],
+    ["查看材料来路", () => {
+      setPanel(`${latest.name} · 材料谱系`, `${latest.lineage.join("；")}。建于${latest.season}的${latest.weather}，生态记录：${latest.ecologicalTrace}。`);
+    }],
+    ["寻找下一张图纸", discoverLifeRecipe],
+  ];
+  if (latest.tier === 1 && latest.uses === 0) actions.push(["拆回可用材料", () => reclaimLifeFurniture(latest.id)]);
+  else actions.push(["回到工作台", interactCraftStudio]);
+  setPanelActions(actions);
+}
+
+function useLifeStructure(structure) {
+  structure.uses += 1;
+  const trace = `${tavernState.day}日 · ${currentWeatherProfile().weather} · ${structure.tier >= 5 ? "共同议事与劳动" : "停留、整理与生活"}`;
+  if (!structure.firstUse) structure.firstUse = trace;
+  structure.memories.push(trace);
+  structure.memories = structure.memories.slice(-12);
+  if (!structure.traceProcessId) {
+    const process = startTraceProcess("structure", structure.name, "structure", structure.id, ["材料", "建造", "第一次使用", "共同生活", "遗迹"]);
+    structure.traceProcessId = process.id;
+    advanceTraceProcess(process, "建造", structure.materials.join("、"), "growing", "object");
   }
-  recordTavernDiscovery("creation", oldFailure ? "修复失败配方并完成星愿灯" : "把生活材料做成星愿灯", 1, { repair: Boolean(oldFailure) });
-  recordAllianceContribution(oldFailure ? "engineer" : "artist", oldFailure ? "修复共同配方" : "制作共同作品", 1, `craft-${Date.now()}`);
-  createLifeSeed("dream", {
-    name: "星愿灯梦想种子",
-    source: "用材料创造星愿灯",
-    payload: "蒲公英种子 + 星光水 + 树根材",
-    growthDirection: "未来光之工坊",
-  });
-  state.seed += 3;
-  addLifeValue("energy", 2);
-  addLifeValue("memory", 1);
-  interacted.add("craft");
-  setPanel("Crafting", `你制作了「星愿灯」。${oldFailure ? "旧失败遗迹成为了这次改良配方的一部分。" : ""}它可以放进花园，也可以带到种子交换站，成为别人世界里的光。`);
-  addMemory("星愿工作室：制作星愿灯");
-  completeFoodEnergyAction("完成星愿灯", "creation");
-  markLifeRhythmAction(["creation"], "制作星愿灯");
-  updateWorldUnlocks();
+  advanceTraceProcess(structure.traceProcessId, structure.uses === 1 ? "第一次使用" : `第${structure.uses}次生活`, trace, "growing", "object");
+  addLifeValue(structure.tier >= 5 ? "harmony" : "memory", 1);
+  recordTavernDiscovery("memory", `在${structure.name}留下生活痕迹`, 1, { structureId: structure.id });
+  setPanel(structure.name, `这里已经发生 ${structure.uses} 次生活。${structure.firstUse}成为第一圈年轮；使用比摆放更能让建筑成为生命空间。`);
+  addMemory(`${structure.name}：留下第 ${structure.uses} 次生活痕迹`);
   save();
+}
+
+function reclaimLifeFurniture(structureId) {
+  const structure = craftingState.structures.find((item) => item.id === structureId);
+  if (!structure || structure.tier !== 1 || structure.uses > 0 || structure.status !== "active") return;
+  structure.status = "reclaimed";
+  structure.memories.push("在第一次使用前拆解，材料回到下一次创造");
+  inventory.planks += 1;
+  inventory.fiber += 1;
+  craftingState.history.push({ event: "structure-reclaimed", structureId, day: tavernState.day });
+  recordCraftMaterial("planks", 1, `拆解${structure.name}`, structure.lineage, "风芽");
+  setPanel("旧物没有成为垃圾", `${structure.name}被拆回根纹木板和花叶纤维。原档案仍保留，因此下一件作品知道这些材料曾经去过哪里。`);
+  addMemory(`循环生产：拆解${structure.name}`);
+  save();
+}
+
+function craftItem() {
+  return craftLifeRecipe("star-lamp");
 }
 
 function usePortal() {
@@ -5758,9 +9701,37 @@ function advanceDemo(step) {
 }
 
 function interactWithGround() {
-  const here = tileType(Math.round(state.x), Math.round(state.y));
+  const tileX = Math.round(state.x);
+  const tileY = Math.round(state.y);
+  const here = tileType(tileX, tileY);
+  const weatherResource = weatherResourceAt(tileX, tileY, here);
+  if (weatherResource) {
+    interacted.add(weatherResource.collectionId);
+    inventory[weatherResource.key] = (inventory[weatherResource.key] || 0) + 1;
+    if (weatherResource.key === "rainbowSeed") inventory.seeds += 1;
+    recordLifeGrowthAction("observation", `在${currentWeatherProfile().weather}里发现${weatherResource.name}`, 1, { place: currentLifePlace() });
+    recordWorldObservation(weatherResource.name, `${currentWeatherProfile().period.name}让${weatherResource.name}短暂出现在这里。`, weatherResource.collectionId);
+    setPanel("天气生成的生命", `你在${currentWeatherProfile().period.name}的${currentWeatherProfile().weather}中发现「${weatherResource.name}」。它只会在合适的时间、地貌与天气关系里出现。`);
+    setPanelActions([
+      ["带回气象站记录", () => {
+        weatherObservatoryState.archives.push({
+          key: weatherResource.collectionId,
+          date: livingDateKey(),
+          period: currentWeatherProfile().period.name,
+          weather: currentWeatherProfile().weather,
+          resource: weatherResource.name,
+          place: currentLifePlace(),
+        });
+        setPanel("天气档案增加", `${weatherResource.name}已经作为一条物候记录回到听天观象台。`);
+        save();
+      }],
+      ["去现实观察天气", () => startSlowLifeInvitation(currentWeatherProfile().isRain ? "rain" : "walk")],
+    ]);
+    save();
+    return;
+  }
   const ground = {
-    water: ["河流", "Dead Night 俯身听水声。生命水不是背景，它正在把村庄和远方连接起来。"],
+    water: ["河流", "风芽 俯身听水声。生命水不是背景，它正在把村庄和远方连接起来。"],
     deepWater: ["深水", "水面以下还有没有被看见的世界。今天只观察，不急着打捞。"],
     bank: ["河岸", "河岸有湿润的泥土和蒲公英种子。这里适合钓鱼、采集，也适合发呆。"],
     path: ["村庄小路", "小路通向邮局、花园、湖泊和别人家门口。开放世界应该用脚走出来。"],
@@ -5771,7 +9742,7 @@ function interactWithGround() {
     meadow: ["晨光草地", "空气很亮，草地在呼吸。这里可以扩展成采集、摄影、野餐和朋友偶遇。"],
   }[here] || ["原野", "风经过一块没有名字的土地。你可以只看一会儿，不必带走什么。"];
 
-  if (here === "water" && currentWeatherProfile().weather === "小雨" && !interacted.has("drift-water")) {
+  if (here === "water" && currentWeatherProfile().isRain && !interacted.has("drift-water")) {
     inventory.driftBottle += 1;
     inventory.water += 1;
     interacted.add("drift-water");
@@ -5808,11 +9779,36 @@ function interactWithGround() {
 }
 
 function setPanel(title, text) {
-  nearbyTitle.textContent = title;
-  nearbyText.textContent = text;
+  nearbyTitle.textContent = compactPanelText(title, 9);
+  nearbyTitle.title = title;
+  nearbyText.textContent = compactPanelText(text, 28);
+  nearbyText.title = text;
   nearbyActions.replaceChildren();
   state.lastSignal = `${title}：${text}`;
   if (lifeCoreFeedback && state.lifeCoreOpen) lifeCoreFeedback.textContent = state.lastSignal;
+}
+
+function compactPanelText(value, limit) {
+  const firstBeat = String(value || "").split(/[。；\n]/)[0].trim();
+  return firstBeat.length > limit ? `${firstBeat.slice(0, Math.max(1, limit - 1))}…` : firstBeat;
+}
+
+function panelActionIcon(label) {
+  if (/鱼|水|听/.test(label)) return "glyph-fish";
+  if (/信|朋友|关系/.test(label)) return "glyph-mail";
+  if (/种|花|生长/.test(label)) return "glyph-seed";
+  if (/世界|地图|出发|现实|走/.test(label)) return "glyph-world";
+  if (/看|档案|记忆|理解/.test(label)) return "glyph-archive";
+  if (/休|家|回来/.test(label)) return "glyph-home";
+  return "glyph-wish";
+}
+
+function compactActionLabel(label) {
+  const short = String(label)
+    .replace(/^(查看|打开|开始|进入|继续|尝试|完成|前往|去)/, "")
+    .split(/[，：:（(]/)[0]
+    .trim();
+  return compactPanelText(short || label, 6);
 }
 
 function setPanelActions(actions) {
@@ -5820,7 +9816,9 @@ function setPanelActions(actions) {
   actions.forEach(([label, action]) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = label;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.innerHTML = `<i class="living-glyph ${panelActionIcon(label)}" aria-hidden="true"></i><span>${compactActionLabel(label)}</span>`;
     button.addEventListener("click", action);
     nearbyActions.appendChild(button);
   });
@@ -5829,7 +9827,103 @@ function setPanelActions(actions) {
 function addMemory(title) {
   const time = currentTimeLabel();
   memories.push(`${time}：你在湖泊村庄遇见了 ${title}。`);
+  recordTrace({ kind: "memory", title, subjectType: "memory", detail: "这段经历进入个人生命轨迹。" });
   renderHud();
+}
+
+function tracePlaceProfile() {
+  const marks = Object.values(traceSystemState.placeMarks);
+  const strongest = [...marks].sort((left, right) => (right.events + right.visits) - (left.events + left.visits))[0] || null;
+  return {
+    places: marks.length,
+    strongest,
+    trailLength: traceSystemState.trail.length,
+    events: traceSystemState.events.length,
+  };
+}
+
+function showTraceMap() {
+  const profile = tracePlaceProfile();
+  const recentKinds = traceSystemState.events.slice(-18).reduce((counts, trace) => {
+    counts[trace.kind] = (counts[trace.kind] || 0) + 1;
+    return counts;
+  }, {});
+  const dominantKind = Object.entries(recentKinds).sort((left, right) => right[1] - left[1])[0]?.[0] || "movement";
+  const kindProfile = traceKindCatalog[dominantKind];
+  setPanel(
+    "生命藤蔓 · 痕迹地图",
+    `地图已经保存 ${profile.trailLength} 个走过的转折与 ${profile.events} 段生命事件。${profile.strongest ? `${profile.strongest.name}的痕迹最密，那里正在长出新的空间细节。` : "第一段藤蔓还在脚下等待。"}最近的主色是「${kindProfile.name}」，它会以${kindProfile.mark}形态留在世界中。`,
+  );
+  setPanelActions([["查看最近过程", showRecentTraceProcess], ["查看时间胶囊", showTraceCapsules]]);
+}
+
+function showRecentTraceProcess() {
+  const process = traceSystemState.processes[traceSystemState.processes.length - 1];
+  if (!process) {
+    setPanel("过程档案", "还没有形成完整过程。走出去、种下一颗种子或使用一件生活物，第一圈年轮就会出现。");
+    return;
+  }
+  const stages = process.stages.length
+    ? process.stages.map((stage) => `${stage.stage}：${stage.detail}`).join(" → ")
+    : "过程已经开始，但第一个阶段还没有发生。";
+  setPanel(`${process.title} · ${process.status}`, `${stages}。结果只占最后一格，前面的每一次变化都仍然可见。`);
+  setPanelActions([["回到痕迹地图", showTraceMap], ["查看时间胶囊", showTraceCapsules]]);
+}
+
+function sealTraceTimeCapsule() {
+  if (inventory.driftBottle <= 0) {
+    setPanel("时间胶囊室", "需要一只由生活生成的漂流瓶。先回应一封风信，或从世界里发现一个瓶子，再来封存这个阶段。");
+    return;
+  }
+  const now = new Date();
+  const recent = traceSystemState.events.slice(-12);
+  const capsule = {
+    id: `trace-capsule-${Date.now()}`,
+    title: `${currentSolarTerm().name} · 此刻的我`,
+    sealedAt: now.toISOString(),
+    unlockAt: new Date(now.getTime() + 365 * 86400000).toISOString(),
+    place: currentLifePlace(),
+    weather: currentWeatherProfile().weather,
+    body: bodyTreeProfile().stage,
+    wish: goddessGardenState.activeWish
+      ? goddessWishActions[goddessGardenState.activeWish.actionId]?.name
+      : "允许未来继续变化",
+    eventIds: recent.map((trace) => trace.id),
+    memory: recent.map((trace) => trace.title).join(" → ") || "这一刻很安静，没有必须证明的成果。",
+    status: "sealed",
+  };
+  traceSystemState.capsules.push(capsule);
+  traceSystemState.capsules = traceSystemState.capsules.slice(-24);
+  inventory.driftBottle -= 1;
+  recordTrace({
+    kind: "memory",
+    title: `封存时间胶囊：${capsule.title}`,
+    subjectType: "time-capsule",
+    subjectId: capsule.id,
+    stage: "封存",
+    detail: "声音、愿望、身体状态、天气与最近过程被一起交给未来。",
+  });
+  setPanel("时间胶囊已经封存", `它保存了${capsule.weather}、${capsule.body}和最近 ${recent.length} 段过程。未来打开时看到的不是成绩单，而是你如何一步一步来到这里。`);
+  setPanelActions([["查看胶囊树", showTraceCapsules], ["回到痕迹地图", showTraceMap]]);
+  save();
+}
+
+function showTraceCapsules() {
+  const capsule = traceSystemState.capsules[traceSystemState.capsules.length - 1];
+  if (!capsule) {
+    setPanel("时间胶囊树", "还没有封存阶段记忆。风信驿的时间胶囊室可以把当时的天气、身体、愿望与过程一起交给未来。");
+    setPanelActions([["封存此刻", sealTraceTimeCapsule], ["回到痕迹地图", showTraceMap]]);
+    return;
+  }
+  const remainingDays = Math.max(0, Math.ceil((new Date(capsule.unlockAt).getTime() - Date.now()) / 86400000));
+  if (remainingDays > 0) {
+    setPanel(capsule.title, `封存地点：${capsule.place}。${capsule.weather}，${capsule.body}。还有约 ${remainingDays} 天才会打开；现在只能看见封面，过去不需要被反复消费。`);
+  } else {
+    capsule.status = "opened";
+    setPanel(`${capsule.title} · 已打开`, `${capsule.memory}。当时的愿望是「${capsule.wish}」。这些痕迹没有替你定义现在，只让你看见变化确实发生过。`);
+  }
+  setPanelActions([["再封存一个阶段", sealTraceTimeCapsule], ["查看最近过程", showRecentTraceProcess]]);
+  save();
 }
 
 function livingDateKey(date = new Date()) {
@@ -6069,6 +10163,7 @@ function advanceNatureKnowledge(id) {
     setPanel(`${stage.name} · ${item.name}`, `${item.details} 关系：${item.relations.join("、")}。同行精灵：${item.spirit}。`);
   } else if (record.stage === 3) {
     inventory.archive += 1;
+    if (item.id === "ancient-seabed") inventory.fossilRubbing += 1;
     const seed = createLifeSeed("knowledge", {
       name: `${item.name}知识种子`,
       source: `${currentSolarTerm().name}在${currentLifePlace()}完成自然记录`,
@@ -6078,7 +10173,8 @@ function advanceNatureKnowledge(id) {
     record.seedId = seed.id;
     registerNatureGraphEdge(item.name, "凝结为", seed.name);
     markLifeRhythmAction(["learning"], `记录${item.name}`);
-    setPanel(`${stage.name} · 知识种子`, `你没有把${item.name}压成一张收集卡。来源、节气、地点、关系和观察被一起封进「${seed.name}」，现在它可以继续旅行。`);
+    const trace = item.id === "ancient-seabed" ? "你只取走一张古海床拓印，完整地层仍留在原地。" : "";
+    setPanel(`${stage.name} · 知识种子`, `你没有把${item.name}压成一张收集卡。${trace}来源、节气、地点、关系和观察被一起封进「${seed.name}」，现在它可以继续旅行。`);
   } else if (record.stage === 4) {
     const seed = lifeSeeds.find((candidate) => candidate.id === record.seedId);
     let destination = null;
@@ -6135,10 +10231,10 @@ function lifeRhythmDimensions(profile = livingCalendarProfile()) {
     winter: { emotion: 8, creation: 4 },
   }[profile.term.season];
   Object.entries(seasonalAffinity).forEach(([key, amount]) => { dimensions[key] += amount; });
-  if (weather.weather === "小雨") {
+  if (weather.isRain) {
     dimensions.emotion += 5;
     dimensions.learning += 4;
-  } else if (weather.weather === "有风") {
+  } else if (weather.isWind) {
     dimensions.relation += 5;
     dimensions.exploration += 5;
   } else {
@@ -6204,10 +10300,64 @@ function lifeRhythmSentence(profile = lifeRhythmProfile()) {
 }
 
 function currentTimeLabel() {
-  const phase = Math.floor((state.tick / 900) % 3);
-  if (phase === 0) return "Morning";
-  if (phase === 1) return "Day";
-  return "Night";
+  return currentWorldRhythm().legacy;
+}
+
+function currentWorldRhythmIndex(offset = 0) {
+  const length = worldRhythmPeriods.length;
+  return (Math.floor(state.tick / 900) + offset + length * 10) % length;
+}
+
+function currentWorldRhythm(offset = 0) {
+  return worldRhythmPeriods[currentWorldRhythmIndex(offset)];
+}
+
+function weatherPatternIndex(date = new Date()) {
+  const daySignal = date.getDate() + date.getMonth() * 3 + worldRuleState.revision + Math.floor(state.eco / 3);
+  return Math.abs(daySignal) % weatherPatternCatalog.length;
+}
+
+function weatherConditionIdFor(rhythmIndex, date = new Date()) {
+  const rhythm = worldRhythmPeriods[rhythmIndex];
+  const profile = livingCalendarProfile(date);
+  const pattern = weatherPatternCatalog[weatherPatternIndex(date)];
+  let conditionId = pattern[rhythmIndex] || rhythm.baseWeather;
+
+  if (profile.term.season === "winter" && ["dawn", "night", "dream"].includes(rhythm.id) && (date.getDate() + rhythmIndex) % 2 === 0) {
+    conditionId = "snow";
+  }
+  const ecologyDelta = worldRuleState.environment.restoration - worldRuleState.environment.extraction + Math.floor(state.eco / 2);
+  if (ecologyDelta >= 5 && rhythm.id === "dawn" && conditionId === "mist") conditionId = "rain";
+  if (ecologyDelta <= -4 && rhythm.id === "noon" && ["wind", "sunny"].includes(conditionId)) conditionId = "heat";
+  if (conditionId === "rainbow" && state.eco < 2) conditionId = "sunset";
+  return conditionId;
+}
+
+function weatherProfileForRhythmIndex(rhythmIndex, date = new Date()) {
+  const rhythm = worldRhythmPeriods[rhythmIndex];
+  const id = weatherConditionIdFor(rhythmIndex, date);
+  const condition = weatherConditionCatalog[id];
+  const season = livingCalendarProfile(date).term.season;
+  const seasonalTemperature = { spring: 1, summer: 4, autumn: -1, winter: -8 }[season] || 0;
+  const directionIndex = Math.abs(date.getDate() + rhythmIndex * 2 + worldRuleState.revision) % 8;
+  const windDirection = ["东", "东南", "南", "西南", "西", "西北", "北", "东北"][directionIndex];
+  const ecologyHumidity = Math.max(-10, Math.min(10, (worldRuleState.environment.restoration - worldRuleState.environment.extraction) * 2 + state.eco));
+  const ecologyHeat = Math.max(0, worldRuleState.environment.extraction - worldRuleState.environment.restoration) >= 4 ? 1 : 0;
+  return {
+    ...condition,
+    id,
+    place: livingCalendarState.place || "杭州",
+    period: rhythm,
+    hour: rhythm.hour,
+    temperature: condition.temperature + seasonalTemperature + ecologyHeat,
+    humidity: Math.max(18, Math.min(100, condition.humidity + ecologyHumidity)),
+    windDirection,
+    nextChangeIn: 900 - (state.tick % 900),
+  };
+}
+
+function weatherForecastProfile() {
+  return weatherProfileForRhythmIndex(currentWorldRhythmIndex(1));
 }
 
 function currentLifePlace() {
@@ -6226,7 +10376,7 @@ function currentLifePlace() {
 
 function currentLifeEmotion() {
   const weather = currentWeatherProfile();
-  if (weather.weather === "小雨") return "安静";
+  if (weather.isRain) return "安静";
   if (currentTimeLabel() === "Night") return "回望";
   if (weather.energy >= 75) return "明亮";
   return "好奇";
@@ -6245,6 +10395,7 @@ function setSceneEmote(emoteId, announce = true) {
   playerEmoteFx.classList.remove("is-hidden", "is-playing");
   requestAnimationFrame(() => playerEmoteFx.classList.add("is-playing"));
   window.setTimeout(() => playerEmoteFx.classList.add("is-hidden"), 820);
+  restartSpiritAction();
   if (announce) setPanel("生活动作", `${emote.name}不是表情贴纸。它会和地点、同行者、天气与家具一起进入下一颗记忆种子。`);
   save();
 }
@@ -6268,7 +10419,7 @@ function nearestSceneLocation(maxDistance = 8) {
 
 function nearbySceneParticipants(location) {
   const participants = residents
-    .filter((resident) => Math.hypot(state.x - resident.x, state.y - resident.y) < 4.2)
+    .filter((resident, index) => !residentIsSheltered(resident, index) && Math.hypot(state.x - resident.x, state.y - resident.y) < 4.2)
     .sort((a, b) => Math.hypot(state.x - a.x, state.y - a.y) - Math.hypot(state.x - b.x, state.y - b.y))
     .slice(0, 3)
     .map((resident) => resident.name);
@@ -6307,6 +10458,9 @@ function registerLivingFurniture(details) {
   };
   livingSceneState.furniture.push(item);
   livingSceneState.furniture = livingSceneState.furniture.slice(-16);
+  const process = startTraceProcess("object", item.name, "furniture", item.id, ["材料汇聚", "制作", "第一次使用", "共同生活", "成为旧物"]);
+  item.traceProcessId = process.id;
+  advanceTraceProcess(process, "制作", `${item.materials.join("、")}由${item.maker}做成${item.name}。`, "growing", "object");
   return item;
 }
 
@@ -6334,7 +10488,7 @@ function furnitureAtScene(location, createPublic = false) {
 function currentLivingScene() {
   const location = nearestSceneLocation();
   const participants = nearbySceneParticipants(location);
-  const eligibleKinds = new Set(["worldTree", "tavern", "forest", "lake", "friend", "furniture", "chapel", "healing", "house"]);
+  const eligibleKinds = new Set(["worldTree", "tavern", "forest", "lake", "friend", "furniture", "chapel", "healing", "house", "craft", "buildSite"]);
   if (!participants.length && !eligibleKinds.has(location?.kind)) return null;
   const profile = sceneProfileFor(location);
   return {
@@ -6349,12 +10503,13 @@ function currentLivingScene() {
 function renderLivingScenePrompt() {
   const context = currentLivingScene();
   const hiddenBySurface = state.lifeCoreOpen || state.backpackOpen || !genesisState.complete;
-  livingScenePrompt.classList.toggle("is-hidden", !context || hiddenBySurface);
-  if (!context || hiddenBySurface) return;
+  livingScenePrompt.classList.toggle("is-hidden", hiddenBySurface);
+  if (hiddenBySurface) return;
   const emote = currentSceneEmote();
   sceneEmoteLabel.textContent = emote.name;
-  sceneCaptureButton.title = `${context.place} · 留下${context.profile.type}`;
-  livingScenePrompt.dataset.scene = context.location?.kind || "world";
+  sceneCaptureButton.disabled = !context;
+  sceneCaptureButton.title = context ? `${context.place} · 留下${context.profile.type}` : "靠近居民或地点后合影";
+  livingScenePrompt.dataset.scene = context?.location?.kind || "world";
 }
 
 function createSceneSnapshot(context) {
@@ -6398,7 +10553,7 @@ function captureLivingScene() {
     type: context.profile.type,
     place: context.place,
     locationKind: context.location?.kind || "world",
-    participants: ["Dead Night", ...companions],
+    participants: ["风芽", ...companions],
     action: emote.name,
     weather: `${weather.weather} / ${weather.spirit}`,
     time: currentTimeLabel(),
@@ -6421,6 +10576,11 @@ function captureLivingScene() {
   livingSceneState.photos = livingSceneState.photos.slice(-10);
   livingSceneState.lastPhotoId = photo.id;
   livingSceneState.photographerXp += 1 + (context.participants.length ? 1 : 0);
+  if (context.participants.length) {
+    recordPowerBondForce("companionship", `在${photo.place}留下共同照片`, photo.id);
+  } else {
+    recordPowerBondForce("exploration", `把${photo.place}的一瞬交给未来`, photo.id);
+  }
   livingSceneState.worldHistory.push({ event: "memory-photo", photoId: photo.id, place: photo.place, time: photo.capturedAt });
   context.furniture.forEach((item) => {
     if (!item.firstUse) item.firstUse = `${context.place} · ${photo.title}`;
@@ -6432,6 +10592,14 @@ function captureLivingScene() {
     state.friendship += 1;
     addLifeValue("harmony", 2);
   }
+  recordTrace({
+    kind: context.participants.length ? "empathy" : "memory",
+    title: `生命合影 · ${photo.title}`,
+    subjectType: context.participants.length ? "relationship" : "memory-photo",
+    subjectId: photo.id,
+    stage: "共同经历",
+    detail: `${photo.participants.join("、")}在${photo.place}${emote.memory}，场景中的物品也保存了这次使用。`,
+  });
   addLifeValue(context.profile.value, 2);
   addLifeValue("memory", 2);
   inventory.archive += 1;
@@ -6478,7 +10646,7 @@ function placePhotoInFrame(photo) {
     id: `memory-frame-${photo.id}`,
     name: `${photo.type}相框`,
     type: "memory-frame",
-    maker: "Dead Night",
+    maker: "风芽",
     materials: ["记忆叶", "森林木材"],
     source: photo.place,
     placedAt: federationState.gardenCreated ? federationState.familyName : "你的小屋",
@@ -6497,6 +10665,18 @@ function useLivingFurniture(item, action, emoteId) {
   if (!item.firstUse) item.firstUse = trace;
   item.memories.push(trace);
   item.memories = item.memories.slice(-8);
+  if (!item.traceProcessId) {
+    const process = startTraceProcess("object", item.name, "furniture", item.id, ["材料汇聚", "制作", "第一次使用", "共同生活", "成为旧物"]);
+    item.traceProcessId = process.id;
+    advanceTraceProcess(process, "已有来处", `${item.materials.join("、")}来自${item.source}。`, "growing", "object");
+  }
+  advanceTraceProcess(
+    item.traceProcessId,
+    item.uses === 1 ? "第一次使用" : `第${item.uses}次生活`,
+    `${currentLifePlace()} · ${action}`,
+    "growing",
+    "object",
+  );
   addLifeValue(action.includes("一起") ? "harmony" : "memory", 1);
   setPanel(item.name, `${action}。这件家具已经被使用 ${item.uses} 次；第一次使用：${item.firstUse}。生活正在给它长出自己的履历。`);
   addMemory(`${item.name}：${action}`);
@@ -6594,7 +10774,7 @@ function slowLifeRhythmProfile() {
   if (phase.id === "night") {
     return { label: `${phase.label} · 花园收拢`, note: "今天不需要继续开花，留一点安静给身体和记忆。" };
   }
-  if (weather.weather === "小雨") {
+  if (weather.isRain) {
     return { label: `${phase.label} · 阴天花园`, note: "阴天不是坏状态，我们不用急着开花。" };
   }
   if (phase.id === "morning") {
@@ -6613,7 +10793,7 @@ function preferredSlowLifeInvitation() {
   const phase = realLifePhase();
   const weather = currentWeatherProfile();
   if (phase.id === "night") return slowLifeInvitationById("evening");
-  if (weather.weather === "小雨") return slowLifeInvitationById("rain");
+  if (weather.isRain) return slowLifeInvitationById("rain");
   if (bodyTreeProfile().score < 52) return slowLifeInvitationById("water");
   if (phase.id === "dusk" || interacted.has("post") || state.friendship > 1) return slowLifeInvitationById("relation");
   if (phase.id === "morning") return slowLifeInvitationById("light");
@@ -6706,7 +10886,7 @@ function finishSlowLifeReturn(keepDiscovery) {
       source: "离开屏幕后带回的生活",
       payload: invitation.memory,
       place: `现实 · ${invitation.place}`,
-      relationships: invitation.kind === "relation" ? ["Dead Night", "现实中的重要关系"] : ["Dead Night", "真实世界"],
+      relationships: invitation.kind === "relation" ? ["风芽", "现实中的重要关系"] : ["风芽", "真实世界"],
       growthDirection: invitation.kind === "relation" ? "现实关系藤蔓" : "今日发现叶",
     });
     inventory.archive += 1;
@@ -6729,6 +10909,8 @@ function finishSlowLifeReturn(keepDiscovery) {
   state.weatherOpen = false;
   setPanel(keepDiscovery ? "欢迎带着世界回来" : "欢迎回来休息", keepDiscovery ? `你带回了「${card.discovery}」。花园只保存这次相遇，不评判它够不够特别。` : "今天没有需要提交的成果。现实生活发生过，就已经足够。 ");
   if (keepDiscovery) addMemory(`现实回声：${card.discovery}`);
+  if (!keepDiscovery) completeGrowthGuidanceRest("离开屏幕，让现实生活先发生");
+  completeGoddessWish("reality", keepDiscovery ? `你离开屏幕后带回了「${card.discovery}」` : "你离开屏幕，允许现实生活先发生");
   save();
   renderHud();
 }
@@ -6798,7 +10980,10 @@ function absorbDandelionNutrient(kind, amount = 1, source = "世界") {
   dandelionProtocol.absorbed += amount;
   if (dandelionProtocol.stage === "seedling") dandelionProtocol.stage = "growing";
   const latest = lifeSeeds.find((seed) => seed.id === dandelionProtocol.latestSeedId);
-  if (latest) latest.history.push({ event: "absorbed", nutrient: kind, source, time: currentTimeLabel() });
+  if (latest) {
+    latest.history.push({ event: "absorbed", nutrient: kind, source, time: currentTimeLabel() });
+    advanceTraceProcess(latest.traceProcessId, "吸收养分", `${source}带来${kind}，种子继续变化。`, "growing", "perception");
+  }
 }
 
 function createLifeSeed(type, details = {}) {
@@ -6814,7 +10999,7 @@ function createLifeSeed(type, details = {}) {
     time: currentTimeLabel(),
     emotion: details.emotion || currentLifeEmotion(),
     place,
-    relationships: details.relationships || (state.friendship > 0 ? [`${state.friendship} 条关系根系`] : ["Dead Night 种子守护者"]),
+    relationships: details.relationships || (state.friendship > 0 ? [`${state.friendship} 条关系根系`] : ["风芽 种子守护者"]),
     growthDirection: details.growthDirection || profile.growth,
     payload: details.payload || "",
     generation: dandelionProtocol.generation,
@@ -6824,6 +11009,15 @@ function createLifeSeed(type, details = {}) {
     history: [{ event: "born", place, source: details.source || "今日生活", time: currentTimeLabel() }],
   };
   lifeSeeds.push(seed);
+  const traceProcess = startTraceProcess(
+    "seed",
+    seed.name,
+    "seed",
+    seed.id,
+    ["诞生", "吸收", "传播", "落地", "开花", "结果"],
+  );
+  seed.traceProcessId = traceProcess.id;
+  advanceTraceProcess(traceProcess, "诞生", `${seed.source}在${seed.place}形成一颗${seed.name}。`, "growing", "memory");
   inventory[profile.inventoryKey] += 1;
   dandelionProtocol.latestSeedId = seed.id;
   dandelionProtocol.blooms += 1;
@@ -6849,17 +11043,35 @@ function chooseSeedDestination(seed) {
   if (seed.type === "place" || seed.type === "dream") return resonanceDestinations[2];
   if (seed.type === "memory") return resonanceDestinations[1];
   const weather = currentWeatherProfile();
-  return weather.weather === "小雨" ? resonanceDestinations[0] : resonanceDestinations[1];
+  return weather.isRain ? resonanceDestinations[0] : resonanceDestinations[1];
 }
 
 function spreadLifeSeed(seed) {
   if (!seed || seed.status !== "carried") return null;
+  if (!seed.traceProcessId) {
+    const process = startTraceProcess(
+      "seed",
+      seed.name,
+      "seed",
+      seed.id,
+      ["已有来处", "传播", "落地", "开花", "结果"],
+    );
+    seed.traceProcessId = process.id;
+    advanceTraceProcess(
+      process,
+      "已有来处",
+      `${seed.source || "旧日生活"}留下了这颗种子；它的旧档案从第一次继续旅行起恢复生长。`,
+      "growing",
+      "memory",
+    );
+  }
   const destination = chooseSeedDestination(seed);
   const profile = lifeSeedTypes[seed.type] || lifeSeedTypes.memory;
   inventory[profile.inventoryKey] = Math.max(0, inventory[profile.inventoryKey] - 1);
   seed.status = "traveling";
   seed.destination = destination.id;
   seed.history.push({ event: "dispersed", wind: currentWeatherProfile().world, destination: destination.title, time: currentTimeLabel() });
+  advanceTraceProcess(seed.traceProcessId, "传播", `${currentWeatherProfile().world}把它带向${destination.title}。`, "growing", "exploration");
   dandelionProtocol.dispersed += 1;
   absorbDandelionNutrient("wind", 1, "世界风系统");
   recordTavernDiscovery("relation", `种子传播：${seed.name}`, 0.5, { seedId: seed.id, stage: "traveling" });
@@ -6877,6 +11089,7 @@ function landLifeSeed(seed) {
   seed.result = profile.growth;
   seed.landedAt = new Date().toISOString();
   seed.history.push({ event: "landed", place: destination.title, result: profile.growth, time: currentTimeLabel() });
+  advanceTraceProcess(seed.traceProcessId, "落地", `在${destination.title}长成${profile.growth}，后续仍会继续留下年轮。`, "rooted", "stewardship");
   dandelionProtocol.stage = "rooting";
 
   if (seed.type === "memory") {
@@ -7027,7 +11240,7 @@ function registerKnownSeed(seedId, discoverer, addToBackpack = true) {
   if (!seedFarmState.knownSeedIds.includes(seedId)) seedFarmState.knownSeedIds.push(seedId);
   const passport = ensureSeedFarmPassport(seedId, discoverer);
   if (!passport.keepers.includes(discoverer)) passport.keepers.push(discoverer);
-  passport.history.push({ event: "received", keeper: "Dead Night", from: discoverer, time: new Date().toISOString() });
+  passport.history.push({ event: "received", keeper: "风芽", from: discoverer, time: new Date().toISOString() });
   passport.history = passport.history.slice(-24);
   if (addToBackpack) inventory.seeds += 1;
   seedFarmState.archiveEvents.push({ event: "seed-known", seedId, source: discoverer, time: new Date().toISOString() });
@@ -7168,9 +11381,9 @@ function seedFarmWeatherReading() {
   const weather = currentWeatherProfile();
   const nursery = seedFarmState.nursery;
   const environment = seedNurseryEnvironments[nursery.environmentId];
-  const advice = weather.weather === "小雨"
+  const advice = weather.isRain
     ? "雨会补充温室水分，今天重点是通风和排水。"
-    : weather.weather === "有风"
+    : weather.isWind
       ? "风适合锻炼茎秆，但幼苗需要低矮支架。"
       : "夜露可以缓慢补水，不需要一次浇满。";
   setPanel("云云的育苗天气", `${weather.place} · ${weather.weather}。${advice}${environment ? ` 当前苗床是${environment.name}，正在训练${environment.trait}。` : " 先到温室为种子选择一种真实环境。"}`);
@@ -7311,7 +11524,7 @@ function careForSeedNursery() {
   const seed = seedFarmItem(nursery.seedId);
   const environment = seedNurseryEnvironments[nursery.environmentId];
   const weather = currentWeatherProfile();
-  const response = weather.weather === "小雨" ? "你减少浇水，打开温室侧窗。" : weather.weather === "有风" ? "你让幼苗短暂接触风，再加低矮支撑。" : "你利用夜露补水，没有打断根系。";
+  const response = weather.isRain ? "你减少浇水，打开温室侧窗。" : weather.isWind ? "你让幼苗短暂接触风，再加低矮支撑。" : "你利用夜露补水，没有打断根系。";
   if (nursery.care < 2) {
     setPanel(`第 ${nursery.care} 次观察`, `${response}${seed.name}正在${environment.name}里形成${environment.trait}特征，还不能判断最终形态。`);
     save();
@@ -7511,7 +11724,10 @@ function interactSeedFarmNpc(resident) {
     const definition = seedFarmMissionCatalog[mission.id];
     actions.push([definition.steps[mission.step], () => progressSeedFarmMission(mission.id, resident.id)]);
   }
-  if (resident.id === "cloudy") actions.push(["读取育苗天气", seedFarmWeatherReading]);
+  if (resident.id === "cloudy") {
+    actions.push(["读取育苗天气", seedFarmWeatherReading]);
+    actions.push(["查看听天观象台", interactWeatherStation]);
+  }
   else if (resident.id === "trader") actions.push(["交换一颗远方种", exchangeSeedWithTraveler]);
   else if (resident.id === "honey") actions.push(["查看授粉生态", interactSeedEcologyFarm]);
   else if (resident.id === "mud") actions.push(["读取土地历史", seedFarmSoilReading]);
@@ -7590,7 +11806,7 @@ function sowFoodCrop() {
   foodLifeState.plot.activeSeedId = crop.id;
   foodLifeState.plot.companionPlants = [...crop.companions];
   foodLifeState.plot.lastWeather = currentWeatherProfile().weather;
-  foodLifeState.plot.moisture = Math.min(6, foodLifeState.plot.moisture + (currentWeatherProfile().weather === "小雨" ? 2 : 0));
+  foodLifeState.plot.moisture = Math.min(6, foodLifeState.plot.moisture + (currentWeatherProfile().isRain ? 2 : 0));
   foodLifeState.plot.history.push(`${currentSolarTerm().name}播下${crop.name}，伴生${crop.companions.join("与")}`);
   foodLifeState.plot.history = foodLifeState.plot.history.slice(-16);
   return { crop, passport };
@@ -7601,7 +11817,7 @@ function careForFoodCrop() {
   const weather = currentWeatherProfile();
   const term = currentSolarTerm();
   let response = "你沿田埂检查水、叶片和土壤，没有按固定表格浇水。";
-  if (weather.weather === "小雨") {
+  if (weather.isRain) {
     plot.moisture = Math.min(6, plot.moisture + 2);
     response = "雨已经替水田补水，你把劳动改成疏沟和观察叶片。";
   } else if (["minor-heat", "major-heat"].includes(term.id)) {
@@ -7716,7 +11932,7 @@ function cookFoodRecipe(recipeId) {
     name: recipe.name,
     level: recipe.level,
     ingredients: [...recipe.ingredients],
-    maker: "Dead Night",
+    maker: "风芽",
     sourceBatchId: harvest?.id || null,
     seedPassportId: harvest?.seedPassportId || null,
     plotId: harvest?.plotId || foodLifeState.plot.id,
@@ -7729,6 +11945,15 @@ function cookFoodRecipe(recipeId) {
   };
   foodLifeState.dishes.push(dish);
   foodLifeState.dishes = foodLifeState.dishes.slice(-24);
+  const process = startTraceProcess(
+    "food",
+    dish.name,
+    "dish",
+    dish.id,
+    ["土地与种子", "采集", "选择食材", "料理", "享用或分享", "余料", "回到土地"],
+  );
+  dish.traceProcessId = process.id;
+  advanceTraceProcess(process, "料理", `${dish.ingredients.join("、")}在${dish.term}的${dish.weather}里成为${dish.name}。`, "growing", "food");
   inventory.meals += 1;
   inventory.familyRecipe = Math.max(1, inventory.familyRecipe);
   addLifeValue("energy", 1);
@@ -7766,6 +11991,7 @@ function consumeFoodDish(dishId) {
   }
   dish.status = "eaten";
   dish.history.push({ event: "eaten", place: currentLifePlace(), time: new Date().toISOString() });
+  advanceTraceProcess(dish.traceProcessId, "享用", `${dish.name}进入身体，准备转化为行动。`, "growing", "food");
   inventory.meals = Math.max(0, inventory.meals - 1);
   inventory.foodLeftovers += 1;
   foodLifeState.energyForAction += 1;
@@ -7787,6 +12013,7 @@ function shareFoodDish(table = null) {
   dish.status = "shared";
   dish.sharedWith = federationState.gardenCreated ? "远方照料者" : "湖泊村居民";
   dish.history.push({ event: "shared", with: dish.sharedWith, place: "共同木桌", time: new Date().toISOString() });
+  advanceTraceProcess(dish.traceProcessId, "分享", `${dish.name}与${dish.sharedWith}成为一段共同记忆。`, "growing", "food");
   if (table) {
     table.uses += 1;
     const trace = `${tavernState.day}日 · 共同木桌 · 分享${dish.name}`;
@@ -7804,7 +12031,7 @@ function shareFoodDish(table = null) {
     name: `${dish.name}共同餐桌种子`,
     source: `${dish.term}的${dish.name}被分享`,
     payload: `${dish.story}。土地 ${dish.plotId} 的收获经过厨房，成为与${dish.sharedWith}的共同记忆。`,
-    relationships: ["Dead Night", dish.sharedWith],
+    relationships: ["风芽", dish.sharedWith],
     growthDirection: "共同食谱与关系水",
   });
   foodLifeState.foodMemories.push({ event: "分享", title: dish.name, detail: `与${dish.sharedWith}在共同木桌分享`, createdAt: new Date().toISOString() });
@@ -7829,8 +12056,12 @@ function compostFoodLeftovers() {
     status: "carried",
     createdAt: new Date().toISOString(),
   };
+  const sourceDish = [...foodLifeState.dishes].reverse().find((dish) => ["eaten", "shared"].includes(dish.status));
+  batch.sourceDishId = sourceDish?.id || null;
+  batch.traceProcessId = sourceDish?.traceProcessId || null;
   foodLifeState.compostBatches.push(batch);
   foodLifeState.compostBatches = foodLifeState.compostBatches.slice(-20);
+  advanceTraceProcess(batch.traceProcessId, "余料变成堆肥", "料理没有被删除，剩余部分正在重新成为土壤。", "growing", "food");
   setPanel("余料没有被删除", "料理余料已经变成一份生命堆肥。把它带回四季农庄，土壤会接住这顿饭留下的最后一部分。 ");
   save();
   renderHud();
@@ -7849,6 +12080,7 @@ function returnCompostToSoil() {
   if (batch) {
     batch.status = "returned";
     batch.returnedAt = new Date().toISOString();
+    advanceTraceProcess(batch.traceProcessId, "回到土地", "堆肥提高土壤肥力，并孕育下一颗种子。", "complete", "food");
   }
   foodLifeState.plot.history.push("料理余料变成堆肥，回到土壤并孕育下一颗种子");
   foodLifeState.plot.history = foodLifeState.plot.history.slice(-16);
@@ -7895,14 +12127,14 @@ function interactRuralTraining() {
     ruralCharacterState.plotStage = "growing";
     ruralCharacterState.seasonIndex = 1;
     ruralCharacterState.lastActionDay = day;
-    if (weather.weather === "小雨") inventory.water += 1;
+    if (weather.isRain) inventory.water += 1;
     const foodCare = careForFoodCrop();
     recordTavernDiscovery("nature", `根据${weather.weather}调整夏季照料`, 1, {
       ruralTraits: { adaptability: 1, responsibility: 1 },
       season: "summer",
       weather: weather.weather,
     });
-    const adjustment = weather.weather === "小雨" ? "雨已经替你浇水，你改去疏通排水沟。" : weather.weather === "有风" ? "风变大了，你给幼苗加上低矮支架。" : "夜露足够，你减少浇水并观察叶片。";
+    const adjustment = weather.isRain ? "雨已经替你浇水，你改去疏通排水沟。" : weather.isWind ? "风变大了，你给幼苗加上低矮支架。" : "夜露足够，你减少浇水并观察叶片。";
     setPanel("夏季 · 生长", `${foodCare} ${adjustment} ${farmLandProfile().sentence} 责任不是照表执行，而是看见环境后改变做法。`);
   } else if (ruralCharacterState.plotStage === "growing") {
     ruralCharacterState.plotStage = "harvest";
@@ -8055,7 +12287,21 @@ function syncLifeGrowthHierarchy(sourceCard = null) {
   const cardCount = lifeGrowthState.experienceCards.length;
   const companionStage = cardCount >= 8 ? 3 : cardCount >= 4 ? 2 : cardCount >= 1 ? 1 : 0;
   const companionNames = ["小蒲公英", "记忆蒲公英", `${lifeGrowthState.personality.name === "正在形成" ? "同行" : lifeGrowthState.personality.name}蒲公英`, "世界种子守护者"];
-  lifeGrowthState.companion = { stage: companionStage, name: companionNames[companionStage], path: lifeGrowthState.personality.id };
+  const skillStyle = lifeSkillGardenProfile().strongest?.style || "尚未定形";
+  const temperament = growthGuidanceState.trust.others >= 3
+    ? "温柔"
+    : growthGuidanceState.trust.self >= 3
+      ? "勇敢"
+      : growthGuidanceState.trust.world >= 3
+        ? "安静而坚定"
+        : "好奇";
+  lifeGrowthState.companion = {
+    stage: companionStage,
+    name: companionNames[companionStage],
+    path: lifeGrowthState.personality.id,
+    temperament,
+    skillStyle,
+  };
 
   let gardenStage = 0;
   lifeGrowthGardenStages.forEach((stage, index) => { if (cardCount >= stage.need) gardenStage = index; });
@@ -8138,19 +12384,31 @@ function recordLifeGrowthAction(kind, title, amount = 1, details = {}) {
     term: currentSolarTerm().name,
     weather: currentWeatherProfile().weather,
     time: currentTimeLabel(),
+    createdAt: new Date().toISOString(),
     cardId: null,
     sourceId: details.sourceId || null,
   };
   lifeGrowthState.traces.push(trace);
   lifeGrowthState.traces = lifeGrowthState.traces.slice(-180);
+  recordTrace({
+    kind: abilityId,
+    title,
+    subjectType: "experience",
+    subjectId: trace.id,
+    detail: `${lifeAbilityCatalog[abilityId].name}由一次真实经历形成，而不是凭空增加。`,
+    locationId: details.place ? `place-${details.place}` : undefined,
+    place: details.place,
+  });
   const color = lifeAbilityCatalog[abilityId].color;
   for (let index = 0; index < 3; index += 1) {
     growthLightParticles.push({ born: state.tick, angle: index * 2.1 + lifeGrowthState.traces.length, color, drift: 16 + index * 7 });
   }
+  const skillPractice = recordLifeSkillPractice(kind, title, details);
   const card = formExperienceCard(abilityId);
   if (!card) syncLifeGrowthHierarchy();
+  const guidanceCompleted = completeGrowthGuidanceSeed(abilityId, title, trace);
   syncGeneratedWorld();
-  return { trace, card };
+  return { trace, card, skillPractice, guidanceCompleted };
 }
 
 function lifeGrowthProfile() {
@@ -8166,6 +12424,909 @@ function lifeGrowthProfile() {
     balance,
     latestCard: lifeGrowthState.experienceCards[lifeGrowthState.experienceCards.length - 1] || null,
   };
+}
+
+function lifeSkillIdsFor(kind, title, details = {}) {
+  const text = `${title} ${details.place || ""} ${details.sourceId || ""}`;
+  const matches = Object.entries(lifeSkillCatalog)
+    .filter(([, skill]) => skill.words.test(text))
+    .map(([id]) => id);
+  const fallbackByAbility = {
+    perception: "observation",
+    creation: "handcraft",
+    empathy: "communication",
+    learning: "language",
+    stewardship: "gardening",
+    exploration: "adventure",
+  };
+  const fallback = fallbackByAbility[growthAbilityFor(kind, details)];
+  if (fallback && !matches.includes(fallback)) matches.push(fallback);
+  return matches.slice(0, 3);
+}
+
+function lifeSkillProfile(skillId) {
+  const skill = lifeSkillCatalog[skillId];
+  const practices = growthGuidanceState.skillPractice.filter((item) => item.skillIds.includes(skillId));
+  const thresholds = [0, 1, 3, 7, 14];
+  let stage = 0;
+  thresholds.forEach((threshold, index) => { if (practices.length >= threshold) stage = index; });
+  return {
+    id: skillId,
+    ...skill,
+    stage,
+    title: lifeSkillTitles[stage],
+    practices,
+    latest: practices[practices.length - 1] || null,
+  };
+}
+
+function lifeSkillGardenProfile() {
+  const profiles = Object.keys(lifeSkillCatalog).map(lifeSkillProfile);
+  const practiced = profiles.filter((profile) => profile.practices.length);
+  const strongest = practiced.length
+    ? [...practiced].sort((left, right) => right.practices.length - left.practices.length)[0]
+    : { id: "unformed", name: "尚未命名的兴趣", tree: "正在形成", style: "一片空白叶", title: "初学者", stage: 0, practices: [], latest: null };
+  const treeTotals = profiles.reduce((result, profile) => {
+    result[profile.tree] = (result[profile.tree] || 0) + profile.practices.length;
+    return result;
+  }, {});
+  const styleTree = Object.entries(treeTotals).sort((left, right) => right[1] - left[1])[0]?.[0] || "正在形成";
+  const linked = practiced
+    .filter((profile) => profile.tree !== strongest.tree)
+    .sort((left, right) => right.practices.length - left.practices.length)
+    .slice(0, 2);
+  return {
+    profiles,
+    practiced,
+    strongest,
+    styleTree,
+    linked,
+    signal: practiced.length
+      ? `${strongest.name}正在形成「${strongest.title}」的做事方式；${linked.length ? `${linked.map((item) => item.name).join("与")}也在为它提供根系。` : "下一次真实练习会让这条能力与别的生命经验连接。"}`
+      : "兴趣还没有被要求成为职业。先试一次，能力会从经历里自己长出来。",
+  };
+}
+
+function recordLifeSkillPractice(kind, title, details = {}) {
+  const skillIds = lifeSkillIdsFor(kind, title, details);
+  const practice = {
+    id: `skill-practice-${Date.now()}-${growthGuidanceState.skillPractice.length}`,
+    title,
+    skillIds,
+    place: details.place || currentLifePlace(),
+    output: details.output || null,
+    time: new Date().toISOString(),
+  };
+  growthGuidanceState.skillPractice.push(practice);
+  growthGuidanceState.skillPractice = growthGuidanceState.skillPractice.slice(-180);
+  skillIds.forEach((skillId) => {
+    const profile = lifeSkillProfile(skillId);
+    growthGuidanceState.skillStyles[skillId] = {
+      title: profile.title,
+      style: profile.style,
+      place: profile.place,
+      updatedAt: practice.time,
+    };
+  });
+  return practice;
+}
+
+function trustGardenStage(kind) {
+  const value = Number(growthGuidanceState.trust[kind] || 0);
+  const stage = value >= 7 ? 3 : value >= 3 ? 2 : value >= 1 ? 1 : 0;
+  return trustGardenStages[kind][stage];
+}
+
+function growthGuidanceEvidence() {
+  const latestTraces = lifeGrowthState.traces.slice(-3).reverse();
+  const latestCard = lifeGrowthState.experienceCards[lifeGrowthState.experienceCards.length - 1] || null;
+  const dominant = Object.keys(lifeAbilityCatalog)
+    .map(lifeAbilityProfile)
+    .sort((left, right) => right.cards - left.cards)[0];
+  return {
+    latestTraces,
+    latestCard,
+    dominant,
+    sentence: latestTraces.length
+      ? `你已经做过：${latestTraces.map((trace) => trace.title).join("、")}。`
+      : "第一段证据不需要伟大，只需要真的发生。",
+  };
+}
+
+function growthGuidancePhaseProfile() {
+  const completed = Object.values(growthGuidanceState.dailySeeds).filter((seed) => seed.status === "complete").length;
+  const cards = lifeGrowthState.experienceCards.length;
+  let stage = 0;
+  if (cards >= 1) stage = 1;
+  if (completed >= 1) stage = 2;
+  if (cards >= 4 && completed >= 2) stage = 3;
+  if (growthGuidanceState.sharedExperienceIds.length) stage = 4;
+  return { stage, ...growthGuidancePhases[stage] };
+}
+
+function growthGuidanceDailySeed() {
+  const key = livingDateKey();
+  if (growthGuidanceState.dailySeeds[key]) return growthGuidanceState.dailySeeds[key];
+  const balance = lifeGrowthBalanceProfile();
+  const lifeBalance = lifeBalanceProfile();
+  const abilityId = lifeBalance.phase === "strained" ? "rest" : balance.state === "one-sided" ? balance.quietId : balance.dominantId;
+  const template = growthGuidanceSeedCatalog[abilityId] || growthGuidanceSeedCatalog.perception;
+  const seed = {
+    id: `guidance-${key}`,
+    dateKey: key,
+    abilityId,
+    name: template.name,
+    action: template.action,
+    destination: template.destination,
+    mode: template.mode,
+    status: "waiting",
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    proof: null,
+  };
+  growthGuidanceState.dailySeeds[key] = seed;
+  return seed;
+}
+
+function powerBondProfile() {
+  const counts = Object.keys(powerBondCatalog).reduce((result, id) => ({ ...result, [id]: 0 }), {});
+  growthGuidanceState.powerMarks.forEach((mark) => { counts[mark.forceId] = (counts[mark.forceId] || 0) + 1; });
+  const strongestId = Object.entries(counts).sort((left, right) => right[1] - left[1])[0][0];
+  const total = growthGuidanceState.powerMarks.length;
+  const stageNames = ["相遇种子", "认识芽", "理解花", "伙伴树", "生命连接林"];
+  const stage = total >= 10 ? 4 : total >= 6 ? 3 : total >= 3 ? 2 : total >= 1 ? 1 : 0;
+  return {
+    counts,
+    strongestId,
+    strongest: powerBondCatalog[strongestId],
+    stage,
+    stageName: stageNames[stage],
+    signal: total
+      ? `${powerBondCatalog[strongestId].name}最常出现；这段关系正在长成${stageNames[stage]}。`
+      : "朋友不是名单。第一份真实回应会成为关系的第一阵风。",
+  };
+}
+
+function growthGuidanceProfile(growth = lifeGrowthProfile()) {
+  const phase = growthGuidancePhaseProfile();
+  const seed = growthGuidanceDailySeed();
+  const evidence = growthGuidanceEvidence();
+  const bond = powerBondProfile();
+  const trust = {
+    self: trustGardenStage("self"),
+    others: trustGardenStage("others"),
+    world: trustGardenStage("world"),
+  };
+  const temperament = growthGuidanceState.trust.others >= 3
+    ? "温柔"
+    : growthGuidanceState.trust.self >= 3
+      ? "勇敢"
+      : growthGuidanceState.trust.world >= 3
+        ? "安静而坚定"
+        : "好奇";
+  let line = `我们试试看，这颗${seed.name}会长成什么样。`;
+  if (seed.mode === "rest") line = "今天不需要开花，先照顾根。";
+  else if (/雨|雾/.test(currentWeatherProfile().weather)) line = "今天适合整理内心花园。";
+  else if (evidence.latestCard) line = `你的花园里已经长出了${evidence.dominant.stage}的芽。`;
+  return { growth, phase, seed, evidence, bond, trust, temperament, line };
+}
+
+function recordPowerBondForce(forceId, title, sourceId = null) {
+  if (!powerBondCatalog[forceId]) return null;
+  const mark = {
+    id: `power-mark-${Date.now()}-${growthGuidanceState.powerMarks.length}`,
+    forceId,
+    title,
+    sourceId,
+    place: currentLifePlace(),
+    time: new Date().toISOString(),
+  };
+  growthGuidanceState.powerMarks.push(mark);
+  growthGuidanceState.powerMarks = growthGuidanceState.powerMarks.slice(-100);
+  growthGuidanceState.trust.others += 1;
+  recordBondMark(mark);
+  recordFriendshipTime(mark);
+  return mark;
+}
+
+function recordBondMark(mark) {
+  const bond = growthGuidanceState.bondGarden;
+  bond.dimensions.time += 1;
+  if (["encouragement", "guardianship"].includes(mark.forceId)) bond.dimensions.trust += 1;
+  if (["companionship", "exploration"].includes(mark.forceId)) bond.dimensions.memories += 1;
+  if (["guardianship", "encouragement"].includes(mark.forceId)) bond.dimensions.mutualHelp += 1;
+  if (["creation", "exploration", "encouragement"].includes(mark.forceId)) bond.dimensions.growth += 1;
+  if (!bond.token) {
+    bond.token = {
+      id: `twin-dandelion-${Date.now()}`,
+      name: "双生蒲公英",
+      form: "两朵独立的花，由一缕微光根系连接",
+      place: mark.place,
+      weather: currentWeatherProfile().weather,
+      createdAt: mark.time,
+    };
+  }
+  bond.history.push({
+    event: "bond-mark",
+    markId: mark.id,
+    forceId: mark.forceId,
+    title: mark.title,
+    time: mark.time,
+  });
+  bond.history = bond.history.slice(-80);
+}
+
+function bondLifeProfile() {
+  const bond = growthGuidanceState.bondGarden;
+  if (allianceState.conflict && !bond.conflict) {
+    bond.conflict = {
+      id: `bond-conflict-${Date.now()}`,
+      title: allianceState.conflict.title || "两条生长方向发生分叉",
+      detail: allianceState.conflict.detail || "目标不同，需要先听见彼此。",
+      status: "fallen-leaf",
+      createdAt: allianceState.conflict.createdAt || new Date().toISOString(),
+    };
+  }
+  const values = Object.values(bond.dimensions);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const livingDimensions = values.filter((value) => value > 0).length;
+  let stage = 0;
+  if (total >= 2 && livingDimensions >= 2) stage = 1;
+  if (total >= 5 && livingDimensions >= 3 && bond.dimensions.trust > 0) stage = 2;
+  if (total >= 9 && livingDimensions >= 4 && bond.dimensions.growth > 0) stage = 3;
+  if (total >= 15 && livingDimensions === 5) stage = 4;
+  const dimensionStates = Object.entries(bond.dimensions).map(([id, value]) => ({
+    id,
+    ...bondDimensionCatalog[id],
+    state: value >= 6 ? "成为根系" : value >= 3 ? "正在生长" : value >= 1 ? "留下第一道痕迹" : "仍在等待",
+  }));
+  return {
+    bond,
+    stage,
+    stageProfile: bondLifeStages[stage],
+    distance: bondDistanceCatalog[bond.distance] || bondDistanceCatalog.space,
+    permission: bondPermissionCatalog[bond.permission] || bondPermissionCatalog.passing,
+    dimensionStates,
+  };
+}
+
+function setBondDistance(distanceId) {
+  if (!bondDistanceCatalog[distanceId]) return;
+  const bond = growthGuidanceState.bondGarden;
+  bond.distance = distanceId;
+  growthGuidanceState.friendshipChronicle.dormant = distanceId === "dormant";
+  bond.history.push({ event: "distance-changed", distanceId, time: new Date().toISOString() });
+  if (distanceId === "dormant") {
+    createWinterSeed("pause", "一段关系进入冬季", "共同记忆被保留，双方不再被互动提醒追赶。", "bond-dormant");
+  }
+  setPanel("关系距离", `${bondDistanceCatalog[distanceId].name}：${bondDistanceCatalog[distanceId].note}`);
+  save();
+  renderHud();
+}
+
+function setBondPermission(permissionId) {
+  if (!bondPermissionCatalog[permissionId]) return;
+  if (permissionId === "partner" && !(allianceState.consensus.consent.self && allianceState.consensus.consent.other)) {
+    setPanel("边界仍然关闭", "伙伴权限需要双方明确同意。共同经历不会自动换取进入私人花园的权利。");
+    return;
+  }
+  if (permissionId === "family" && !federationState.ceremony.completed) {
+    setPanel("共享根系仍在等待", "家人权限只来自双方完成的关系仪式，不由互动次数或礼物数量自动升级。");
+    return;
+  }
+  const bond = growthGuidanceState.bondGarden;
+  bond.permission = permissionId;
+  bond.history.push({ event: "boundary-changed", permissionId, time: new Date().toISOString() });
+  setPanel("私人花园边界", `${bondPermissionCatalog[permissionId].name}：${bondPermissionCatalog[permissionId].note}`);
+  save();
+  renderHud();
+}
+
+function openBondBoundaryControls() {
+  const profile = bondLifeProfile();
+  setPanel("私人花园边界", `当前是「${profile.permission.name}」：${profile.permission.note}边界可以收回，关系不会因此被判定退级。`);
+  setPanelActions([
+    ["只允许路过", () => setBondPermission("passing")],
+    ["开放朋友区域", () => setBondPermission("friend")],
+    ["申请伙伴共管", () => setBondPermission("partner")],
+    ["查看家人仪式条件", () => setBondPermission("family")],
+  ]);
+}
+
+function repairBondConflict() {
+  const conflict = growthGuidanceState.bondGarden.conflict;
+  if (!conflict || conflict.status !== "fallen-leaf") {
+    setPanel("没有需要强行修复的枯叶", "关系可以自然生长，也可以保持距离。");
+    return;
+  }
+  const conflictTime = new Date(conflict.createdAt).getTime();
+  const repairTrace = lifeGrowthState.traces.find((trace) => trace.abilityId === "empathy" && new Date(trace.createdAt || 0).getTime() > conflictTime);
+  if (!repairTrace) {
+    setPanel("枯叶仍在树下", "先完成一次真实沟通、道歉或共同经历。礼物不能替代对方的理解与同意。");
+    return;
+  }
+  conflict.status = "new-sprout";
+  conflict.repairedAt = new Date().toISOString();
+  conflict.proof = repairTrace.title;
+  growthGuidanceState.bondGarden.dimensions.trust += 1;
+  recordTrace({
+    kind: "relationship",
+    title: "枯叶旁长出新芽",
+    subjectType: "bond-conflict",
+    subjectId: conflict.id,
+    stage: "修复",
+    detail: `${repairTrace.title}成为新的共同理解；旧裂痕仍被年轮保存。`,
+  });
+  setPanel("关系重新发芽", `旧裂痕没有被擦掉；「${repairTrace.title}」让枯叶旁长出一枚新芽。`);
+  save();
+}
+
+function openDandelionBondGarden() {
+  const profile = bondLifeProfile();
+  const dimensions = profile.dimensionStates.map((item) => `${item.symbol} ${item.name}：${item.state}`).join("；");
+  const conflict = profile.bond.conflict
+    ? `关系树有一片${profile.bond.conflict.status === "fallen-leaf" ? "等待理解的枯叶" : "裂痕旁的新芽"}。`
+    : "";
+  setPanel("关系蒲公英", `${profile.stageProfile.name}：${profile.stageProfile.note} 当前距离是「${profile.distance.name}」，边界是「${profile.permission.name}」。${dimensions}。${conflict}`);
+  const actions = [
+    ["相遇与关系年轮", () => openEncounterGarden()],
+    ["留出一点空间", () => setBondDistance("space")],
+    ["靠近一步", () => setBondDistance("near")],
+    ["调整私人花园边界", () => openBondBoundaryControls()],
+  ];
+  actions.push(profile.bond.conflict?.status === "fallen-leaf"
+    ? ["照顾一片枯叶", () => repairBondConflict()]
+    : ["让关系暂时休眠", () => setBondDistance("dormant")]);
+  setPanelActions(actions);
+}
+
+function ensureEncounterSeed() {
+  const skills = lifeSkillGardenProfile();
+  const guidance = growthGuidanceProfile();
+  const latestCard = lifeGrowthState.experienceCards[lifeGrowthState.experienceCards.length - 1] || null;
+  const existing = growthGuidanceState.encounterSeed;
+  const next = {
+    id: existing?.id || `encounter-seed-${Date.now()}`,
+    lookingFor: guidance.seed.action,
+    growing: `${skills.strongest.name} · ${skills.strongest.title}`,
+    willingToShare: latestCard?.title || growthGuidanceState.kindnessSeeds[growthGuidanceState.kindnessSeeds.length - 1]?.name || "一次真实观察",
+    updatedAt: new Date().toISOString(),
+  };
+  growthGuidanceState.encounterSeed = next;
+  return next;
+}
+
+function encounterMatchProfile() {
+  const seed = ensureEncounterSeed();
+  const skills = lifeSkillGardenProfile();
+  const practicedIds = new Set(skills.practiced.map((skill) => skill.id));
+  const ranked = encounterArchetypes
+    .map((candidate) => ({
+      ...candidate,
+      resonance: candidate.skills.filter((skillId) => practicedIds.has(skillId)),
+    }))
+    .sort((left, right) => right.resonance.length - left.resonance.length);
+  const candidate = ranked[0];
+  const reasons = [];
+  if (candidate.resonance.length) reasons.push(`你们都走过${candidate.resonance.map((id) => lifeSkillCatalog[id].name).join("与")}的路`);
+  reasons.push(`你正在生长${seed.growing}`);
+  reasons.push(`对方${candidate.need}`);
+  reasons.push(`你愿意分享「${seed.willingToShare}」`);
+  return { seed, candidate, reasons };
+}
+
+function beginEncounter() {
+  const match = encounterMatchProfile();
+  const existing = growthGuidanceState.encounters.find((item) => item.candidateId === match.candidate.id && item.status === "growing");
+  if (existing) {
+    setPanel("相遇仍在生长", `你与${existing.name}已经因为「${existing.event}」发生连接。相遇不需要被重复匹配，只需要继续留下共同经历。`);
+    return existing;
+  }
+  const encounter = {
+    id: `encounter-${Date.now()}-${growthGuidanceState.encounters.length}`,
+    candidateId: match.candidate.id,
+    name: match.candidate.name,
+    place: match.candidate.place,
+    event: match.candidate.event,
+    reasons: match.reasons,
+    weather: currentWeatherProfile().weather,
+    term: currentSolarTerm().name,
+    status: "growing",
+    createdAt: new Date().toISOString(),
+  };
+  growthGuidanceState.encounters.push(encounter);
+  growthGuidanceState.encounters = growthGuidanceState.encounters.slice(-40);
+  createLifeSeed("relationship", {
+    name: "相遇种子",
+    source: encounter.place,
+    payload: encounter.event,
+    relationships: ["风芽", encounter.name],
+    growthDirection: "相遇花",
+  });
+  recordPowerBondForce("exploration", `在${encounter.place}遇见${encounter.name}`, encounter.id);
+  recordTrace({
+    kind: "encounter",
+    title: encounter.event,
+    subjectType: "encounter",
+    subjectId: encounter.id,
+    stage: "相遇",
+    detail: `${encounter.reasons.join("；")}。相遇来自生命轨迹的共鸣，不是随机在线推荐。`,
+  });
+  setPanel("风里的相遇", `你在${encounter.place}遇见${encounter.name}。${encounter.reasons.join("；")}。世界生成了「${encounter.event}」，没有自动添加好友。`);
+  save();
+  renderHud();
+  return encounter;
+}
+
+function recordFriendshipTime(mark) {
+  const chronicle = growthGuidanceState.friendshipChronicle;
+  const now = mark.time || new Date().toISOString();
+  if (!chronicle.lifeBirthday) chronicle.lifeBirthday = now;
+  if (!chronicle.encounterDay) {
+    chronicle.encounterDay = {
+      date: now,
+      place: mark.place || currentLifePlace(),
+      weather: currentWeatherProfile().weather,
+      term: currentSolarTerm().name,
+      event: mark.title,
+    };
+  }
+  chronicle.lastInteractionAt = now;
+  chronicle.dormant = false;
+  if (!chronicle.friendshipDay && growthGuidanceState.powerMarks.length >= 3) {
+    chronicle.friendshipDay = {
+      date: now,
+      place: mark.place || currentLifePlace(),
+      weather: currentWeatherProfile().weather,
+      term: currentSolarTerm().name,
+      event: "第一次让关系承担共同经历",
+    };
+    createLifeSeed("relationship", {
+      name: "友谊树种子",
+      source: chronicle.friendshipDay.place,
+      payload: chronicle.friendshipDay.event,
+      relationships: ["风芽", "曾经互相成为力量的人"],
+      growthDirection: "友谊树",
+    });
+  }
+}
+
+function friendshipTimeProfile() {
+  const chronicle = growthGuidanceState.friendshipChronicle;
+  if (!chronicle.lifeBirthday) chronicle.lifeBirthday = new Date().toISOString();
+  const bond = powerBondProfile();
+  const lastTime = chronicle.lastInteractionAt ? new Date(chronicle.lastInteractionAt).getTime() : Date.now();
+  const daysQuiet = Math.max(0, Math.floor((Date.now() - lastTime) / 86400000));
+  chronicle.dormant = daysQuiet >= 30;
+  return {
+    chronicle,
+    bond,
+    lifeDay: new Date(chronicle.lifeBirthday).toLocaleDateString("zh-CN"),
+    encounterDay: chronicle.encounterDay ? new Date(chronicle.encounterDay.date).toLocaleDateString("zh-CN") : null,
+    friendshipDay: chronicle.friendshipDay ? new Date(chronicle.friendshipDay.date).toLocaleDateString("zh-CN") : null,
+    season: chronicle.dormant ? "休眠" : bond.stage >= 3 ? "开花" : "生长",
+  };
+}
+
+function celebrateFriendshipDay() {
+  const profile = friendshipTimeProfile();
+  if (!profile.chronicle.friendshipDay) {
+    setPanel("友谊日仍在未来", "相遇日记录第一次共鸣；友谊日要等到关系真正承担过共同经历，不会由按钮提前制造。");
+    return null;
+  }
+  const year = new Date().getFullYear();
+  const existing = profile.chronicle.celebrations.find((item) => item.year === year);
+  if (existing) {
+    setPanel("今年的友谊叶", `你们已经在${existing.place}感谢过这段连接。庆典不需要重复领取。`);
+    return existing;
+  }
+  const celebration = {
+    id: `friendship-festival-${year}`,
+    year,
+    place: federationState.gardenCreated ? federationState.familyName : "世界树广场",
+    memories: livingSceneState.photos.slice(-3).map((photo) => photo.title),
+    future: "下一次见面时，共同照顾一株小生命",
+    createdAt: new Date().toISOString(),
+  };
+  profile.chronicle.celebrations.push(celebration);
+  createFriendshipGiftBox("memory");
+  recordTrace({
+    kind: "relationship",
+    title: `${year} 友谊生日`,
+    subjectType: "friendship-festival",
+    subjectId: celebration.id,
+    stage: "感谢",
+    detail: `回看共同经历，种下未来计划；没有排行榜或随机奖励。`,
+  });
+  setPanel("友谊生日", `在${celebration.place}，你们回看${celebration.memories.length ? celebration.memories.join("、") : "第一次相遇"}，并种下未来愿望：「${celebration.future}」。`);
+  save();
+  return celebration;
+}
+
+function openEncounterGarden() {
+  const match = encounterMatchProfile();
+  setPanel("相遇种子", `正在寻找：${match.seed.lookingFor}。正在生长：${match.seed.growing}。愿意分享：${match.seed.willingToShare}。风指向${match.candidate.place}的${match.candidate.name}，因为${match.reasons.join("；")}。`);
+  setPanelActions([
+    ["去经历这次相遇", () => beginEncounter()],
+    ["查看关系年轮", () => openFriendshipTimeGarden()],
+    ["暂时不相遇", () => setPanel("相遇种子", "它会留在风里。没有在线状态，也没有错过提醒。")],
+  ]);
+}
+
+function openFriendshipTimeGarden() {
+  const profile = friendshipTimeProfile();
+  const encounter = profile.chronicle.encounterDay
+    ? `相遇日 ${profile.encounterDay} · ${profile.chronicle.encounterDay.place} · ${profile.chronicle.encounterDay.weather}`
+    : "相遇日尚未发生";
+  const friendship = profile.chronicle.friendshipDay
+    ? `友谊日 ${profile.friendshipDay} · ${profile.chronicle.friendshipDay.event}`
+    : "关系还没有走到需要命名友谊日的阶段";
+  setPanel("关系年轮", `生命日 ${profile.lifeDay}。${encounter}。${friendship}。关系现在处于${profile.season}季；休眠不是删除，再次联系会重新发芽。`);
+  setPanelActions([
+    ["打开相遇地图", () => openEncounterGarden()],
+    ["举行友谊生日", () => celebrateFriendshipDay()],
+    ["查看友谊礼盒", () => createFriendshipGiftBox("memory")],
+  ]);
+}
+
+function completeGrowthGuidanceSeed(abilityId, title, trace = null) {
+  const seed = growthGuidanceDailySeed();
+  if (seed.status !== "waiting" || seed.mode !== "action" || seed.abilityId !== abilityId) return false;
+  seed.status = "complete";
+  seed.completedAt = new Date().toISOString();
+  seed.proof = title;
+  growthGuidanceState.trust.self += 1;
+  growthGuidanceState.trust.world += abilityId === "stewardship" || abilityId === "perception" ? 1 : 0;
+  const firstCourage = !growthGuidanceState.courageTraces.some((item) => item.abilityId === abilityId);
+  if (firstCourage) {
+    const courage = courageFormCatalog[abilityId] || courageFormCatalog.perception;
+    growthGuidanceState.courageTraces.push({
+      id: `courage-${Date.now()}`,
+      abilityId,
+      name: courage.name,
+      result: courage.result,
+      proof: title,
+      time: seed.completedAt,
+    });
+  }
+  growthGuidanceState.history.push({ event: "small-promise-kept", seedId: seed.id, traceId: trace?.id || null, title, time: seed.completedAt });
+  recordTrace({
+    kind: "growth",
+    title: `小承诺完成：${seed.name}`,
+    subjectType: "guidance-seed",
+    subjectId: seed.id,
+    stage: "尝试",
+    status: "left-a-mark",
+    detail: `${title}成为相信自己的证据。`,
+  });
+  if (growthGuidanceState.trust.self === 3) {
+    inventory.memorySeed += 1;
+    addMemory("坚持之叶：三个小承诺留下了真实痕迹");
+  }
+  return true;
+}
+
+function completeGrowthGuidanceRest(title = "允许现实生活先发生") {
+  const seed = growthGuidanceDailySeed();
+  if (seed.status !== "waiting" || seed.mode !== "rest") return false;
+  seed.status = "complete";
+  seed.completedAt = new Date().toISOString();
+  seed.proof = title;
+  growthGuidanceState.trust.self += 1;
+  growthGuidanceState.trust.world += 1;
+  growthGuidanceState.history.push({ event: "roots-rested", seedId: seed.id, title, time: seed.completedAt });
+  return true;
+}
+
+function createWinterSeed(kind, title, detail, sourceId = null) {
+  const profile = winterSeedCatalog[kind] || winterSeedCatalog.pause;
+  if (sourceId) {
+    const existing = growthGuidanceState.winterSeeds.find((seed) => seed.sourceId === sourceId);
+    if (existing) return existing;
+  }
+  const seed = {
+    id: `winter-seed-${Date.now()}-${growthGuidanceState.winterSeeds.length}`,
+    kind,
+    name: profile.name,
+    title,
+    detail,
+    color: profile.color,
+    future: profile.future,
+    sourceId,
+    status: "dormant",
+    support: [],
+    createdAt: new Date().toISOString(),
+    awakenedAt: null,
+  };
+  growthGuidanceState.winterSeeds.push(seed);
+  growthGuidanceState.winterSeeds = growthGuidanceState.winterSeeds.slice(-40);
+  recordTrace({
+    kind: "winter",
+    title: `${profile.name}：${title}`,
+    subjectType: "winter-seed",
+    subjectId: seed.id,
+    stage: "承受",
+    status: "dormant",
+    detail: `${detail} 这段经历被保存，但不会被美化或催促。`,
+  });
+  return seed;
+}
+
+function restGrowthGuidanceSeed() {
+  const seed = growthGuidanceDailySeed();
+  if (seed.status !== "waiting") return seed;
+  seed.status = "dormant";
+  seed.dormantAt = new Date().toISOString();
+  if (!growthGuidanceState.dormantSeeds.some((item) => item.seedId === seed.id)) {
+    growthGuidanceState.dormantSeeds.push({ seedId: seed.id, name: seed.name, action: seed.action, dormantAt: seed.dormantAt });
+  }
+  createWinterSeed("pause", seed.name, "今天没有继续，也没有被判定失败。", seed.id);
+  setPanel("种子进入休眠", "它没有消失，只是在等待下一场春雨。今天可以到这里。");
+  save();
+  renderHud();
+  return seed;
+}
+
+function wakeGrowthGuidanceSeed() {
+  const sleeping = [...growthGuidanceState.dormantSeeds].reverse().find((item) => {
+    const seed = Object.values(growthGuidanceState.dailySeeds).find((candidate) => candidate.id === item.seedId);
+    return seed?.status === "dormant";
+  });
+  if (!sleeping) {
+    setPanel("没有需要催醒的种子", "休眠不是欠下的任务。等一颗种子自己需要春天时，再回来。");
+    return null;
+  }
+  const seed = Object.values(growthGuidanceState.dailySeeds).find((candidate) => candidate.id === sleeping.seedId);
+  seed.status = "waiting";
+  seed.awakenedAt = new Date().toISOString();
+  const winter = growthGuidanceState.winterSeeds.find((item) => item.sourceId === seed.id);
+  if (winter) {
+    winter.status = "awakening";
+    winter.awakenedAt = seed.awakenedAt;
+    winter.support.push("自己愿意再试一次");
+  }
+  growthGuidanceState.courageTraces.push({
+    id: `courage-restart-${Date.now()}`,
+    abilityId: seed.abilityId,
+    name: "重新开始的勇气",
+    result: "重新生长经验",
+    proof: seed.action,
+    time: seed.awakenedAt,
+  });
+  setPanel("下一场春雨", `「${seed.name}」重新醒来。只需要下一步：${seed.action}。`);
+  save();
+  renderHud();
+  return seed;
+}
+
+function plantKindnessSeed(type) {
+  const profile = kindnessSeedCatalog[type] || kindnessSeedCatalog.encouragement;
+  const seed = {
+    id: `kindness-${Date.now()}-${growthGuidanceState.kindnessSeeds.length}`,
+    type,
+    name: profile.name,
+    message: profile.message,
+    flower: profile.flower,
+    land: type === "gratitude" ? "朋友土地" : type === "knowledge" ? "公共土地" : "世界树土地",
+    status: "planted",
+    care: ["一句真实的话", "一次对应行动"],
+    createdAt: new Date().toISOString(),
+  };
+  growthGuidanceState.kindnessSeeds.push(seed);
+  growthGuidanceState.kindnessSeeds = growthGuidanceState.kindnessSeeds.slice(-80);
+  const lifeSeed = createLifeSeed(profile.kind, {
+    name: profile.name,
+    source: "一段真实信息与行动",
+    payload: profile.message,
+    relationships: ["风芽", "等待接住它的生命"],
+    growthDirection: profile.flower,
+  });
+  seed.lifeSeedId = lifeSeed.id;
+  recordPowerBondForce(profile.power, `${profile.name}被种入${seed.land}`, seed.id);
+  growthGuidanceState.trust.world += 1;
+  setPanel(profile.name, `${profile.message} 它被种入${seed.land}，只有真实行动和回应才能让它长成${profile.flower}。`);
+  save();
+  renderHud();
+  return seed;
+}
+
+function shareLatestMemoryPhoto() {
+  const photo = [...livingSceneState.photos].reverse().find((item) => !item.guidanceSharedAt);
+  if (!photo) {
+    setPanel("记忆照片种子", "还没有可以寄出的生命合影。先在一个真实场景里留下照片、天气、同行者与故事。");
+    return null;
+  }
+  photo.guidanceSharedAt = new Date().toISOString();
+  photo.delivery = photo.participants.length > 1 ? "寄给朋友" : "寄给陌生世界";
+  createLifeSeed("memory", {
+    name: `${photo.title}的光影种子`,
+    source: photo.place,
+    payload: `${photo.weather}里的一段生命片段`,
+    relationships: photo.participants,
+    growthDirection: photo.participants.length > 1 ? "友谊花" : "探索花",
+  });
+  recordPowerBondForce(photo.participants.length > 1 ? "companionship" : "exploration", `分享记忆照片：${photo.title}`, photo.id);
+  growthGuidanceState.trust.world += 1;
+  setPanel("光影种子已经起风", `「${photo.title}」没有进入公开信息流；它以${photo.delivery}的方式出发，并保留地点、天气与同行者。`);
+  save();
+  renderHud();
+  return photo;
+}
+
+function createFriendshipGiftBox(type = "memory") {
+  const photo = livingSceneState.photos[livingSceneState.photos.length - 1] || null;
+  const latestCard = lifeGrowthState.experienceCards[lifeGrowthState.experienceCards.length - 1] || null;
+  const boxNames = {
+    memory: "回忆礼盒",
+    courage: "鼓励礼盒",
+    journey: "旅行礼盒",
+    family: "家庭礼盒",
+    creator: "创作礼盒",
+  };
+  const box = {
+    id: `friendship-box-${Date.now()}-${growthGuidanceState.friendshipBoxes.length}`,
+    type,
+    name: boxNames[type] || boxNames.memory,
+    status: "wrapped",
+    layers: [
+      { name: "信件", value: type === "courage" ? "有人相信你正在成长。" : "谢谢你曾经在这里。" },
+      { name: "照片", value: photo?.title || "一片尚未显影的共同风景" },
+      { name: "种子", value: type === "creator" ? "灵感种子" : type === "journey" ? "地方种子" : "友谊种子" },
+      { name: "共同记忆", value: latestCard?.title || "第一次愿意把时间交给彼此" },
+      { name: "未来愿望", value: "下一次见面时，一起照顾一株小生命" },
+    ],
+    source: currentLifePlace(),
+    term: currentSolarTerm().name,
+    weather: currentWeatherProfile().weather,
+    createdAt: new Date().toISOString(),
+  };
+  growthGuidanceState.friendshipBoxes.push(box);
+  growthGuidanceState.friendshipBoxes = growthGuidanceState.friendshipBoxes.slice(-30);
+  recordPowerBondForce(type === "courage" ? "encouragement" : type === "creator" ? "creation" : "companionship", `包好${box.name}`, box.id);
+  setPanel(box.name, `叶片与花粉包住了五层生命痕迹：${box.layers.map((layer) => layer.name).join("、")}。它保留${box.source}、${box.term}与${box.weather}。`);
+  setPanelActions([
+    ["一层层打开", () => openFriendshipGiftBox(box.id)],
+    ["留到以后", () => setPanel(box.name, "礼盒会等。心意没有领取倒计时。")],
+  ]);
+  save();
+  renderHud();
+  return box;
+}
+
+function openFriendshipGiftBox(boxId) {
+  const box = growthGuidanceState.friendshipBoxes.find((item) => item.id === boxId);
+  if (!box) return;
+  box.status = "opened";
+  box.openedAt = new Date().toISOString();
+  const memoryPlant = box.type === "courage" ? "勇气花" : box.type === "journey" ? "远方风草" : "友谊花";
+  box.memoryPlant = memoryPlant;
+  if (!box.lifeSeedId) {
+    box.lifeSeedId = createLifeSeed("relationship", {
+      name: `${box.name}里的友谊种子`,
+      source: box.source,
+      payload: box.layers.map((layer) => `${layer.name}：${layer.value}`).join("；"),
+      relationships: ["风芽", "礼盒的接收者"],
+      growthDirection: memoryPlant,
+    }).id;
+  }
+  recordTrace({
+    kind: "relationship",
+    title: `打开${box.name}`,
+    subjectType: "friendship-box",
+    subjectId: box.id,
+    stage: "成为记忆",
+    detail: `礼盒展开为${memoryPlant}，每一层都保留来源和时间。`,
+  });
+  setPanel(box.name, `${box.layers.map((layer) => `${layer.name}：${layer.value}`).join("；")}。这些痕迹长成了${memoryPlant}。`);
+  save();
+}
+
+function shareLatestGrowthExperience() {
+  const card = [...lifeGrowthState.experienceCards].reverse().find((item) => !growthGuidanceState.sharedExperienceIds.includes(item.id));
+  if (!card) {
+    setPanel("传递", "还没有一张新的经历卡需要被分享。先让生活发生，经验会自己找到可以帮助的人。");
+    return null;
+  }
+  growthGuidanceState.sharedExperienceIds.push(card.id);
+  plantKindnessSeed(card.abilityId === "learning" ? "knowledge" : card.abilityId === "creation" ? "creation" : "encouragement");
+  growthGuidanceState.trust.others += 1;
+  growthGuidanceState.history.push({ event: "experience-shared", cardId: card.id, time: new Date().toISOString() });
+  setPanel("经验成为种子", `「${card.title}」没有变成炫耀记录。它被整理成一颗能帮助新人的种子：${card.memory}。`);
+  return card;
+}
+
+function openLifeSkillGarden() {
+  const skills = lifeSkillGardenProfile();
+  const links = skills.linked.length ? `相连根系：${skills.linked.map((skill) => `${skill.name} · ${skill.title}`).join("、")}。` : "";
+  setPanel("生命技能花园", `${skills.signal} ${links}技能来自情境练习，不需要点击升级。你的外在风格正在长出「${skills.strongest.style}」。`);
+  const actions = [];
+  if (skills.strongest.latest) actions.push(["查看最近练习", () => setPanel(skills.strongest.name, `${skills.strongest.latest.title} · ${skills.strongest.latest.place}。这次经历让你改变了与世界互动的方式。`)]);
+  if (skills.strongest.stage >= 3) actions.push(["把方法传给别人", () => shareLatestGrowthExperience()]);
+  actions.push(["回到成长旅程", () => openGrowthJourney()]);
+  setPanelActions(actions);
+}
+
+function openGrowthJourney() {
+  const guidance = growthGuidanceProfile();
+  const skills = lifeSkillGardenProfile();
+  const journey = growthGuidancePhases.map((phase, index) => index === guidance.phase.stage ? `正在${phase.form} · ${phase.name}` : `${phase.form} · ${phase.name}`).join(" → ");
+  setPanel("生命成长旅程", `${journey}。${guidance.evidence.sentence} 蒲公英现在显出${guidance.temperament}的性格；${skills.signal}`);
+  setPanelActions([
+    ["看见真实证据", () => openGrowthEvidence()],
+    ["打开技能花园", () => openLifeSkillGarden()],
+    ["传递一段经验", () => shareLatestGrowthExperience()],
+  ]);
+}
+
+function openGrowthEvidence() {
+  const guidance = growthGuidanceProfile();
+  const cardText = guidance.evidence.latestCard
+    ? `最近的经历卡「${guidance.evidence.latestCard.title}」由${guidance.evidence.latestCard.actions.join("、")}形成。`
+    : "经历还没有凑成卡片，这不影响它们已经发生。";
+  setPanel("看见自己", `${guidance.evidence.sentence} ${cardText} 相信自己的树长到「${guidance.trust.self}」，不是因为一句鼓励，而是因为这些痕迹。`);
+  setPanelActions([
+    ["成长旅程", () => openGrowthJourney()],
+    ["技能花园", () => openLifeSkillGarden()],
+  ]);
+}
+
+function openPowerBondGarden() {
+  const guidance = growthGuidanceProfile();
+  const flower = growthGuidanceState.kindnessSeeds[growthGuidanceState.kindnessSeeds.length - 1];
+  setPanel("力量朋友花园", `${guidance.bond.signal} ${flower ? `最近的${flower.name}正在${flower.land}长成${flower.flower}。` : "还没有种下善意；它必须同时带着一句真实信息和一个现实行动。"}连接会给彼此力量，但不会占有对方的根。`);
+  setPanelActions([
+    ["打开关系蒲公英", () => openDandelionBondGarden()],
+    ["种一颗鼓励种子", () => plantKindnessSeed("encouragement")],
+    ["种一颗感谢种子", () => plantKindnessSeed("gratitude")],
+    ["寄出一张记忆照片", () => shareLatestMemoryPhoto()],
+    ["包一份友谊礼盒", () => createFriendshipGiftBox("memory")],
+  ]);
+}
+
+function openWinterGarden() {
+  const dormant = [...growthGuidanceState.winterSeeds].reverse().find((seed) => seed.status !== "transformed");
+  if (!dormant) {
+    setPanel("寒冬花园", "这里不主动制造痛苦，也不要求你先受伤才能成长。需要保存的冬天出现时，根之档案馆会为它留一块安静土地。");
+    setPanelActions([["让今日种子休眠", () => restGrowthGuidanceSeed()]]);
+    return;
+  }
+  const support = dormant.support.length ? `已经接住它的阳光：${dormant.support.join("、")}。` : "它现在不需要被解释，只需要被允许存在。";
+  setPanel("寒冬花园", `一颗${dormant.name}保存着「${dormant.title}」。${support}未来可能长成${dormant.future}，但没有期限。`);
+  const actions = [];
+  if (dormant.status === "dormant") actions.push(["送一束温暖", () => supportWinterSeed(dormant.id, "一封没有要求的信")]);
+  if (dormant.status === "awakening") actions.push(["记录新的理解", () => transformWinterSeed(dormant.id)]);
+  actions.push(["唤醒一颗休眠种子", () => wakeGrowthGuidanceSeed()]);
+  setPanelActions(actions);
+}
+
+function supportWinterSeed(seedId, support) {
+  const seed = growthGuidanceState.winterSeeds.find((item) => item.id === seedId);
+  if (!seed) return;
+  if (!seed.support.includes(support)) seed.support.push(support);
+  recordPowerBondForce("guardianship", `陪一颗${seed.name}过冬`, seed.id);
+  setPanel("温暖礼盒", `没有人要求这颗种子赶快变好。${support}被放在根旁，成为一点可以自行决定何时吸收的阳光。`);
+  save();
+}
+
+function transformWinterSeed(seedId) {
+  const seed = growthGuidanceState.winterSeeds.find((item) => item.id === seedId);
+  if (!seed || seed.status !== "awakening") return;
+  seed.status = "transformed";
+  seed.transformedAt = new Date().toISOString();
+  seed.result = seed.future;
+  growthGuidanceState.trust.self += 1;
+  growthGuidanceState.trust.world += 1;
+  recordTrace({
+    kind: "growth",
+    title: `${seed.name}长出${seed.future}`,
+    subjectType: "winter-seed",
+    subjectId: seed.id,
+    stage: "理解与转化",
+    status: "left-a-mark",
+    detail: "转化来自时间、照顾与新的行动，不是苦难本身发放的奖励。",
+  });
+  setPanel("根系留下的力量", `「${seed.title}」没有被删除，也没有被美化。它经过时间与支持，终于长成${seed.future}。`);
+  save();
 }
 
 function generatedWorldRouteState(routeId) {
@@ -8517,7 +13678,7 @@ function tavernLifeAdvice() {
   const relationNeedsCare = state.friendship < 2 && inventory.letters === 0;
   if (water.reservoir < 48) return "桂花老板把今日酒单改成温水：先照料根系，不急着完成整张委托板。";
   if (relationNeedsCare) return "墙角那棵朋友藤有点安静。今天可以带一封信出发，不需要强迫自己热闹。";
-  if (weather.weather === "小雨") return "雨把世界的声音压低了。适合去森林观察、去湖边理解，再带一段故事回来。";
+  if (weather.isRain) return "雨把世界的声音压低了。适合去森林观察、去湖边理解，再带一段故事回来。";
   return "带一个空格子的背包出发。今天只需要真的遇见一件东西。";
 }
 
@@ -8628,7 +13789,7 @@ function interactTavern() {
   if (tavernState.pendingDiscoveries.length) {
     const result = digestTavernReturn();
     const proposalText = result.proposal
-      ? `地下室的 Dead Night 只提出了「${result.proposal.name}」分枝，仍要去世界树完成共同确认。`
+      ? `地下室的 风芽 只提出了「${result.proposal.name}」分枝，仍要去世界树完成共同确认。`
       : "这些经历还不足以改写世界，先被保存为下一次观察的证据。";
     const commissionText = result.completed ? `今日委托「${result.completed.title}」完成，获得${result.completed.reward}。` : "今日委托仍会沿着下一次出发继续。";
     const ruralText = result.ruralGrowth.changed
@@ -8638,7 +13799,7 @@ function interactTavern() {
       ? `最近的行动凝成「${result.log.experience}」，成为${result.log.ability}的一部分；你的${result.log.garden}正连接${result.log.community}。`
       : `这些行动仍是微光，先由酒馆保存，等下一次相近经历把它们连起来。`;
     const generatedText = result.log.generatedRegion ? `地图边缘的${result.log.generatedRegion}正在经历${result.log.generatedStage}。` : "地图没有预设新区域，仍在等待长期兴趣聚集。";
-    setPanel("夜晚分享宴会", `桂花老板把 ${result.log.stories.length} 段经历摊在长桌上：${result.log.summary}。${growthText}${generatedText}你正在长成「${result.log.form}」，Dead Night 进化为「${result.log.spirit}」。${ruralText}${commissionText}${proposalText}`);
+    setPanel("夜晚分享宴会", `桂花老板把 ${result.log.stories.length} 段经历摊在长桌上：${result.log.summary}。${growthText}${generatedText}你正在长成「${result.log.form}」，风芽 进化为「${result.log.spirit}」。${ruralText}${commissionText}${proposalText}`);
     addMemory(`种种酒馆：第 ${result.log.day} 日世界日志`);
     save();
     return;
@@ -8675,7 +13836,7 @@ function interactTavern() {
     const pressure = Object.entries(worldRuleState.pressures).map(([kind, value]) => `${kind}:${value}`).join(" · ");
     const insight = worldRuleState.pendingProposal
       ? `当前提案「${worldRuleState.pendingProposal.name}」正在等待世界树共同确认。`
-      : "Dead Night 仍在观察，没有足够证据提出新规则。";
+      : "风芽 仍在观察，没有足够证据提出新规则。";
     setPanel(room.name, `规则观察层只提出可能，不直接控制世界。当前规则「${rule.name}」，经历压力 ${pressure}。${insight}`);
   }
   tavernState.roomIndex = (tavernState.roomIndex + 1) % tavernRooms.length;
@@ -8722,7 +13883,7 @@ function lifeBalanceProfile() {
     },
     body: {
       name: "根系",
-      world: "Dead Night 的步子慢了一点，花瓣也轻轻垂下。",
+      world: "风芽 的步子慢了一点，花瓣也轻轻垂下。",
       action: "回小屋休息，把今天收束成一颗记忆种子",
     },
     emotion: {
@@ -8899,7 +14060,7 @@ function observeWorldRule(kind, amount = 1, source = "生命行为") {
     score: leadingScore,
     evidence: [source],
     result: path.result,
-    proposedBy: "Dead Night 世界观察者",
+    proposedBy: "风芽 世界观察者",
     status: "waiting-community",
   };
   return worldRuleState.pendingProposal;
@@ -8918,6 +14079,14 @@ function recordEnvironmentChange(kind, amount = 1, source = "世界事件") {
     time: currentTimeLabel(),
   });
   worldRuleState.memory = worldRuleState.memory.slice(-48);
+  recordTrace({
+    kind: kind === "restoration" ? "stewardship" : "failure",
+    title: source,
+    subjectType: "environment",
+    stage: kind === "restoration" ? "修复" : "取用",
+    status: kind === "restoration" ? "left-a-mark" : "strained",
+    detail: `环境${kind === "restoration" ? "获得" : "承受"} ${amount} 份变化。`,
+  });
   return livingRuleProfile();
 }
 
@@ -8940,6 +14109,9 @@ function archiveWorldFailure(id, title, detail) {
   inventory.failureArchive += 1;
   inventory.archive += 1;
   recordTavernDiscovery("creation", `失败遗迹：${title}`, 1, { failure: key });
+  const process = startTraceProcess("failure", title, "failure", key, ["尝试", "遇到条件", "留下遗迹", "等待重生"]);
+  advanceTraceProcess(process, "留下遗迹", detail, "failed", "failure");
+  createWinterSeed("failure", title, detail, key);
   return failure;
 }
 
@@ -8972,12 +14144,24 @@ function renderHud() {
   seedValue.textContent = state.seed;
   memoryValue.textContent = memories.length;
   ecoValue.textContent = state.eco;
-  friendValue.textContent = state.friendship;
+  friendValue.textContent = bondLifeProfile().stageProfile.name;
   areaValue.textContent = state.area;
   wishValue.textContent = lifeSeeds.length;
   const today = livingCalendarProfile();
+  const weather = currentWeatherProfile();
+  const guidance = growthGuidanceProfile();
+  const skills = lifeSkillGardenProfile();
+  const shelter = worldSpiritShelterProfile();
   timeLabel.textContent = today.term.name;
   timeLabel.title = `${today.dateKey} · ${today.culture.name}`;
+  visualSeason.textContent = today.term.name;
+  visualWeather.textContent = shelter.count ? `${shelter.count}⌂` : `${weather.temperature}°`;
+  sceneWeatherButton.dataset.weather = weather.id;
+  sceneWeatherButton.dataset.shelter = shelter.count ? "true" : "false";
+  sceneWeatherButton.setAttribute("aria-label", `${weather.weather}，${weather.temperature}度${shelter.count ? `，${shelter.count}位精灵已躲进屋里` : ""}`);
+  sceneProfileStage.textContent = guidance.phase.form;
+  sceneProfileTrust.textContent = `${skills.strongest.name} · ${skills.strongest.title}`;
+  sceneMinimapLabel.textContent = state.near?.title || currentLifePlace();
   flowText.textContent = currentFlowText();
   renderSurfaceDock();
   renderInventory();
@@ -9008,7 +14192,7 @@ function renderSurfaceDock() {
   const backpackActive = state.backpackOpen;
   const postActive = state.postOpen;
   const dandelionActive = state.companionOpen;
-  const worldActive = isPixelWorldSurface();
+  const worldActive = state.atlasOpen;
   surfaceGardenButton.classList.toggle("is-active", gardenActive);
   surfaceBackpackButton.classList.toggle("is-active", backpackActive);
   surfacePostButton.classList.toggle("is-active", postActive);
@@ -9019,10 +14203,10 @@ function renderSurfaceDock() {
   surfacePostButton.setAttribute("aria-pressed", String(postActive));
   surfaceDandelionButton.setAttribute("aria-pressed", String(dandelionActive));
   surfaceDepartButton.setAttribute("aria-pressed", String(worldActive));
-  surfaceDepartButton.setAttribute("aria-label", "回到开放像素世界");
-  surfaceDepartButton.title = "回到开放像素世界";
+  surfaceDepartButton.setAttribute("aria-label", "打开世界地图");
+  surfaceDepartButton.title = "打开世界地图";
   document.body.classList.toggle("is-garden-surface", gardenActive);
-  document.body.classList.toggle("has-primary-panel", gardenActive || backpackActive || postActive || dandelionActive);
+  document.body.classList.toggle("has-primary-panel", gardenActive || worldActive || backpackActive || postActive || dandelionActive);
 }
 
 function isPixelWorldSurface() {
@@ -9057,6 +14241,68 @@ function closeAllSurfacePanels() {
   ].forEach((key) => {
     state[key] = false;
   });
+}
+
+const firstWindSteps = [
+  { id: "profile", title: "看自己", text: "点一下", target: () => sceneProfileButton.getBoundingClientRect() },
+  { id: "weather", title: "看天空", text: "晴 · 雨 · 夜", target: () => sceneWeatherButton.getBoundingClientRect() },
+  { id: "backpack", title: "开背包", text: "六格行囊", target: () => surfaceBackpackButton.getBoundingClientRect() },
+];
+
+let firstWindStepIndex = 0;
+
+function firstWindIsOpen() {
+  return Boolean(firstWindGuide && !firstWindGuide.classList.contains("is-hidden"));
+}
+
+function positionFirstWindGuide() {
+  if (!firstWindIsOpen()) return;
+  const step = firstWindSteps[firstWindStepIndex];
+  const rect = step.target();
+  const padding = window.innerWidth <= 640 ? 5 : 8;
+  firstWindFocus.style.left = `${Math.max(4, rect.left - padding)}px`;
+  firstWindFocus.style.top = `${Math.max(4, rect.top - padding)}px`;
+  firstWindFocus.style.width = `${Math.min(window.innerWidth - 8, rect.width + padding * 2)}px`;
+  firstWindFocus.style.height = `${Math.min(window.innerHeight - 8, rect.height + padding * 2)}px`;
+}
+
+function renderFirstWindGuide() {
+  if (!firstWindIsOpen()) return;
+  const step = firstWindSteps[firstWindStepIndex];
+  firstWindProgress.textContent = firstWindSteps.map((_, index) => index <= firstWindStepIndex ? "●" : "○").join(" ");
+  firstWindTitle.textContent = step.title;
+  firstWindText.textContent = step.text;
+  firstWindNext.textContent = firstWindStepIndex === firstWindSteps.length - 1 ? "↗" : "›";
+  firstWindNext.setAttribute("aria-label", firstWindStepIndex === firstWindSteps.length - 1 ? "打开背包" : "下一步");
+  firstWindGuide.dataset.step = step.id;
+  requestAnimationFrame(positionFirstWindGuide);
+}
+
+function finishFirstWindGuide(openBackpack = false) {
+  firstWindGuide.classList.add("is-hidden");
+  firstWindFocus.classList.add("is-hidden");
+  document.body.classList.remove("is-first-wind-guiding");
+  localStorage.setItem("dedalionFirstWindGuideSeen", "1");
+  if (openBackpack) showBackpackSurface();
+}
+
+function startFirstWindGuide(force = false) {
+  localStorage.setItem("dedalionFirstWindGuideSeen", "1");
+  firstWindGuide.classList.add("is-hidden");
+  firstWindFocus.classList.add("is-hidden");
+  document.body.classList.remove("is-first-wind-guiding");
+}
+
+function advanceFirstWindGuide(targetId = null) {
+  if (!firstWindIsOpen()) return;
+  const step = firstWindSteps[firstWindStepIndex];
+  if (targetId && targetId !== step.id) return;
+  if (firstWindStepIndex === firstWindSteps.length - 1) {
+    finishFirstWindGuide(true);
+    return;
+  }
+  firstWindStepIndex += 1;
+  renderFirstWindGuide();
 }
 
 function renderLifeCore() {
@@ -9116,7 +14362,7 @@ function waterSourceProfile() {
       id: "natural",
       name: "自然水",
       icon: "glyph-weather",
-      value: clampScore(38 + (weather.weather === "小雨" ? 28 : 0) + inventory.starWater * 12 + inventory.water * 12 + state.eco * 4),
+      value: clampScore(38 + (weather.isRain ? 28 : 0) + inventory.starWater * 12 + inventory.water * 12 + state.eco * 4),
       care: "去河边、森林，或接住一场雨。",
     },
     {
@@ -9347,27 +14593,183 @@ function lifeCoreProfile() {
   };
 }
 
+function livingRuleMysteryProgress(ruleId) {
+  const catalog = livingRuleMysteryCatalog[ruleId];
+  if (!catalog) return null;
+  const rules = worldRuleState.mystery.rules;
+  if (!rules[ruleId]) {
+    rules[ruleId] = {
+      ruleId,
+      status: "hidden",
+      clues: [],
+      understoodAt: null,
+      completedAt: null,
+      rewardGranted: false,
+      practices: 0,
+    };
+  }
+  rules[ruleId].clues = rules[ruleId].clues || [];
+  return rules[ruleId];
+}
+
+function livingRuleMysteryStatus(progress) {
+  return {
+    hidden: "尚未发现",
+    discovered: "发现异常",
+    collecting: "收集线索",
+    ready: "等待理解",
+    understood: "已经理解",
+    completed: "成为世界权限",
+    deviated: "出现世界偏差",
+  }[progress?.status] || "尚未发现";
+}
+
+function grantLivingRulePermission(ruleId) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  const progress = livingRuleMysteryProgress(ruleId);
+  if (!rule || !progress || progress.rewardGranted) return false;
+  if (!worldRuleState.mystery.permissions.includes(rule.permission)) {
+    worldRuleState.mystery.permissions.push(rule.permission);
+  }
+  if (rule.rewardKey && typeof inventory[rule.rewardKey] === "number") inventory[rule.rewardKey] += 1;
+  progress.rewardGranted = true;
+  worldRuleState.mystery.archive.push({
+    ruleId,
+    name: rule.name,
+    permission: rule.permission,
+    understoodAt: progress.understoodAt,
+    completedAt: progress.completedAt,
+  });
+  worldRuleState.mystery.archive = worldRuleState.mystery.archive.slice(-30);
+  return true;
+}
+
+function syncGenesisRuleMystery() {
+  if (!genesisState.complete) return;
+  const rule = livingRuleMysteryCatalog["genesis-seed"];
+  const progress = livingRuleMysteryProgress(rule.id);
+  progress.status = "completed";
+  progress.clues = rule.clues.map((_, index) => index);
+  progress.understoodAt = progress.understoodAt || new Date().toISOString();
+  progress.completedAt = progress.completedAt || progress.understoodAt;
+  grantLivingRulePermission(rule.id);
+}
+
+function discoverLivingRuleClue(ruleId) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  const progress = livingRuleMysteryProgress(ruleId);
+  if (!rule || !progress || progress.status === "completed") return;
+  const nextIndex = rule.clues.findIndex((_, index) => !progress.clues.includes(index));
+  if (nextIndex < 0) {
+    progress.status = "ready";
+  } else {
+    progress.clues.push(nextIndex);
+    progress.status = progress.clues.length >= rule.clues.length ? "ready" : "collecting";
+  }
+  worldRuleState.mystery.activeRuleId = ruleId;
+  state.atlasRuleId = ruleId;
+  save();
+  renderWorldAtlas();
+}
+
+function understandLivingRule(ruleId) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  const progress = livingRuleMysteryProgress(ruleId);
+  if (!rule || !progress || progress.clues.length < rule.clues.length) return;
+  progress.status = "understood";
+  progress.understoodAt = progress.understoodAt || new Date().toISOString();
+  save();
+  renderWorldAtlas();
+}
+
+function practiceLivingRule(ruleId) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  const progress = livingRuleMysteryProgress(ruleId);
+  if (!rule || !progress || !["understood", "completed"].includes(progress.status)) return;
+  progress.status = "completed";
+  progress.practices += 1;
+  progress.completedAt = progress.completedAt || new Date().toISOString();
+  grantLivingRulePermission(ruleId);
+  recordTrace({
+    kind: "world-rule",
+    title: `理解${rule.name}`,
+    subjectType: "living-rule",
+    subjectId: ruleId,
+    stage: "理解与实践",
+    status: "left-a-mark",
+    detail: `${rule.meaning} 获得世界权限：${rule.permission}。`,
+  });
+  save();
+  renderHud();
+}
+
+function registerLivingRuleDeviation(ruleId, detail) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  if (!rule) return null;
+  const deviation = {
+    id: `world-deviation-${Date.now()}-${worldRuleState.mystery.deviations.length}`,
+    ruleId,
+    detail,
+    status: "waiting-repair",
+    createdAt: new Date().toISOString(),
+  };
+  worldRuleState.mystery.deviations.push(deviation);
+  worldRuleState.mystery.deviations = worldRuleState.mystery.deviations.slice(-20);
+  const progress = livingRuleMysteryProgress(ruleId);
+  progress.status = "deviated";
+  return deviation;
+}
+
+function repairLivingRuleDeviation(deviationId) {
+  const deviation = worldRuleState.mystery.deviations.find((item) => item.id === deviationId);
+  if (!deviation || deviation.status === "repaired") return;
+  deviation.status = "repaired";
+  deviation.repairedAt = new Date().toISOString();
+  deviation.repair = "先停止、归还一份照顾，再重新观察规则";
+  const progress = livingRuleMysteryProgress(deviation.ruleId);
+  progress.status = progress.clues.length >= livingRuleMysteryCatalog[deviation.ruleId].clues.length ? "ready" : "collecting";
+  recordEnvironmentChange("restoration", 1, `修复${livingRuleMysteryCatalog[deviation.ruleId].name}的世界偏差`);
+  save();
+  renderHud();
+}
+
+function worldRegionGrowthSignals(regionId) {
+  const routeMap = {
+    "ancient-continent": ["botany"],
+    "earth-farm": ["agriculture"],
+    "creation-workshop": ["art"],
+    "deep-sea-mystery": ["earth"],
+    "dandelion-city": ["social"],
+  };
+  const routeIds = routeMap[regionId] || [];
+  return generatedWorldProfile().active
+    .filter((profile) => routeIds.includes(profile.id))
+    .map((profile) => `${profile.name} · ${profile.stageProfile.name}`);
+}
+
 function renderWorldAtlas() {
   worldAtlasPanel.classList.toggle("is-hidden", !state.atlasOpen);
   if (!state.atlasOpen) return;
 
-  const atlasRegions = [...overworldMap, ...generatedWorldAtlasRegions()];
+  syncGenesisRuleMystery();
+  const atlasRegions = worldSpatialMap;
   const selectedRegion = atlasRegions[state.atlasIndex % atlasRegions.length] || atlasRegions[0];
   atlasMap.innerHTML = "";
-  for (let slot = 0; slot < 35; slot += 1) {
+  for (let slot = 0; slot < 9; slot += 1) {
     const region = atlasRegions.find((item) => item.slot === slot);
-    const card = document.createElement("div");
+    const card = document.createElement(region ? "button" : "div");
     if (!region) {
       card.className = "atlas-region is-empty";
       atlasMap.appendChild(card);
       continue;
     }
+    card.type = "button";
     const index = atlasRegions.indexOf(region);
-    card.className = `atlas-region${region.current ? " is-current" : ""}${region.generated ? " is-generated" : ""}${region.id === selectedRegion.id ? " is-selected" : ""}`;
-    card.innerHTML = `<b>${region.name}</b><i>${region.layer}</i><span>${region.role}</span><span>${region.connects}</span>`;
+    card.className = `atlas-region${region.current ? " is-current" : ""}${region.center ? " is-center" : ""}${region.id === selectedRegion.id ? " is-selected" : ""}`;
+    card.innerHTML = `<i class="living-glyph ${region.icon}" aria-hidden="true"></i><b>${region.name}</b><small>${region.role}</small>`;
     card.addEventListener("click", () => {
       state.atlasIndex = index;
-      setPanel(region.name, `${region.role}：${region.path}。`);
+      state.atlasRuleId = null;
       save();
       renderWorldAtlas();
     });
@@ -9377,24 +14779,125 @@ function renderWorldAtlas() {
 }
 
 function renderAtlasDetail(region) {
+  const growthSignals = worldRegionGrowthSignals(region.id);
+  const ruleNames = (region.ruleIds || []).map((ruleId) => livingRuleMysteryCatalog[ruleId]?.name).filter(Boolean);
   atlasDetail.innerHTML = `
     <h3>${region.name}</h3>
-    <p><b>所在层：</b>${region.layer}。<b>区域定位：</b>${region.role}。</p>
-    <p><b>地貌：</b>${region.terrain}</p>
-    <p><b>空间路径：</b>${region.path}</p>
+    <p><b>${region.layer}</b> · ${region.role}</p>
+    <p>${region.terrain}</p>
     <div class="atlas-tags">
-      <b>星球层级<br>${planetLayers.join(" / ")}</b>
-      <b>连接区域<br>${region.connects}</b>
-      <b>地区<br>${region.districts.join(" / ")}</b>
-      <b>建筑<br>${region.buildings.join(" / ")}</b>
-      <b>系统<br>${region.systems.join(" / ")}</b>
-      <b>物品<br>${region.items.join(" / ")}</b>
+      <b>走进去<br>${region.districts.join(" / ")}</b>
+      <b>在这里生活<br>${region.functions.join(" / ")}</b>
+      <b>隐藏规律<br>${ruleNames.length ? ruleNames.join(" / ") : "等待生活留下线索"}</b>
+      <b>区域生长<br>${growthSignals.length ? growthSignals.join(" / ") : "系统仍藏在场景与建筑里"}</b>
     </div>
-    <ol class="atlas-play">
-      ${region.functions.map((item) => `<li>${item}</li>`).join("")}
-    </ol>
-    <p><b>地图原则：</b>世界观概念是背后的系统；地图区域是玩家走进去的空间；建筑是功能入口；玩法发生在建筑或场景内部。</p>
+    <p class="atlas-path">${region.path}</p>
+    <div class="atlas-detail-actions"></div>
   `;
+  const actions = atlasDetail.querySelector(".atlas-detail-actions");
+  if (region.center) {
+    const archiveButton = document.createElement("button");
+    archiveButton.type = "button";
+    archiveButton.textContent = "规则档案馆";
+    archiveButton.addEventListener("click", () => {
+      state.atlasRuleId = "archive";
+      renderWorldAtlas();
+    });
+    actions.appendChild(archiveButton);
+  }
+  (region.ruleIds || []).forEach((ruleId) => {
+    const rule = livingRuleMysteryCatalog[ruleId];
+    const progress = livingRuleMysteryProgress(ruleId);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = `${rule.name} · ${livingRuleMysteryStatus(progress)}`;
+    button.addEventListener("click", () => {
+      state.atlasRuleId = ruleId;
+      worldRuleState.mystery.activeRuleId = ruleId;
+      renderWorldAtlas();
+    });
+    actions.appendChild(button);
+  });
+  if (state.atlasRuleId === "archive") renderLivingRuleArchive();
+  else if (livingRuleMysteryCatalog[state.atlasRuleId]) renderLivingRuleMystery(state.atlasRuleId);
+}
+
+function renderLivingRuleArchive() {
+  const activeWorldRule = livingRuleProfile();
+  const pendingRule = worldRuleState.pendingProposal;
+  const archive = document.createElement("section");
+  archive.className = "rule-archive";
+  archive.innerHTML = `
+    <span>RULE ARCHIVE · 世界如何呼吸</span>
+    <strong>规则不是威胁，而是尚未被理解的生命规律。</strong>
+    <p>发现异常 → 收集线索 → 理解规则 → 用行动验证 → 获得世界权限</p>
+    <div class="rule-archive-grid"></div>
+    <small>已获得权限：${worldRuleState.mystery.permissions.length ? worldRuleState.mystery.permissions.join(" / ") : "第一条规则仍在等待理解"}</small>
+    <small>世界活规则：${activeWorldRule.name} · ${activeWorldRule.phaseName}${pendingRule ? `；新的分枝「${pendingRule.name}」正在等待共同确认` : "；旧规则会随生态证据继续变化"}</small>
+  `;
+  const grid = archive.querySelector(".rule-archive-grid");
+  Object.values(livingRuleMysteryCatalog).forEach((rule) => {
+    const progress = livingRuleMysteryProgress(rule.id);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = `<b>${rule.category}</b><span>${rule.name}</span><small>${livingRuleMysteryStatus(progress)}</small>`;
+    button.addEventListener("click", () => {
+      state.atlasRuleId = rule.id;
+      renderWorldAtlas();
+    });
+    grid.appendChild(button);
+  });
+  atlasDetail.appendChild(archive);
+}
+
+function renderLivingRuleMystery(ruleId) {
+  const rule = livingRuleMysteryCatalog[ruleId];
+  const progress = livingRuleMysteryProgress(ruleId);
+  const unresolvedDeviation = [...worldRuleState.mystery.deviations].reverse().find((item) => item.ruleId === ruleId && item.status !== "repaired");
+  const mystery = document.createElement("section");
+  mystery.className = "rule-mystery";
+  mystery.innerHTML = `
+    <span>${rule.category} · ${livingRuleMysteryStatus(progress)}</span>
+    <strong>${rule.name}</strong>
+    <ol>${rule.clauses.map((clause) => `<li>${clause}</li>`).join("")}</ol>
+    <div class="rule-clues">
+      ${rule.clues.map((clue, index) => `<p class="${progress.clues.includes(index) ? "is-found" : ""}">${progress.clues.includes(index) ? clue : "线索仍藏在场景里"}</p>`).join("")}
+    </div>
+    <p class="rule-meaning">${["understood", "completed"].includes(progress.status) ? rule.meaning : "先观察世界，不急着猜答案。"}</p>
+    <div class="rule-actions"></div>
+  `;
+  const actions = mystery.querySelector(".rule-actions");
+  const addAction = (label, handler) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.addEventListener("click", handler);
+    actions.appendChild(button);
+  };
+  if (unresolvedDeviation) {
+    addAction("修复世界偏差", () => repairLivingRuleDeviation(unresolvedDeviation.id));
+  } else if (!["ready", "understood", "completed"].includes(progress.status)) {
+    addAction(progress.status === "hidden" ? "观察第一处异常" : "继续寻找线索", () => discoverLivingRuleClue(ruleId));
+    addAction("先行动看看", () => {
+      registerLivingRuleDeviation(ruleId, "在还没有理解生命规律时改变了场景。");
+      save();
+      renderWorldAtlas();
+    });
+  } else if (progress.status === "ready") {
+    addAction("把线索连成理解", () => understandLivingRule(ruleId));
+  } else if (progress.status === "understood") {
+    addAction("用一次照顾验证规则", () => practiceLivingRule(ruleId));
+  } else {
+    const permission = document.createElement("b");
+    permission.className = "rule-permission";
+    permission.textContent = `世界权限 · ${rule.permission}`;
+    actions.appendChild(permission);
+  }
+  addAction("返回规则档案馆", () => {
+    state.atlasRuleId = "archive";
+    renderWorldAtlas();
+  });
+  atlasDetail.appendChild(mystery);
 }
 
 function renderLifeEcology() {
@@ -9477,7 +14980,7 @@ function bodyTreeProfile() {
     "每天饭后走 20 分钟；每周安排 2 到 3 次力量根系训练。",
   ];
   if (lowest.name === "睡眠月苔") tasks.unshift("今天能量偏低：不要安排 8 个任务，只完成一颗身体种子。");
-  if (weather.weather === "小雨") tasks.unshift("小雨日适合室内整理饮食记录和做轻力量，不适合逼自己高强度冲刺。");
+  if (weather.isRain) tasks.unshift("雨天适合室内整理饮食记录和做轻力量，不适合逼自己高强度冲刺。");
   return {
     score,
     stage,
@@ -9528,7 +15031,7 @@ function gardenerProfile() {
     rank,
     plantLife: inventory.seeds + inventory.flowers + inventory.herbs,
     soil: Math.max(1, state.eco + inventory.memoryFruit + (interacted.has("forest") ? 1 : 0)),
-    weather: weather.weather === "小雨" ? "蘑菇活跃" : weather.weather === "有风" ? "蒲公英传播" : "月光植物出现",
+    weather: weather.isRain ? "蘑菇活跃" : weather.isWind ? "蒲公英传播" : weather.isNight ? "月光植物出现" : "授粉生命活跃",
     spiritCare: state.friendship + inventory.letters,
     design: inventory.furniture + inventory.starLamp,
     toolCount: `${tools.length}/${gardenerTools.length}`,
@@ -9544,8 +15047,8 @@ function gardenerTasksFor(rank, weather) {
   if (inventory.memoryFruit <= 0) tasks.push("观察记忆果树，获得一枚地方知识果实。");
   if (inventory.starWater <= 0 && currentTimeLabel() !== "Night") tasks.push("夜晚回到湖边，寻找星光水。");
   if (rank.min >= 9 && inventory.furniture <= 0) tasks.push("去种子交换站换一件家具，开始花园设计。");
-  if (weather.weather === "小雨") tasks.push("今天适合建立“小雨森林”微气候。");
-  if (weather.weather === "有风") tasks.push("今天适合吹散蒲公英，让种子去远方花园。");
+  if (weather.isRain) tasks.push("今天适合建立“小雨森林”微气候。");
+  if (weather.isWind) tasks.push("今天适合吹散蒲公英，让种子去远方花园。");
   if (tasks.length < 3) tasks.push("照顾一只精灵，让植物关系进入社区循环。");
   return tasks.slice(0, 4);
 }
@@ -9583,7 +15086,7 @@ function worldCycleProfile() {
   const gardener = gardenerProfile();
   const signals = {
     reality: 1 + memories.length + inventory.letters + Math.floor(weather.energy / 50),
-    perception: 1 + state.eco + bottleTotal + (weather.weather === "小雨" ? inventory.mushrooms + 1 : 0),
+    perception: 1 + state.eco + bottleTotal + (weather.isRain ? inventory.mushrooms + 1 : 0),
     agent: dandelionWishes.length + archiveTotal + (memories.length > 0 ? 1 : 0),
     garden: seedTotal + gardenTotal + inventory.herbs + inventory.mushrooms,
     world: state.eco + state.area + inventory.wordFish + inventory.memoryFruit,
@@ -9723,18 +15226,19 @@ function ecologyAdvice(trees) {
 }
 
 function currentWeatherProfile() {
-  return weatherProfiles[currentTimeLabel()];
+  return weatherProfileForRhythmIndex(currentWorldRhythmIndex());
 }
 
 function renderLifeWeather() {
   const weather = currentWeatherProfile();
+  const forecast = weatherForecastProfile();
   lifeWeatherPanel.classList.toggle("is-hidden", !state.weatherOpen);
-  weatherHeadline.textContent = `${weather.place} · ${weather.weather} · ${weather.world} · ${weather.spirit}`;
+  weatherHeadline.textContent = `${weather.period.name} ${weather.period.hours} · ${weather.place}${weather.weather} · ${weather.world}`;
   energyValue.textContent = `能量 ${weather.energy}%`;
   createValue.textContent = `创造 ${weather.create}%`;
   socialValue.textContent = `社交 ${weather.social}%`;
   focusValue.textContent = `专注 ${weather.focus}%`;
-  weatherAdvice.textContent = weather.advice;
+  weatherAdvice.textContent = `${weather.advice} 下一时段：${forecast.period.name} · ${forecast.weather}。`;
   seedTasks.innerHTML = "";
   weather.tasks.forEach((task) => {
     const item = document.createElement("li");
@@ -9747,41 +15251,70 @@ function renderCompanionPaths() {
   companionPanel.classList.toggle("is-hidden", !state.companionOpen);
   if (!state.companionOpen) return;
 
-  const rhythm = slowLifeRhythmProfile();
-  const balance = lifeBalanceProfile();
-  const today = livingCalendarProfile();
-  const lifeRhythm = lifeRhythmProfile();
   const growth = lifeGrowthProfile();
+  const guidance = growthGuidanceProfile(growth);
+  const skills = lifeSkillGardenProfile();
   const generated = generatedWorldProfile();
-  const alliance = allianceNetworkProfile();
-  const cultureName = today.culture.name.replace(`${today.place} · `, "");
-  const oneAction = balance.phase === "balanced" ? lifeRhythm.seed.action : balance.dominant.action;
-  companionHeadline.textContent = `今天只做一件事：${oneAction}`;
-  companionReport.textContent = balance.phase === "balanced"
-    ? `${today.term.name} · ${today.place}${currentWeatherProfile().weather} · ${cultureName}。${growth.companion.name}正陪着一座${growth.garden.name}；今日种子「${lifeRhythm.seed.name}」${lifeRhythm.seed.completed ? "已经留下回声" : "正在等待一次真实行动"}。共同体处于${alliance.stageProfile.name}，你正在承担${alliance.role.name}责任。${generated.signal}`
-    : `${today.term.name}。${balance.dominant.world} ${growth.balance.signal} ${rhythm.note} 共同体处于${alliance.stageProfile.name}。${generated.signal}`;
+  companionPanel.dataset.skillStage = String(skills.strongest.stage || 0);
+  companionHeadline.textContent = `${guidance.phase.form} · ${skills.strongest.name}`;
+  companionReport.textContent = `${skills.strongest.title} · ${generated.leading?.name || "世界树"}`;
+  companionReport.title = `${guidance.line} ${skills.signal}`;
   companionGrid.innerHTML = "";
-  [
-    { id: "forest", name: "森林", note: lifeRhythm.areaSignals.forest, icon: "glyph-gardener" },
-    { id: "lake", name: "湖泊", note: lifeRhythm.areaSignals.lake, icon: "glyph-fish" },
-    { id: "friend", name: "朋友家", note: lifeRhythm.areaSignals.friend, icon: "glyph-friend" },
-    { id: "post", name: "邮局", note: lifeRhythm.areaSignals.post, icon: "glyph-mail" },
-  ].forEach((destination) => {
+  generated.routes.forEach((route) => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "companion-card";
-    card.innerHTML = `<i class="living-glyph ${destination.icon}" aria-hidden="true"></i><b>${destination.name}</b><span>${destination.note}</span>`;
-    card.addEventListener("click", () => guideFromDandelion(destination));
+    card.className = "companion-card skill-kingdom";
+    card.dataset.stage = String(route.stage);
+    card.title = `${route.name} · ${route.stageProfile.name}`;
+    card.setAttribute("aria-label", card.title);
+    card.innerHTML = `<i class="kingdom-mark" aria-hidden="true">${route.mark}</i><b>${route.name}</b><span class="kingdom-growth" aria-hidden="true">${generatedWorldStageCatalog.map((_, index) => `<i class="${index <= route.stage ? "is-grown" : ""}"></i>`).join("")}</span>`;
+    card.addEventListener("click", () => practiceGeneratedRegion(route.id));
     companionGrid.appendChild(card);
   });
   companionSeeds.innerHTML = "";
-  const returnItem = document.createElement("li");
-  const returnButton = document.createElement("button");
-  returnButton.type = "button";
-  returnButton.innerHTML = `<i class="pixel-footstep" aria-hidden="true"></i><span>把屏幕留在这里，去生活</span>`;
-  returnButton.addEventListener("click", () => startSlowLifeInvitation());
-  returnItem.appendChild(returnButton);
-  companionSeeds.appendChild(returnItem);
+  const appendAction = (label, handler, icon = "glyph-seed") => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = `<i class="living-glyph ${icon}" aria-hidden="true"></i><span>${label}</span>`;
+    button.addEventListener("click", handler);
+    item.appendChild(button);
+    companionSeeds.appendChild(item);
+  };
+  const seedLabel = guidance.seed.status === "complete" ? "今日 · 开花" : guidance.seed.status === "dormant" ? "今日 · 休眠" : `今日 · ${guidance.seed.name}`;
+  appendAction(seedLabel, () => startGrowthGuidanceSeed(), guidance.seed.mode === "rest" ? "glyph-home" : "glyph-seed");
+  appendAction(`${skills.strongest.name} · ${skills.strongest.title}`, () => openGrowthEvidence(), "glyph-archive");
+  const leading = generated.leading || generated.routes[0];
+  appendAction(`${leading.name} · ${leading.stageProfile.name}`, () => practiceGeneratedRegion(leading.id), "glyph-world");
+}
+
+function startGrowthGuidanceSeed() {
+  const seed = growthGuidanceDailySeed();
+  if (seed.status === "complete") {
+    openGrowthEvidence();
+    return;
+  }
+  if (seed.status === "dormant") {
+    wakeGrowthGuidanceSeed();
+    return;
+  }
+  if (seed.mode === "rest") {
+    startSlowLifeInvitation();
+    return;
+  }
+  const destinations = {
+    forest: { id: "forest", name: "森林" },
+    lake: { id: "lake", name: "湖泊" },
+    friend: { id: "friend", name: "朋友家" },
+    post: { id: "post", name: "邮局" },
+  };
+  const destination = destinations[seed.destination] || destinations.forest;
+  guideFromDandelion(destination);
+  setPanel(seed.name, `${seed.action}。这不是考核，也没有连续打卡；发生一次真实行动，就足够让它留下证据。`);
+  setPanelActions([
+    ["让它休眠", () => restGrowthGuidanceSeed()],
+    ["为什么是这一步", () => openGrowthEvidence()],
+  ]);
 }
 
 function guideFromDandelion(destination) {
@@ -9802,6 +15335,9 @@ function renderPostSurface() {
   postPanel.classList.toggle("is-hidden", !state.postOpen);
   if (!state.postOpen) return;
   const hasConnection = inventory.letters > 0 || state.friendship > 0;
+  const bond = bondLifeProfile();
+  const bondStages = ["初遇 · 两颗种子", "熟悉 · 共生芽", "朋友 · 友谊花", "深度关系 · 伙伴树", "世界树枝芽"];
+  const explorations = growthGuidanceState.powerMarks.filter((mark) => mark.forceId === "exploration").length;
   postHeadline.textContent = hasConnection ? "有一条关系仍在风里发光。" : "风里有一封尚未相遇的信。";
   postSignal.textContent = hasConnection
     ? "你可以回应，也可以晚一点再来。连接不会因为没有红点而消失。"
@@ -9809,6 +15345,9 @@ function renderPostSurface() {
   postStatus.textContent = inventory.letters > 0
     ? `你的花园保存着 ${inventory.letters} 封风信。没有必须回复的期限。`
     : "没有红点，也没有必须回复的期限。";
+  postBondVisual.dataset.stage = String(bond.stage);
+  postBondStage.textContent = bondStages[bond.stage];
+  postBondMeta.textContent = `共同经历 ${growthGuidanceState.powerMarks.length} · 共同探索 ${explorations} · 信物 ${inventory.dandelionToken}。${bond.distance.name}，${bond.permission.name}。`;
 }
 
 function companionProfile() {
@@ -9850,6 +15389,9 @@ function currentFlowText() {
     const commission = tavernState.activeCommission;
     return `酒馆委托：${commission.title} ${commission.progress}/${commission.target}`;
   }
+  const guidanceSeed = growthGuidanceDailySeed();
+  if (guidanceSeed.status === "waiting") return guidanceSeed.action;
+  if (guidanceSeed.status === "dormant") return `${guidanceSeed.name}正在休眠，今天不需要把它叫醒`;
   const rhythm = lifeRhythmProfile();
   if (!rhythm.seed.completed) return rhythm.seed.action;
   if (state.demoStep >= 6) return "完成：现实输入已回到花园，今日生命记录已生成";
@@ -9865,14 +15407,110 @@ function currentFlowText() {
   return flow[Math.min(state.demoStep, flow.length - 1)];
 }
 
+function backpackLifeState(categoryId, key, amount) {
+  if (categoryId === "material") return `${amount} 份`;
+  if (categoryId === "seed") {
+    if (["originSeed", "wishSeed", "dreamSeed"].includes(key)) return "等待时机";
+    if (amount >= 4) return "可以传播";
+    if (amount >= 2) return "正在生长";
+    return "等待春天";
+  }
+  if (categoryId === "plant") return amount >= 3 ? "可以分享" : "今日鲜活";
+  if (categoryId === "knowledge") return amount >= 3 ? "可以讲给别人" : "正在理解";
+  if (categoryId === "token") return ["letters", "driftBottle", "rareBottle"].includes(key) ? "等待回应" : "由你保管";
+  return key === "failureArchive" ? "等待重生" : "已留下痕迹";
+}
+
+function renderPixelBackpack() {
+  const category = backpackCategories.find((item) => item.id === activeBackpackCategoryId) || backpackCategories[0];
+  const items = category.items.filter((key) => inventory[key] > 0);
+  if (!items.includes(selectedBackpackItemKey)) selectedBackpackItemKey = items[0] || null;
+
+  const tabs = document.createElement("nav");
+  tabs.className = "backpack-tabs";
+  tabs.setAttribute("aria-label", "背包分类");
+  backpackCategories.forEach((item) => {
+    const count = item.items.filter((key) => inventory[key] > 0).length;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = item.id === category.id ? "is-active" : "";
+    button.title = `${item.name} · ${count}类`;
+    button.setAttribute("aria-label", `${item.name}，${count}类物品`);
+    button.setAttribute("aria-pressed", String(item.id === category.id));
+    button.innerHTML = `<i class="living-glyph ${item.icon}" aria-hidden="true"></i><span>${item.name}</span>`;
+    button.addEventListener("click", () => {
+      activeBackpackCategoryId = item.id;
+      selectedBackpackItemKey = null;
+      renderInventory();
+    });
+    tabs.appendChild(button);
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "backpack-grid";
+  grid.setAttribute("role", "grid");
+  grid.setAttribute("aria-label", `${category.name}物品格`);
+  const slotCount = Math.max(20, Math.ceil(items.length / 5) * 5);
+  for (let index = 0; index < slotCount; index += 1) {
+    const key = items[index];
+    if (!key) {
+      const empty = document.createElement("span");
+      empty.className = "inventory-slot is-empty";
+      empty.setAttribute("aria-hidden", "true");
+      grid.appendChild(empty);
+      continue;
+    }
+    const amount = inventory[key];
+    const [glyph, name] = livingInventoryIcons[key] || ["glyph-seed", key];
+    const lifeState = backpackLifeState(category.id, key, amount);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `inventory-slot${key === selectedBackpackItemKey ? " is-selected" : ""}`;
+    button.title = `${name} · ${lifeState}`;
+    button.setAttribute("role", "gridcell");
+    button.setAttribute("aria-label", `${name}，${lifeState}`);
+    button.innerHTML = `
+      <i class="living-glyph ${glyph}" aria-hidden="true"></i>
+      ${category.id === "material" ? `<b>${amount}</b>` : ""}
+    `;
+    button.addEventListener("click", () => {
+      selectedBackpackItemKey = key;
+      renderInventory();
+    });
+    grid.appendChild(button);
+  }
+
+  const detail = document.createElement("article");
+  detail.className = "backpack-item-detail";
+  if (selectedBackpackItemKey) {
+    const [glyph, name] = livingInventoryIcons[selectedBackpackItemKey] || ["glyph-seed", selectedBackpackItemKey];
+    const amount = inventory[selectedBackpackItemKey];
+    const lifeState = backpackLifeState(category.id, selectedBackpackItemKey, amount);
+    detail.innerHTML = `
+      <i class="living-glyph ${glyph}" aria-hidden="true"></i>
+      <span><b>${name}</b><small>${lifeState}</small></span>
+      ${category.id === "material" ? `<em>× ${amount}</em>` : `<em>${category.name}</em>`}
+    `;
+  } else {
+    detail.innerHTML = `<span><b>${category.name}还是空的</b><small>去世界里遇见第一件属于这里的生命痕迹。</small></span>`;
+  }
+
+  flowText.textContent = `${category.name} · ${items.length}类正在同行`;
+  inventoryList.append(tabs, grid, detail);
+}
+
 function renderInventory() {
   inventoryPanel.classList.toggle("is-hidden", !state.backpackOpen);
   if (!state.backpackOpen) return;
   inventoryList.innerHTML = "";
+  if (document.body.classList.contains("is-focused-ui")) {
+    renderPixelBackpack();
+    return;
+  }
   backpackCategories.forEach((category) => {
     const items = category.items.filter((key) => inventory[key] > 0);
     const group = document.createElement("section");
-    group.className = "backpack-category";
+    group.className = `backpack-category backpack-category-${category.id}`;
     group.innerHTML = `<strong><i class="living-glyph ${category.icon}" aria-hidden="true"></i>${category.name}</strong>`;
     const slots = document.createElement("div");
     slots.className = "backpack-slots";
@@ -9885,7 +15523,9 @@ function renderInventory() {
         const [glyph, name] = livingInventoryIcons[key] || ["glyph-seed", key];
         const item = document.createElement("div");
         item.className = "inventory-item";
-        item.innerHTML = `<i class="living-glyph ${glyph}" aria-hidden="true"></i><span>${name}</span><b>${inventory[key]}</b>`;
+        const lifeState = backpackLifeState(category.id, key, inventory[key]);
+        item.title = `${name} · ${inventory[key]} · ${lifeState}`;
+        item.innerHTML = `<i class="living-glyph ${glyph}" aria-hidden="true"></i><span>${name}</span><b>${lifeState}</b>`;
         slots.appendChild(item);
       });
     }
@@ -9893,11 +15533,11 @@ function renderInventory() {
     inventoryList.appendChild(group);
   });
 
-  if (document.body.classList.contains("is-focused-ui")) return;
-
+  const currentRecipe = lifeCraftingRecipe();
+  const buildProfile = lifeBuildingProfile();
   const blueprint = document.createElement("div");
   blueprint.className = "backpack-blueprint";
-  blueprint.innerHTML = `<b><i class="living-glyph glyph-exchange" aria-hidden="true"></i>当前蓝图：星愿灯</b><span>蒲公英种子 + 星水滴 + 树根材</span><small>在星愿工作室按 E 合成</small>`;
+  blueprint.innerHTML = `<b><i class="living-glyph glyph-exchange" aria-hidden="true"></i>当前图纸：${currentRecipe.name}</b><span>${recipeCostText(currentRecipe)}</span><small>${buildProfile.stage.name} · ${buildProfile.profession.name}正在形成 · 去星愿工作室按 E</small>`;
   inventoryList.appendChild(blueprint);
 
   const form = selfEvolutionForms[selfEvolutionState.formId];
@@ -9906,7 +15546,7 @@ function renderInventory() {
   passport.className = "life-passport";
   passport.innerHTML = `
     <b><i class="living-glyph glyph-cycle" aria-hidden="true"></i>生命形态：${selfEvolutionState.form}</b>
-    <span>Dead Night：${selfEvolutionState.spiritPath}</span>
+    <span>风芽：${selfEvolutionState.spiritPath}</span>
     <small>${form ? form.gift : "先把第一段经历带回种种酒馆，形态才会开始生长。"}</small>
     <span>乡村人格：${rural.name} · ${rural.season.name}</span>
     <small>${rural.gift}。${rural.traitText}</small>
@@ -10021,7 +15661,7 @@ function drawGenesisGardenBackdrop(width, height, watered) {
   }
 
   const weather = currentWeatherProfile();
-  if (weather.weather === "小雨") {
+  if (weather.isRain) {
     genesisCtx.fillStyle = "#4fcbd3";
     for (let index = 0; index < 26; index += 1) {
       const x = (index * 37 + state.tick * 2) % width;
@@ -10414,7 +16054,7 @@ function waterGenesisGarden() {
   inventory.seeds = Math.max(0, inventory.seeds - 1);
   inventory.flowers += 1;
   dandelionProtocol.nutrients.water += 1;
-  if (weather.weather === "小雨") {
+  if (weather.isRain) {
     inventory.water += 1;
     dandelionProtocol.nutrients.water += 1;
   } else {
@@ -10424,7 +16064,7 @@ function waterGenesisGarden() {
   genesisWaterButton.disabled = true;
   genesisWaterButton.querySelector("span").textContent = "第一颗芽正在醒来";
   genesisGardenTitle.textContent = "照顾第一天。";
-  genesisGardenLine.textContent = weather.weather === "小雨"
+  genesisGardenLine.textContent = weather.isRain
     ? "雨滴进入水源，种子记住了今天的天气。"
     : "嫩芽吸收阳光，种子记住了今天的温度。";
   addMemory(`创世花园：在${weather.weather}里浇醒第一颗芽`);
@@ -10460,15 +16100,17 @@ function finishGenesisRitual() {
   dandelionProtocol.stage = "dispersal";
   dandelionProtocol.dispersed += 1;
   worldTreeState.released += 1;
+  syncGenesisRuleMystery();
   addLifeValue("flow", 2);
   addLifeValue("growth", 1);
-  addMemory(`世界起点：与${route.personality}的 Dead Night 一起走向${route.name}`);
-  setPanel("第一次出发", `Dead Night 从嫩芽旁抬起头：我会陪你去看那颗飞向${route.name}的种子落在哪里，也会在合适的时候把你送回真实生活。`);
+  addMemory(`世界起点：与${route.personality}的 风芽 一起走向${route.name}`);
+  setPanel("第一次出发", `风芽 从嫩芽旁抬起头：我会陪你去看那颗飞向${route.name}的种子落在哪里，也会在合适的时候把你送回真实生活。`);
   save();
   renderHud();
   stopGenesisAudio();
   genesisRitual.classList.add("is-complete");
   setTimeout(() => genesisRitual.classList.add("is-hidden"), 850);
+  setTimeout(() => startFirstWindGuide(), 1050);
 }
 
 function initGenesisRitual() {
@@ -10632,13 +16274,32 @@ window.addEventListener("keyup", (event) => {
 window.addEventListener("resize", () => {
   resize();
   resizeGenesisCanvas();
+  positionFirstWindGuide();
 });
 
 surfaceGardenButton.addEventListener("click", showGardenSurface);
-surfaceDepartButton.addEventListener("click", departToWorld);
-surfaceBackpackButton.addEventListener("click", showBackpackSurface);
+surfaceDepartButton.addEventListener("click", showWorldSurface);
+surfaceBackpackButton.addEventListener("click", () => {
+  showBackpackSurface();
+  advanceFirstWindGuide("backpack");
+});
 surfacePostButton.addEventListener("click", showPostSurface);
 surfaceDandelionButton.addEventListener("click", showDandelionSurface);
+sceneProfileButton.addEventListener("click", () => {
+  showDandelionSurface();
+  advanceFirstWindGuide("profile");
+});
+sceneMinimapButton.addEventListener("click", () => {
+  showWorldSurface();
+  advanceFirstWindGuide("map");
+});
+sceneWeatherButton.addEventListener("click", () => {
+  toggleLifeWeather();
+  advanceFirstWindGuide("weather");
+});
+canvas.addEventListener("click", () => advanceFirstWindGuide("world"));
+firstWindNext.addEventListener("click", () => advanceFirstWindGuide());
+firstWindSkip.addEventListener("click", () => finishFirstWindGuide(false));
 postBottleButton.addEventListener("click", () => {
   writeLetter();
   state.postOpen = true;
@@ -10649,6 +16310,7 @@ healingPauseButton.addEventListener("click", toggleHealingPause);
 healingWithdrawButton.addEventListener("click", withdrawHealingSharing);
 ceremonyWithdrawButton.addEventListener("click", withdrawRelationshipCeremony);
 sceneEmoteButton.addEventListener("click", cycleSceneEmote);
+sceneSpiritButton.addEventListener("click", () => requestSpiritAction("respond"));
 sceneCaptureButton.addEventListener("click", captureLivingScene);
 slowLifeStartButton.addEventListener("click", () => startSlowLifeInvitation());
 slowLifeChangeButton.addEventListener("click", rotateSlowLifeInvitation);
@@ -10706,7 +16368,25 @@ function installPanelCloseButtons() {
 
 installPanelCloseButtons();
 
-Promise.all(residents.map((resident) => loadImage(resident.img).then((image) => loadedResidents.push({ id: resident.id, image })))).then(() => {
+Promise.all([
+  ...residents.map((resident) => loadImage(resident.img).then((image) => loadedResidents.push({ id: resident.id, image }))),
+  loadImage("./assets/sprites/garden-cottage-v2.png").then((image) => {
+    loadedSceneAssets.gardenCottage = image;
+  }),
+  loadImage("./assets/sprites/greenhouse-tavern-v2.png").then((image) => {
+    loadedSceneAssets.greenhouseTavern = image;
+  }),
+  loadImage("./assets/maps/dandelion-island.png").then((image) => {
+    loadedSceneAssets.worldMap = image;
+  }),
+]).then(() => {
+  if (localStorage.getItem("dedalionTerrainRevision") !== "dandelion-island-v1") {
+    state.x = 96;
+    state.y = 71;
+    localStorage.setItem("dedalionTerrainRevision", "dandelion-island-v1");
+    localStorage.setItem("dedalionWorldX", String(state.x));
+    localStorage.setItem("dedalionWorldY", String(state.y));
+  }
   resize();
   initGenesisRitual();
   if (genesisState.complete) {
@@ -10719,15 +16399,24 @@ Promise.all(residents.map((resident) => loadImage(resident.img).then((image) => 
   }
   renderHud();
   frame();
+  setTimeout(() => startFirstWindGuide(), 650);
 });
 
 function toggleLifeWeather() {
+  if (state.near?.kind !== "weatherStation") {
+    const weather = currentWeatherProfile();
+    state.weatherOpen = false;
+    setPanel("天空正在发生", `${weather.period.name} · ${weather.weather}。天气已经直接发生在河流、植物、NPC和材料刷新里；沿世界树东北侧的高地走到听天观象台，才能读取完整仪器。`);
+    save();
+    renderHud();
+    return;
+  }
   state.weatherOpen = !state.weatherOpen;
   const weather = currentWeatherProfile();
   if (state.weatherOpen) {
-    setPanel("生命天气互译", `${weather.spirit}把${weather.weather}翻译成今日节奏：${weather.advice}`);
+    setPanel("观象台记录册", `${weather.spirit}把${weather.weather}翻译成今日节奏：${weather.advice}`);
   } else {
-    setPanel("Life Weather OS", "今日生命天气已收起。按 L 可以重新打开。");
+    setPanel("回到观象台", "记录册已经收起，水晶天气球、风轮和天空重新成为画面中心。");
   }
   save();
   renderLifeWeather();
@@ -10741,7 +16430,7 @@ function toggleBackpack() {
 function showBackpackSurface() {
   closeAllSurfacePanels();
   state.backpackOpen = true;
-  setPanel("生命背包", "这里只看五类相遇之物：种子、礼物、材料、档案和特殊生命。");
+  setPanel("蒲公英背包", "这里只看六类生命行囊：种子、植物、知识、信物、材料和记忆。种子显示状态，不用数字催促生长。");
   save();
   renderHud();
 }
@@ -10750,6 +16439,16 @@ function showGardenSurface() {
   closeAllSurfacePanels();
   state.lifeCoreOpen = true;
   setPanel("个人生命花园", "这里只回答一件事：今天的花园需要什么。更深的档案仍在树根里，不必现在全部打开。");
+  save();
+  renderHud();
+}
+
+function showWorldSurface() {
+  closeAllSurfacePanels();
+  state.atlasOpen = true;
+  state.atlasIndex = worldSpatialMap.findIndex((region) => region.center);
+  state.atlasRuleId = null;
+  setPanel("世界树地图", "一棵世界树连接八个区域。这里只看世界与道路，系统都藏在可以走进去的地方。");
   save();
   renderHud();
 }
@@ -10952,7 +16651,7 @@ function plantWorldWish() {
   worldTreeState.phase = 1;
   setPanel(
     "个人蒲公英花圃",
-    `${isReturnedSeed ? "一颗从远方回来的种子落进你的花圃。" : "Dead Night 从今天的生活里凝出一颗种子。"}${template.name}：「${template.text}」种子已经写入来源、时间、情绪、地点、关系和成长方向。再次按 E 或按 P，把它吹向世界。`,
+    `${isReturnedSeed ? "一颗从远方回来的种子落进你的花圃。" : "风芽 从今天的生活里凝出一颗种子。"}${template.name}：「${template.text}」种子已经写入来源、时间、情绪、地点、关系和成长方向。再次按 E 或按 P，把它吹向世界。`,
   );
   addMemory(`世界树花园：种下${template.name}`);
   save();
@@ -10978,7 +16677,7 @@ function blowDandelionWish() {
   if (!destination) {
     worldTreeState.phase = 0;
     worldTreeState.pendingWish = null;
-    setPanel("种子守护者", "Dead Night 没有找到可以交给风的成熟种子。这次循环已经回到萌芽期。");
+    setPanel("种子守护者", "风芽 没有找到可以交给风的成熟种子。这次循环已经回到萌芽期。");
     save();
     return;
   }
@@ -11065,7 +16764,7 @@ function harvestWorldMemoryFruit() {
     dandelionProtocol.nutrients[key] = Math.floor(dandelionProtocol.nutrients[key] / 2);
   });
   addLifeValue("memory", 2);
-  const ruleText = ratifiedRule ? `共同花园接受了 Dead Night 的提案：世界规则从「${ratifiedRule.previous}」长出「${ratifiedRule.name}」分枝。${ratifiedRule.result}。` : "世界没有强行改写规则，仍在继续观察生命活动。";
+  const ruleText = ratifiedRule ? `共同花园接受了 风芽 的提案：世界规则从「${ratifiedRule.previous}」长出「${ratifiedRule.name}」分枝。${ratifiedRule.result}。` : "世界没有强行改写规则，仍在继续观察生命活动。";
   setPanel("世界记忆果", `树冠结出第 ${worldTreeState.fruit} 颗世界记忆果。${ruleText}它保存了愿望、环境、关系和规则变化；新的循环已经开始。`);
   addMemory(`世界树花园：收获第 ${worldTreeState.fruit} 颗世界记忆果`);
   save();
@@ -11073,31 +16772,20 @@ function harvestWorldMemoryFruit() {
 }
 
 function toggleWorldAtlas() {
-  state.atlasOpen = !state.atlasOpen;
-  if (state.atlasOpen) state.lifeCoreOpen = false;
-  else state.lifeCoreOpen = true;
-  if (state.atlasOpen) {
-    const atlasRegions = [...overworldMap, ...generatedWorldAtlasRegions()];
-    const region = atlasRegions[state.atlasIndex % atlasRegions.length] || atlasRegions[0];
-    setPanel("蒲公英星球地图", `现在显示真实空间层级：星球、地表世界、区域、建筑和功能点。按 N 查看下一个区域：当前是${region.name}。`);
-  } else {
-    setPanel("Dandelion Planet Map", "空间地图已收起。按 M 可以重新打开。");
-  }
-  save();
-  renderLifeCore();
-  renderWorldAtlas();
+  if (state.atlasOpen) departToWorld();
+  else showWorldSurface();
 }
 
 function nextAtlasRegion() {
-  const atlasRegions = [...overworldMap, ...generatedWorldAtlasRegions()];
+  const atlasRegions = worldSpatialMap;
+  if (!state.atlasOpen) closeAllSurfacePanels();
   state.atlasOpen = true;
-  state.lifeCoreOpen = false;
   state.atlasIndex = (state.atlasIndex + 1) % atlasRegions.length;
+  state.atlasRuleId = null;
   const region = atlasRegions[state.atlasIndex];
-  setPanel(region.name, `${region.layer} / ${region.role}：${region.path}`);
+  setPanel(region.name, `${region.role}。${region.path}`);
   save();
-  renderLifeCore();
-  renderWorldAtlas();
+  renderHud();
 }
 
 function addWishParticles() {
