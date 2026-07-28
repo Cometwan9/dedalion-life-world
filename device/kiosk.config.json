@@ -1,0 +1,11 @@
+{
+  "appUrl": "http://127.0.0.1:8787/?device=1",
+  "healthUrl": "http://127.0.0.1:8787/api/health",
+  "fullscreen": true,
+  "orientation": "landscape",
+  "minimumViewport": {
+    "width": 800,
+    "height": 480
+  },
+  "soundDefault": true
+}
